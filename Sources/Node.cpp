@@ -70,6 +70,8 @@ void Node::splitNodeValue(QString string) {
                 strValueRight = rightSide;
                 mathOperation = operation;
                 qDebug() << strValueLeft << mathOperation << strValueRight;
+                // this comment is really stuipdi
+                // just to add documentation
                 return;
             }
         }
