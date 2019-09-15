@@ -4,8 +4,6 @@
 
 #include "MainWindow.h"
 
-#define NUMBER_OF_POINTS 1000000
-
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -13,13 +11,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// ! CONNECTIONS
 	connect(ui->QPushButton_PlotPoints, SIGNAL(clicked()), this, SLOT(QPushButton_PlotPoints_clicked()));
+	connect(ui->QPushButton_deleteFunction, SIGNAL(clicked()), this, SLOT(QPushButton_deleteFunction_clicked()));
 	connect(ui->QLineEdit_addFunction, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
+	connect(ui->QLineEdit_functionParam, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
 	connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
 
 
 	/* ! GRAPH INITIALIZATION */
 	ui->customPlot->setOpenGl(true, 16); // enable openGL
-	ui->customPlot->openGl() ? qDebug() << "OPENGL enabled" : qDebug() << "OPENGL disabled";
 	if (ui->customPlot->openGl()) {
 		qDebug() << "OPENGL enabled";
 		statusBarMsg("openGL enabled", 5000);
@@ -56,12 +55,72 @@ void MainWindow::statusBarMsg(const char msg[], int time) {
 
 void MainWindow::QLineEdit_addFunction_returnPressed() {
 	QString text = ui->QLineEdit_addFunction->text();
+	text.remove(" ");
 
     BinaryTree tree(text);
 
-	QVector<double> x_arr = generateXArray(-1000, 1000, NUMBER_OF_POINTS);
-	QVector<double> y_arr = tree.calculateTree(x_arr, ui->progressBar);
-    plot(x_arr, y_arr);
+	QStringList xConfig = ui->QLineEdit_functionParam->text().split(",");
+	int min, max, len;
+	if (xConfig.length() == 3) {
+		min = xConfig.at(0).toInt();
+		max = xConfig.at(1).toInt();
+		len = xConfig.at(2).toInt();
+
+		// * check if values failed to convert
+		// * if failed, they'll be 0
+		min == 0 ? min = -10 : min;
+		max == 0 ? max = 10 : max;
+		len == 0 ? len = 1000 : len;
+	} else { // default values
+		min = -10;
+		max = 10;
+		len = 1000;
+	}
+	QVector<double> xArray = generateXArray(min, max, len);
+	QVector<double> yArray = tree.calculateTree(xArray, ui->progressBar);
+
+	//////////////////////////////////
+	//	PLOTTING AND ADDING
+	//////////////////////////////////
+	QList<QColor> colors = {
+			QColor(qRgb(31, 119, 180)),
+			QColor(qRgb(255, 127, 14)),
+			QColor(qRgb(44, 160, 44)),
+			QColor(qRgb(214, 39, 40)),
+			QColor(qRgb(148, 103, 189)),
+			QColor(qRgb(140, 86, 75)),
+			QColor(qRgb(244, 119, 194)),
+			QColor(qRgb(127, 127, 127)),
+			QColor(qRgb(188, 189, 34)),
+			QColor(qRgb(23, 190, 207))
+	};
+
+	functionGraphList->append(new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis));
+	functionGraphList->last()->setData(xArray, yArray);
+
+	int colorIndex = functionGraphList->length() - 1;
+
+	// only take the last number of the index if bigger than 10
+	if (colorIndex > 9) {
+		QString str = QString::number(colorIndex);
+		colorIndex = str.mid(str.length() - 1).toInt();
+	}
+
+	QPen graphPen;
+	graphPen.setColor(QColor(colors.at(colorIndex)));
+	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
+	functionGraphList->last()->setPen(graphPen); // apply color to graph
+	ui->customPlot->replot();
+
+
+	// * add item to widget and set the appropriate icon color
+	auto pixmap = QPixmap(16, 16);
+	pixmap.fill(QColor(colors.at(colorIndex)));
+
+	auto *item = new QListWidgetItem();
+	item->setText(text);
+	item->setIcon(QIcon(pixmap));
+	ui->QListWidget_functionList->addItem(item);
 }
 
 QVector<double> MainWindow::generateXArray(int lowerLim, int upperLim, unsigned int length) {
@@ -90,7 +149,8 @@ void MainWindow::plot(const QVector<double> &xArray, const QVector<double> &yArr
     //if (rand()%100 > 50)
     //    customPlot->graph()->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)(rand()%14+1)));
     QPen graphPen;
-    graphPen.setColor(QColor(rand() % 245 + 10, rand() % 245 + 10, rand() % 245 + 10));
+//    graphPen.setColor(QColor(rand() % 245 + 10, rand() % 245 + 10, rand() % 245 + 10));
+	graphPen.setColor(QColor(255, 255, 0));
     graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
 	ui->customPlot->graph()->setPen(graphPen);
 	ui->customPlot->replot();
@@ -103,14 +163,14 @@ void MainWindow::QPushButton_PlotPoints_clicked() {
 	// * in the above text edit
 	// todo: save plotting parameters, so it doesn't always use
 	// todo: the default ones, and not required to type them in again every time
-	for (auto i : *graphList) {
+	for (auto i : *pointsGraphList) {
 		// delete previously plotted graphs
 		ui->customPlot->removeGraph(i);
 	}
 	// remove the pointers
-	graphList->clear();
+	pointsGraphList->clear();
 
-	graphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+	pointsGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
 
 	QString text = ui->QTextEdit_pointsList->toPlainText();
 	QStringList arrayLine = text.split("\n", QString::SkipEmptyParts);
@@ -120,13 +180,13 @@ void MainWindow::QPushButton_PlotPoints_clicked() {
 
 		if (currentLine.at(0) == "[") { // * configuration line
 			// ! create a new graph to configure it
-			graphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+			pointsGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
 			// * set defaults for graph
-			graphList->last()->setAdaptiveSampling(false);
-			graphList->last()->removeFromLegend();
-			graphList->last()->setLineStyle(QCPGraph::lsNone);
-			graphList->last()->setScatterStyle(QCPScatterStyle::ssDot);
-			graphList->last()->setPen(QPen(QBrush(Qt::red), 3));
+			pointsGraphList->last()->setAdaptiveSampling(false);
+			pointsGraphList->last()->removeFromLegend();
+			pointsGraphList->last()->setLineStyle(QCPGraph::lsNone);
+			pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDot);
+			pointsGraphList->last()->setPen(QPen(QBrush(Qt::red), 3));
 
 			QList<QString> parameterArray = currentLine.remove("[").remove("]").split(",", QString::SkipEmptyParts);
 
@@ -138,17 +198,17 @@ void MainWindow::QPushButton_PlotPoints_clicked() {
 
 				if (param == "LineStyle") {
 					if (value == "None") {
-						graphList->last()->setLineStyle(QCPGraph::lsNone);
+						pointsGraphList->last()->setLineStyle(QCPGraph::lsNone);
 					} else if (value == "Line") {
-						graphList->last()->setLineStyle(QCPGraph::lsLine);
+						pointsGraphList->last()->setLineStyle(QCPGraph::lsLine);
 					} else if (value == "IsImpulse") {
-						graphList->last()->setLineStyle(QCPGraph::lsImpulse);
+						pointsGraphList->last()->setLineStyle(QCPGraph::lsImpulse);
 					} else if (value == "StepLeft") {
-						graphList->last()->setLineStyle(QCPGraph::lsStepLeft);
+						pointsGraphList->last()->setLineStyle(QCPGraph::lsStepLeft);
 					} else if (value == "StepCenter") {
-						graphList->last()->setLineStyle(QCPGraph::lsStepCenter);
+						pointsGraphList->last()->setLineStyle(QCPGraph::lsStepCenter);
 					} else if (value == "StepRight") {
-						graphList->last()->setLineStyle(QCPGraph::lsStepRight);
+						pointsGraphList->last()->setLineStyle(QCPGraph::lsStepRight);
 					}
 
 				} else if (param == "Pen") {
@@ -157,91 +217,91 @@ void MainWindow::QPushButton_PlotPoints_clicked() {
 					QString width = value.split(";").at(1);
 
 					if (color == "black") {
-						graphList->last()->setPen(QPen(QBrush(Qt::black), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::black), width.toInt()));
 					} else if (color == "white") {
-						graphList->last()->setPen(QPen(QBrush(Qt::white), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::white), width.toInt()));
 					} else if (color == "darkGray") {
-						graphList->last()->setPen(QPen(QBrush(Qt::darkGray), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkGray), width.toInt()));
 					} else if (color == "gray") {
-						graphList->last()->setPen(QPen(QBrush(Qt::gray), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::gray), width.toInt()));
 					} else if (color == "lightGray") {
-						graphList->last()->setPen(QPen(QBrush(Qt::lightGray), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::lightGray), width.toInt()));
 					} else if (color == "red") {
-						graphList->last()->setPen(QPen(QBrush(Qt::red), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::red), width.toInt()));
 					} else if (color == "green") {
-						graphList->last()->setPen(QPen(QBrush(Qt::green), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::green), width.toInt()));
 					} else if (color == "blue") {
-						graphList->last()->setPen(QPen(QBrush(Qt::blue), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::blue), width.toInt()));
 					} else if (color == "cyan") {
-						graphList->last()->setPen(QPen(QBrush(Qt::cyan), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::cyan), width.toInt()));
 					} else if (color == "magenta") {
-						graphList->last()->setPen(QPen(QBrush(Qt::magenta), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::magenta), width.toInt()));
 					} else if (color == "yellow") {
-						graphList->last()->setPen(QPen(QBrush(Qt::yellow), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::yellow), width.toInt()));
 					} else if (color == "darkRed") {
-						graphList->last()->setPen(QPen(QBrush(Qt::darkRed), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkRed), width.toInt()));
 					} else if (color == "darkGreen") {
-						graphList->last()->setPen(QPen(QBrush(Qt::darkGreen), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkGreen), width.toInt()));
 					} else if (color == "darkBlue") {
-						graphList->last()->setPen(QPen(QBrush(Qt::darkBlue), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkBlue), width.toInt()));
 					} else if (color == "darkCyan") {
-						graphList->last()->setPen(QPen(QBrush(Qt::darkCyan), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkCyan), width.toInt()));
 					} else if (color == "darkMagenta") {
-						graphList->last()->setPen(QPen(QBrush(Qt::darkMagenta), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkMagenta), width.toInt()));
 					} else if (color == "darkYellow") {
-						graphList->last()->setPen(QPen(QBrush(Qt::darkYellow), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkYellow), width.toInt()));
 					} else if (color == "transparent") {
-						graphList->last()->setPen(QPen(QBrush(Qt::transparent), width.toInt()));
+						pointsGraphList->last()->setPen(QPen(QBrush(Qt::transparent), width.toInt()));
 					}
 				} else if (param == "ScatterStyle") {
 					if (value == "None") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssNone);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssNone);
 					} else if (value == "Dot") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssDot);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDot);
 					} else if (value == "Cross") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssCross);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCross);
 					} else if (value == "Circle") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssCircle);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCircle);
 					} else if (value == "CrossCircle") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssCrossCircle);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCrossCircle);
 					} else if (value == "CrossSquare") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssCrossSquare);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCrossSquare);
 					} else if (value == "Custom") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssCustom);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCustom);
 					} else if (value == "Diamond") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssDiamond);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDiamond);
 					} else if (value == "Disc") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssDisc);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDisc);
 					} else if (value == "Peace") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssPeace);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPeace);
 					} else if (value == "Pixmap") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssPixmap);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPixmap);
 					} else if (value == "Plus") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssPlus);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPlus);
 					} else if (value == "PlusCircle") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssPlusCircle);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPlusCircle);
 					} else if (value == "PlusSquare") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssPlusSquare);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPlusSquare);
 					} else if (value == "Square") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssSquare);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssSquare);
 					} else if (value == "Star") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssStar);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssStar);
 					} else if (value == "Triangle") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssTriangle);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssTriangle);
 					} else if (value == "TriangleInverted") {
-						graphList->last()->setScatterStyle(QCPScatterStyle::ssTriangleInverted);
+						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssTriangleInverted);
 					}
 
 				} else if (param == "RemoveFromLegend") {
 					if (value == "True") {
-						graphList->last()->removeFromLegend();
+						pointsGraphList->last()->removeFromLegend();
 					}
 
 				} else if (param == "AdaptiveSampling") {
 					if (value == "True") {
-						graphList->last()->setAdaptiveSampling(true);
+						pointsGraphList->last()->setAdaptiveSampling(true);
 					} else if (value == "False") {
-						graphList->last()->setAdaptiveSampling(false);
+						pointsGraphList->last()->setAdaptiveSampling(false);
 					}
 				}
 			} // iteration over parameter and value
@@ -249,9 +309,25 @@ void MainWindow::QPushButton_PlotPoints_clicked() {
 		} else { // * append point to last graph
 			QStringList coords = currentLine.split(",", QString::SkipEmptyParts);
 			if (coords.length() == 2) {
-				graphList->last()->addData(coords.at(0).toDouble(), coords.at(1).toDouble());
+				pointsGraphList->last()->addData(coords.at(0).toDouble(), coords.at(1).toDouble());
 			}
 		}
 	}
 	ui->customPlot->replot();
+}
+
+void MainWindow::QPushButton_deleteFunction_clicked() {
+	QModelIndex selectedIndex = ui->QListWidget_functionList->currentIndex();
+
+	// row is essentially the index of the selected item
+	if (selectedIndex.row() != -1) {
+		// delete from widget
+		ui->QListWidget_functionList->takeItem(selectedIndex.row());
+		// use pointer stored in list to it delete from the graph
+		ui->customPlot->removeGraph((QCPGraph *) functionGraphList->at(selectedIndex.row()));
+		functionGraphList->removeAt(selectedIndex.row()); // remove from list
+		ui->customPlot->replot();
+	} else {
+		statusBarMsg("Please select a function");
+	}
 }

@@ -3,7 +3,6 @@
 //
 
 #include "MainWindow.h"
-#include <iostream>
 
 
 int main(int argc, char *argv[]) {
@@ -14,7 +13,3 @@ int main(int argc, char *argv[]) {
 
     return app.exec();
 }
-
-// ! warning
-// * highlighed comment
-// ? what is this

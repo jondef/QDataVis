@@ -19,8 +19,6 @@ public:
 
 private:
     Node *pRoot;
-
-    int getFunction();
 };
 
 

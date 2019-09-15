@@ -7,9 +7,7 @@
 
 
 BinaryTree::BinaryTree(QString expression) {
-    expression.remove(" ");
     pRoot = new Node(expression);
-
 }
 
 

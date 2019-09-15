@@ -4,6 +4,8 @@
 
 #include "Node.h"
 
+#include <utility>
+
 
 Node::Node(QString aInput, Node *aParent) {
 
@@ -11,7 +13,7 @@ Node::Node(QString aInput, Node *aParent) {
         pParent = aParent;
     }
 
-    splitNodeValue(aInput);
+	splitNodeValue(std::move(aInput));
     convertToDouble();
 }
 
