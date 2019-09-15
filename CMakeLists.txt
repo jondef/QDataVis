@@ -20,10 +20,17 @@ include_directories(
 )
 
 file(GLOB SOURCE_FILES
-        "${PROJECT_SOURCE_DIR}/Headers/*.h"
-        "${PROJECT_SOURCE_DIR}/Headers/*.hpp"
         "${PROJECT_SOURCE_DIR}/Sources/*.cpp"
         "${PROJECT_SOURCE_DIR}/Sources/*.c"
+        )
+
+file(GLOB HEADER_FILES
+        "${PROJECT_SOURCE_DIR}/Headers/*.h"
+        "${PROJECT_SOURCE_DIR}/Headers/*.hpp"
+        )
+
+file(GLOB UI_FILES
+        "${PROJECT_SOURCE_DIR}/Headers/*.ui"
         )
 
 
@@ -37,6 +44,8 @@ set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.3\\mingw73_64")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 set(CMAKE_VERBOSE_MAKEFILE OFF) # enable verbose output
 
+# need this to include the auto generated ui_mainwindow.h
+# file from the qt5_wrap_ui call below.
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
@@ -60,12 +69,14 @@ foreach (dependency ${DEPENDENCIES})
     link_directories(${PROJECT_SOURCE_DIR}/dependencies/${dependency}/bin)
 endforeach ()
 
+# wrap the ui file to a c++ header
+qt5_wrap_ui(ui_wrap ${UI_FILES})
 
 # compile exe
 if (DISABLE_CMD_WINDOW)
-    add_executable(Application WIN32 ${SOURCE_FILES})
+    add_executable(Application WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
 else ()
-    add_executable(Application ${SOURCE_FILES})
+    add_executable(Application ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
 endif ()
 
 # link dlls to exe

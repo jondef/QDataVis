@@ -7,7 +7,8 @@
 #define NUMBER_OF_POINTS 1000000
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+	ui->setupUi(this);
     // HD 1280 x 720
     setBaseSize(1280, 720);
     setMinimumSize(1280, 720);
@@ -16,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     pQWidget_centralWidget->setLayout(pQGridLayout_mainLayout);
     this->setCentralWidget(pQWidget_centralWidget);
+
+	pQTabWidget_graphPlottables->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Ignored);
+	progressBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Ignored);
 
     QWidget *pQWidget_graphPlottables_functionTab = new QWidget;
     QGridLayout *pQGridLayout_graphPlottables_functionTab = new QGridLayout;
@@ -42,29 +46,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     progressBar->setGeometry(10, 10, 180, 30);
 
 
-    QSlider *slider = new QSlider;
-    slider->setOrientation(Qt::Horizontal);
-    slider->setRange(0, 100);
-    slider->setValue(0);
-    slider->setGeometry(10, 40, 180, 30);
-
-
-
     // CONNECTIONS
-    QObject::connect(slider, SIGNAL(valueChanged(int)), progressBar, SLOT(setValue(int)));
     connect(pQPushButton_Quit, SIGNAL(clicked()), QApplication::instance(), SLOT(quit()));
-
     connect(pQPushButton_PlotAllPoints, SIGNAL(clicked()), this, SLOT(QPushButton_PlotAllPoints_clicked()));
-
     connect(pQLineEdit_addFunction, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
 
     pQGridLayout_mainLayout->addWidget(pQPushButton_Quit, 4, 0, 1, 2);
 
     pQGridLayout_mainLayout->addWidget(progressBar);
-    pQGridLayout_mainLayout->addWidget(slider);
 
     pQGridLayout_mainLayout->addWidget(customPlot, 0, 0, 1, 2);
+
     initGraph();
+}
+
+
+MainWindow::~MainWindow() {
+	delete ui;
 }
 
 
@@ -78,47 +76,15 @@ void MainWindow::initGraph() {
     customPlot->xAxis->setLabel("x");
     customPlot->yAxis->setLabel("y");
     // set axes ranges, so we see all data:
-    customPlot->xAxis->setRange(-5, 5);
-    customPlot->yAxis->setRange(-5, 5);
+	customPlot->xAxis->setRange(-10, 10);
+	customPlot->yAxis->setRange(-10, 10);
 
-    // Set interations:
+	// Set interations
     customPlot->setInteraction(QCP::iRangeDrag, true);
     customPlot->setInteraction(QCP::iRangeZoom, true);
 
-    // configure the points graph
-	//pointsGraph->setAdaptiveSampling(false);
-	//pointsGraph->removeFromLegend();
-	//pointsGraph->setLineStyle(QCPGraph::lsNone);
-	//pointsGraph->setScatterStyle(QCPScatterStyle::ssDot);
-	//pointsGraph->setPen(QPen(QBrush(Qt::red), 3));
-    //pointsGraph->setPen(QPen(QBrush(QColor(rand()%255, rand()%255, rand()%255)),2));
-
     customPlot->replot();
 }
-
-/*
-void MainWindow::QLineEdit_addPoint_returnPressed() {
-    QString text = pQLineEdit_addPoint->text();
-    QStringList stringList = text.split(",");
-
-    if (stringList.length() == 2) {
-        QString xCoord = stringList[0];
-        QString yCoord = stringList[1];
-
-        bool xOk, yOk;
-        double xCoordD = xCoord.toDouble(&xOk);
-        double yCoordD = yCoord.toDouble(&yOk);
-
-        // if ok == true -> conversion successful
-        if (xOk && yOk) {
-            this->plot(xCoordD, yCoordD);
-        } else {
-            statusBarMsg("Invalid 2D coordinates");
-        }
-    } else {
-        statusBarMsg("Invalid 2D coordinates");
-    }
-}*/
 
 
 void MainWindow::statusBarMsg(const char msg[], int time) {
@@ -131,7 +97,7 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 
     BinaryTree tree(text);
 
-	QVector<double> x_arr = generateXArray(-10, 10, NUMBER_OF_POINTS);
+	QVector<double> x_arr = generateXArray(-1000, 1000, NUMBER_OF_POINTS);
 	QVector<double> y_arr = tree.calculateTree(x_arr, progressBar);
     plot(x_arr, y_arr);
 }
@@ -166,37 +132,13 @@ void MainWindow::plot(const QVector<double> &xArray, const QVector<double> &yArr
     customPlot->replot();
 }
 
-/*
-void MainWindow::plot(double x, double y) {
-    pointsGraph->addData(x, y);
-    customPlot->replot();
-
-    // add point to list and combobox
-    pPointsList->append(qMakePair(x, y));
-    pQComboBox_deletePoint->addItem(QString("(%1, %2)").arg(x).arg(y));
-}
-
-void MainWindow::QPushButton_removePoint_clicked() {
-    // this function takes the point to
-    // delete from the combobox, clears the graph and replots everything
-    pPointsList->removeAt(pQComboBox_deletePoint->currentIndex());
-
-    pQComboBox_deletePoint->removeItem(pQComboBox_deletePoint->currentIndex());
-
-    // clear the graph
-    pointsGraph->data()->clear();
-
-    // replot the points
-    for (auto i : *pPointsList) {
-        pointsGraph->addData(i.first, i.second);
-    }
-
-    customPlot->replot();
-}*/
-
 
 void MainWindow::QPushButton_PlotAllPoints_clicked() {
-
+	// * Function is connected to the plot all points button
+	// * It clears the points graphs, then replots everything
+	// * in the above text edit
+	// todo: save plotting parameters, so it doesn't always use
+	// todo: the default ones, and not required to type them in again every time
 	for (auto i : *graphList) {
 		// delete previously plotted graphs
 		customPlot->removeGraph(i);
@@ -204,8 +146,6 @@ void MainWindow::QPushButton_PlotAllPoints_clicked() {
 	// remove the pointers
 	graphList->clear();
 
-
-	//QCPGraph *pointsGraph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
 	graphList->append(new QCPGraph(customPlot->xAxis, customPlot->yAxis));
 
 	QString text = pQTextEdit_pointsList->toPlainText();
