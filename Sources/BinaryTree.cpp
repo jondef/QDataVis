@@ -2,6 +2,7 @@
 // Created by John on 12/06/2019.
 //
 
+#include <QtWidgets/QProgressBar>
 #include "BinaryTree.h"
 
 
@@ -16,7 +17,6 @@ double BinaryTree::calculateTree(double xPlug) {
     // returns f(x)
 
     Node *currentNode = pRoot;
-
 
     bool returning = false;
 
@@ -68,26 +68,29 @@ double BinaryTree::calculateTree(double xPlug) {
         }
 
     }
-
+	// ? might be useless
     // compute the values of root's children
-    if (currentNode->hasLeftChild) {
-        currentNode->doubleValueLeft = currentNode->pLeftChild->computeOperation(xPlug);
-        currentNode->valueLeftOk = true;
-    }
+	//if (currentNode->hasLeftChild) {
+	//    currentNode->doubleValueLeft = currentNode->pLeftChild->computeOperation(xPlug);
+	//    currentNode->valueLeftOk = true;
+	//}
     if (currentNode->hasRightChild) {
         currentNode->doubleValueRight = currentNode->pRightChild->computeOperation(xPlug);
         currentNode->valueRightOk = true;
     }
-
+	currentNode->getNodeStats(currentNode->computeOperation(xPlug));
     return currentNode->computeOperation(xPlug);
+
 }
 
 
-QVector<double> BinaryTree::calculateTree(QVector<double> xArray) {
+QVector<double> BinaryTree::calculateTree(QVector<double> xArray, QProgressBar *progressBar) {
     QVector<double> yArray(xArray.length());
 
     for (int i = 0; i < xArray.length(); ++i) {
         yArray[i] = calculateTree(xArray[i]);
+		progressBar->setValue(i / float(xArray.length()) * 100);
     }
+	progressBar->setValue(100);
     return yArray;
 }

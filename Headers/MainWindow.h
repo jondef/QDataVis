@@ -22,18 +22,17 @@ public:
 
     QCustomPlot *customPlot = new QCustomPlot;
     QCPCurve *plotCurves = new QCPCurve(customPlot->xAxis, customPlot->yAxis);
-    QCPGraph *pointsGraph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
 
     QList<QPair<double, double>> *pPointsList = new QList<QPair<double, double>>{};
 
 
 public slots:
 
-    void QLineEdit_addPoint_returnPressed();
+	//void QLineEdit_addPoint_returnPressed();
 
     void QLineEdit_addFunction_returnPressed();
 
-    void QPushButton_removePoint_clicked();
+	//void QPushButton_removePoint_clicked();
 
     void QPushButton_PlotAllPoints_clicked();
 
@@ -51,12 +50,6 @@ private:
     QTabWidget *pQTabWidget_graphOptions = new QTabWidget();
 
     // WIDGETS INSTANCES
-    QLabel *pQLabel_addPoint = new QLabel("Add point (x, y)");
-    QLineEdit *pQLineEdit_addPoint = new QLineEdit();
-
-    QComboBox *pQComboBox_deletePoint = new QComboBox;
-    QPushButton *pQPushButton_removePoint = new QPushButton("Remove point");
-
     QLabel *pQLabel_addFunction = new QLabel("Add function");
     QLineEdit *pQLineEdit_addFunction = new QLineEdit();
 
@@ -66,6 +59,10 @@ private:
 
     QTextEdit *pQTextEdit_pointsList = new QTextEdit();
 
+	QProgressBar *progressBar = new QProgressBar;
+
+
+	QList<QCPGraph *> *graphList = new QList<QCPGraph *>;
     // PLOT FUNCTIONS
     void initGraph();
 

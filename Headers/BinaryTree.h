@@ -7,6 +7,7 @@
 
 
 #include "Node.h"
+#include <QtCore>
 
 class BinaryTree {
 public:
@@ -14,7 +15,7 @@ public:
 
     double calculateTree(double xPlug);
 
-    QVector<double> calculateTree(QVector<double> xArray);
+	QVector<double> calculateTree(QVector<double> xArray, QProgressBar *progessBar);
 
 private:
     Node *pRoot;

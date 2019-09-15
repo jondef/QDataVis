@@ -3,7 +3,7 @@ message("CMAKE VERSION IS " ${CMAKE_VERSION})
 set(CMAKE_CXX_STANDARD 17)
 
 project(GUI_APP)
-set(DISABLE_CMD_WINDOW ON)
+set(DISABLE_CMD_WINDOW OFF)
 
 function(print_all_variables)
     get_cmake_property(_variableNames VARIABLES)

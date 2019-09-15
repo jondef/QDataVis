@@ -14,7 +14,7 @@ public:
 
     void splitNodeValue(QString string);
 
-    void GetNodeStats();
+	void getNodeStats(double xPlug);
 
     double computeOperation(double xPlug);
 

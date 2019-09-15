@@ -53,25 +53,25 @@ void Node::splitNodeValue(QString string) {
         for (int i : indexOfOperators) {
             // check if found operator is in a parentheses or not
             if (parenthesesArray.at(i) == 0) {
-                QString leftSide = string.left(i);
-                QString rightSide = string.mid(i + 1);
+				QString leftSide = string.left(i);
+				QString rightSide = string.mid(i + 1);
 
-                // if you have -2*x you gotta add a zero on the left side
-                if (leftSide.isEmpty()) {
-                    if (!rightSide.contains("+") && !rightSide.contains("-")) {
-                        leftSide = "0";
-                    } else if (rightSide.at(0) == "(") {
-                        leftSide = "0";
-                    } else {
-                        continue;
-                    }
-                }
-                strValueLeft = leftSide;
-                strValueRight = rightSide;
-                mathOperation = operation;
-                qDebug() << strValueLeft << mathOperation << strValueRight;
-                return;
-            }
+				// if you have -2*x you gotta add a zero on the left side
+				if (leftSide.isEmpty()) {
+					if (!rightSide.contains("+") && !rightSide.contains("-")) {
+						leftSide = "0";
+					} else if (rightSide.at(0) == "(") {
+						leftSide = "0";
+					} else {
+						continue;
+					}
+				}
+				strValueLeft = leftSide;
+				strValueRight = rightSide;
+				mathOperation = operation;
+				qDebug() << strValueLeft << mathOperation << strValueRight;
+				return;
+			}
         }
     }
     throw std::logic_error("Error @ split nodeValue function: Unable to find split");
@@ -129,17 +129,16 @@ QList<int> Node::getParenthesesArray(const QString &string) {
     return list;
 }
 
-/*
-void Node::GetNodeStats() {
+
+void Node::getNodeStats(double xPlug) {
     bool debug = false;
     if (debug) {
-        qDebug() << "pParent: " << pParent << "\thasLeftChild: " << hasLeftChild << "\tpLeft_child: " << pLeftChild
-                 << "\thasRightChild: " << hasRightChild << "\tpRight_child: " << pRightChild << "\n";
-        qDebug() << "operation: [" << strValueLeft.toStdString() << " (" << doubleValueLeft << ")] "
-                 << mathOperation.toStdString() << " [" << strValueRight.toStdString() << " (" << doubleValueRight
-                 << ")]\n\n";
+		qDebug() << "pParent: " << pParent << "\thasLeftChild: " << hasLeftChild << "\tpLeft_child: " << pLeftChild
+				 << "\thasRightChild: " << hasRightChild << "\tpRight_child: " << pRightChild;
+		qDebug() << "operation: [" << strValueLeft << " (" << doubleValueLeft << ")] " << mathOperation << " ["
+				 << strValueRight << " (" << doubleValueRight << ")]\n";
     }
-}*/
+}
 
 double Node::computeOperation(double xPlug) {
 
