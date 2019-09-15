@@ -91,6 +91,6 @@ QVector<double> BinaryTree::calculateTree(QVector<double> xArray, QProgressBar *
         yArray[i] = calculateTree(xArray[i]);
 		progressBar->setValue(i / float(xArray.length()) * 100);
     }
-	progressBar->setValue(100);
+	progressBar->setValue(0);
     return yArray;
 }

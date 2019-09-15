@@ -6,37 +6,160 @@
             <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>640</width>
-                <height>480</height>
+                <width>943</width>
+                <height>600</height>
             </rect>
         </property>
-        <property name="windowTitle">
-            <string>MainWindow</string>
+        <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+            </sizepolicy>
         </property>
-        <widget class="QWidget" name="centralwidget"/>
+        <property name="windowTitle">
+            <string>Ultimate Plotter</string>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <layout class="QGridLayout" name="gridLayout">
+                <item row="1" column="2">
+                    <widget class="QTabWidget" name="tabWidget">
+                        <property name="sizePolicy">
+                            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="currentIndex">
+                            <number>0</number>
+                        </property>
+                        <widget class="QWidget" name="Function_tab">
+                            <attribute name="title">
+                                <string>Functions</string>
+                            </attribute>
+                            <layout class="QGridLayout" name="gridLayout_2">
+                                <item row="3" column="0">
+                                    <layout class="QGridLayout" name="gridLayout_5">
+                                        <item row="0" column="0">
+                                            <widget class="QLineEdit" name="QLineEdit_functionParam">
+                                                <property name="placeholderText">
+                                                    <string>min;max;length</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item row="5" column="0">
+                                    <widget class="QProgressBar" name="progressBar">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="value">
+                                            <number>0</number>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="1" column="0">
+                                    <layout class="QGridLayout" name="gridLayout_3">
+                                        <item row="1" column="1">
+                                            <widget class="QLineEdit" name="QLineEdit_addFunction">
+                                                <property name="sizePolicy">
+                                                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                                        <horstretch>0</horstretch>
+                                                        <verstretch>0</verstretch>
+                                                    </sizepolicy>
+                                                </property>
+                                                <property name="inputMask">
+                                                    <string/>
+                                                </property>
+                                                <property name="placeholderText">
+                                                    <string>Add function here</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item row="0" column="1">
+                                            <widget class="QListWidget" name="QListWidget_functionList"/>
+                                        </item>
+                                    </layout>
+                                </item>
+                            </layout>
+                        </widget>
+                        <widget class="QWidget" name="Points_tab">
+                            <attribute name="title">
+                                <string>Points</string>
+                            </attribute>
+                            <layout class="QGridLayout" name="gridLayout_4">
+                                <item row="0" column="0">
+                                    <widget class="QTextEdit" name="QTextEdit_pointsList">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="3" column="0" rowspan="2">
+                                    <layout class="QGridLayout" name="gridLayout_6">
+                                        <item row="0" column="0">
+                                            <widget class="QPushButton" name="QPushButton_PlotPoints">
+                                                <property name="text">
+                                                    <string>Plot Points</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item row="0" column="1">
+                                            <widget class="QPushButton" name="QPushButton_FormattingHelp">
+                                                <property name="text">
+                                                    <string>Formatting help</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                            </layout>
+                        </widget>
+                    </widget>
+                </item>
+                <item row="1" column="1">
+                    <widget class="QCustomPlot" name="customPlot" native="true">
+                        <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
         <widget class="QMenuBar" name="menubar">
             <property name="geometry">
                 <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>640</width>
+                    <width>943</width>
                     <height>21</height>
                 </rect>
             </property>
-            <widget class="QMenu" name="menuSheisse">
+            <widget class="QMenu" name="menuFile">
                 <property name="title">
-                    <string>Scheisse</string>
+                    <string>File</string>
                 </property>
                 <addaction name="actionQuit"/>
             </widget>
-            <widget class="QMenu" name="menuTesting">
+            <widget class="QMenu" name="menuHelp">
                 <property name="title">
-                    <string>Testing</string>
+                    <string>Help</string>
                 </property>
-                <addaction name="actionCopy"/>
+                <addaction name="actionAbout"/>
+                <addaction name="separator"/>
+                <addaction name="actionAbout_2"/>
             </widget>
-            <addaction name="menuSheisse"/>
-            <addaction name="menuTesting"/>
+            <addaction name="menuFile"/>
+            <addaction name="menuHelp"/>
         </widget>
         <widget class="QStatusBar" name="statusbar"/>
         <action name="actionQuit">
@@ -49,7 +172,25 @@
                 <string>Copy</string>
             </property>
         </action>
+        <action name="actionAbout">
+            <property name="text">
+                <string>Show Help</string>
+            </property>
+        </action>
+        <action name="actionAbout_2">
+            <property name="text">
+                <string>About</string>
+            </property>
+        </action>
     </widget>
+    <customwidgets>
+        <customwidget>
+            <class>QCustomPlot</class>
+            <extends>QWidget</extends>
+            <header>../../dependencies/qcustomplot/include/qcustomplot.h</header>
+            <container>1</container>
+        </customwidget>
+    </customwidgets>
     <resources/>
     <connections/>
 </ui>

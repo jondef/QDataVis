@@ -9,55 +9,38 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
-    // HD 1280 x 720
-    setBaseSize(1280, 720);
-    setMinimumSize(1280, 720);
-    //setFixedSize(500, 500);
-    setWindowTitle("GUI");
-
-    pQWidget_centralWidget->setLayout(pQGridLayout_mainLayout);
-    this->setCentralWidget(pQWidget_centralWidget);
-
-	pQTabWidget_graphPlottables->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Ignored);
-	progressBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Ignored);
-
-    QWidget *pQWidget_graphPlottables_functionTab = new QWidget;
-    QGridLayout *pQGridLayout_graphPlottables_functionTab = new QGridLayout;
-    pQGridLayout_graphPlottables_functionTab->addWidget(pQLabel_addFunction, 0, 0);
-    pQGridLayout_graphPlottables_functionTab->addWidget(pQLineEdit_addFunction, 0, 1);
-
-    pQWidget_graphPlottables_functionTab->setLayout(pQGridLayout_graphPlottables_functionTab);
-    pQTabWidget_graphPlottables->addTab(pQWidget_graphPlottables_functionTab, "Functions");
-
-    QWidget *pQWidget_graphPlottables_pointsTab = new QWidget;
-    QGridLayout *pQGridLayout_graphPlottables_pointsTab = new QGridLayout;
-    pQGridLayout_graphPlottables_pointsTab->addWidget(pQTextEdit_pointsList, 0, 0);
-    pQTextEdit_pointsList->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Ignored);
-    pQGridLayout_graphPlottables_pointsTab->addWidget(pQPushButton_PlotAllPoints, 1, 0);
-
-    pQWidget_graphPlottables_pointsTab->setLayout(pQGridLayout_graphPlottables_pointsTab);
-    pQTabWidget_graphPlottables->addTab(pQWidget_graphPlottables_pointsTab, "Points");
-
-    pQGridLayout_mainLayout->addWidget(pQTabWidget_graphPlottables, 0, 2);
 
 
-    progressBar->setRange(0, 100);
-    progressBar->setValue(0);
-    progressBar->setGeometry(10, 10, 180, 30);
+	// ! CONNECTIONS
+	connect(ui->QPushButton_PlotPoints, SIGNAL(clicked()), this, SLOT(QPushButton_PlotPoints_clicked()));
+	connect(ui->QLineEdit_addFunction, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
+	connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
 
 
-    // CONNECTIONS
-    connect(pQPushButton_Quit, SIGNAL(clicked()), QApplication::instance(), SLOT(quit()));
-    connect(pQPushButton_PlotAllPoints, SIGNAL(clicked()), this, SLOT(QPushButton_PlotAllPoints_clicked()));
-    connect(pQLineEdit_addFunction, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
+	/* ! GRAPH INITIALIZATION */
+	ui->customPlot->setOpenGl(true, 16); // enable openGL
+	ui->customPlot->openGl() ? qDebug() << "OPENGL enabled" : qDebug() << "OPENGL disabled";
+	if (ui->customPlot->openGl()) {
+		qDebug() << "OPENGL enabled";
+		statusBarMsg("openGL enabled", 5000);
+	} else {
+		qDebug() << "OPENGL disabled";
+		statusBarMsg("openGL disabled", 5000);
+	}
+	ui->customPlot->addGraph();
 
-    pQGridLayout_mainLayout->addWidget(pQPushButton_Quit, 4, 0, 1, 2);
+	// give the axes some labels:
+	ui->customPlot->xAxis->setLabel("x");
+	ui->customPlot->yAxis->setLabel("y");
+	// set axes ranges, so we see all data:
+	ui->customPlot->xAxis->setRange(-10, 10);
+	ui->customPlot->yAxis->setRange(-10, 10);
 
-    pQGridLayout_mainLayout->addWidget(progressBar);
+	// Set interations
+	ui->customPlot->setInteraction(QCP::iRangeDrag, true);
+	ui->customPlot->setInteraction(QCP::iRangeZoom, true);
 
-    pQGridLayout_mainLayout->addWidget(customPlot, 0, 0, 1, 2);
-
-    initGraph();
+	ui->customPlot->replot();
 }
 
 
@@ -66,39 +49,18 @@ MainWindow::~MainWindow() {
 }
 
 
-void MainWindow::initGraph() {
-
-    customPlot->setOpenGl(true, 16); // enable openGL
-    customPlot->openGl() ? qDebug() << "OPENGL enabled" : qDebug() << "OPENGL disabled";
-    customPlot->addGraph();
-
-    // give the axes some labels:
-    customPlot->xAxis->setLabel("x");
-    customPlot->yAxis->setLabel("y");
-    // set axes ranges, so we see all data:
-	customPlot->xAxis->setRange(-10, 10);
-	customPlot->yAxis->setRange(-10, 10);
-
-	// Set interations
-    customPlot->setInteraction(QCP::iRangeDrag, true);
-    customPlot->setInteraction(QCP::iRangeZoom, true);
-
-    customPlot->replot();
-}
-
-
 void MainWindow::statusBarMsg(const char msg[], int time) {
-    statusBar()->showMessage(msg, time);
+	ui->statusbar->showMessage(msg, time);
 }
 
 
 void MainWindow::QLineEdit_addFunction_returnPressed() {
-    QString text = pQLineEdit_addFunction->text();
+	QString text = ui->QLineEdit_addFunction->text();
 
     BinaryTree tree(text);
 
 	QVector<double> x_arr = generateXArray(-1000, 1000, NUMBER_OF_POINTS);
-	QVector<double> y_arr = tree.calculateTree(x_arr, progressBar);
+	QVector<double> y_arr = tree.calculateTree(x_arr, ui->progressBar);
     plot(x_arr, y_arr);
 }
 
@@ -119,21 +81,23 @@ QVector<double> MainWindow::generateXArray(int lowerLim, int upperLim, unsigned 
 
 
 void MainWindow::plot(const QVector<double> &xArray, const QVector<double> &yArray) {
-    customPlot->addGraph();
-    customPlot->graph()->setName(QString("New graph %1").arg(customPlot->graphCount() - 1));
-    customPlot->graph()->setData(xArray, yArray);
-    //customPlot->graph()->setLineStyle((QCPGraph::LineStyle)(rand()%5+1));
+	ui->customPlot->addGraph();
+	ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount() - 1));
+	ui->customPlot->graph()->setData(xArray, yArray);
+	// ! QCPCurve *plotCurves = new QCPCurve(customPlot->xAxis, customPlot->yAxis);
+
+	//customPlot->graph()->setLineStyle((QCPGraph::LineStyle)(rand()%5+1));
     //if (rand()%100 > 50)
     //    customPlot->graph()->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)(rand()%14+1)));
     QPen graphPen;
     graphPen.setColor(QColor(rand() % 245 + 10, rand() % 245 + 10, rand() % 245 + 10));
     graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
-    customPlot->graph()->setPen(graphPen);
-    customPlot->replot();
+	ui->customPlot->graph()->setPen(graphPen);
+	ui->customPlot->replot();
 }
 
 
-void MainWindow::QPushButton_PlotAllPoints_clicked() {
+void MainWindow::QPushButton_PlotPoints_clicked() {
 	// * Function is connected to the plot all points button
 	// * It clears the points graphs, then replots everything
 	// * in the above text edit
@@ -141,14 +105,14 @@ void MainWindow::QPushButton_PlotAllPoints_clicked() {
 	// todo: the default ones, and not required to type them in again every time
 	for (auto i : *graphList) {
 		// delete previously plotted graphs
-		customPlot->removeGraph(i);
+		ui->customPlot->removeGraph(i);
 	}
 	// remove the pointers
 	graphList->clear();
 
-	graphList->append(new QCPGraph(customPlot->xAxis, customPlot->yAxis));
+	graphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
 
-	QString text = pQTextEdit_pointsList->toPlainText();
+	QString text = ui->QTextEdit_pointsList->toPlainText();
 	QStringList arrayLine = text.split("\n", QString::SkipEmptyParts);
 
 	for (int line = 0; line < arrayLine.length(); line++) { // * iterate over lines
@@ -156,7 +120,7 @@ void MainWindow::QPushButton_PlotAllPoints_clicked() {
 
 		if (currentLine.at(0) == "[") { // * configuration line
 			// ! create a new graph to configure it
-			graphList->append(new QCPGraph(customPlot->xAxis, customPlot->yAxis));
+			graphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
 			// * set defaults for graph
 			graphList->last()->setAdaptiveSampling(false);
 			graphList->last()->removeFromLegend();
@@ -289,5 +253,5 @@ void MainWindow::QPushButton_PlotAllPoints_clicked() {
 			}
 		}
 	}
-	customPlot->replot();
+	ui->customPlot->replot();
 }
