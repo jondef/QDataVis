@@ -13,9 +13,6 @@
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
 
-namespace Ui {
-	class MainWindow;
-}
 
 class MainWindow : public QMainWindow {
 Q_OBJECT // enable signals and slots
@@ -50,6 +47,9 @@ public slots:
 
 	void plotMoveLegend();
 
+	void savePlotImage();
+
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
@@ -60,13 +60,14 @@ private:
 
 	void initGraph();
 
-	void statusBarMsg(const char *msg, int time = 2000);
+	void statusBarMsg(QString msg, int time = 2000);
 
     static QVector<double> generateXArray(int lowerLim, int upperLim, unsigned int length);
 
 	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
 
 	QList<QCPGraph *> *functionGraphList = new QList<QCPGraph *>; // stored pointers of the function graph
+
 };
 
 #endif //GUI_APP_MAINWINDOW_H

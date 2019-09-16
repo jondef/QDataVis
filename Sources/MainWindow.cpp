@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->QLineEdit_addFunction, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
 	connect(ui->QLineEdit_functionParam, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
 	connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
+	connect(ui->actionSave_as, SIGNAL(triggered()), this, SLOT(savePlotImage()));
 }
 
 
@@ -95,8 +96,41 @@ void MainWindow::initGraph() {
 }
 
 
-void MainWindow::statusBarMsg(const char msg[], int time) {
+void MainWindow::statusBarMsg(QString msg, int time) {
 	ui->statusBar->showMessage(msg, time);
+}
+
+
+void MainWindow::savePlotImage() {
+	QString save_path_filename = QFileDialog::getSaveFileName(this, tr("Save plot"), "",
+															  tr("*.jpg;;*.png;;*.bmp;;*.pdf"));
+
+	if (save_path_filename.isEmpty()) {
+		return;
+	}
+
+	QFile file(save_path_filename);
+
+	if (!file.open(QIODevice::WriteOnly)) {
+		QMessageBox::warning(nullptr, "Error", tr("\n Could not create image file on disk"));
+	}
+
+	QString ext = save_path_filename.mid(save_path_filename.length() - 4);
+	bool savedOk = false;
+	if (ext == ".png") {
+		savedOk = ui->customPlot->savePng(save_path_filename, 0, 0, 3.0, 100);
+	} else if (ext == ".jpg") {
+		savedOk = ui->customPlot->saveJpg(save_path_filename, 0, 0, 3.0, 100);
+	} else if (ext == ".bmp") {
+		savedOk = ui->customPlot->saveBmp(save_path_filename, 0, 0, 3.0);
+	} else if (ext == ".pdf") {
+		savedOk = ui->customPlot->savePdf(save_path_filename, 0, 0, QCP::epAllowCosmetic, QString(""),
+										  QString("Title"));
+	}
+
+	if (savedOk) {
+		statusBarMsg(QString("Successfully saved plot as a %1 file").arg(ext), 5000);
+	}
 }
 
 
@@ -546,13 +580,3 @@ void MainWindow::plotOppositeAxesConnection() {
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
