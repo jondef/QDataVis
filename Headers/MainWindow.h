@@ -28,6 +28,28 @@ public slots:
 
 	void QPushButton_deleteFunction_clicked();
 
+	void plotOppositeAxesConnection();
+
+	void plotAxisLockDrag();
+
+	void plotAxisLockZoom();
+
+	void plotGraphClicked(QCPAbstractPlottable *plottable, int dataIndex);
+
+	void plotContextMenuRequest(QPoint pos);
+
+	void plotTitleDoubleClicked(QMouseEvent *event);
+
+	void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
+
+	void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
+
+	void plotContextMenuRemoveAllGraphs();
+
+	void plotContextMenuRemoveSelectedGraph();
+
+	void plotMoveLegend();
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
@@ -36,16 +58,15 @@ public:
 private:
 	Ui::MainWindow *ui;
 
+	void initGraph();
+
 	void statusBarMsg(const char *msg, int time = 2000);
 
     static QVector<double> generateXArray(int lowerLim, int upperLim, unsigned int length);
 
 	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
 
-	QList<QCPCurve *> *functionGraphList = new QList<QCPCurve *>; // stored pointers of the function graph
-
-	void plot(const QVector<double> &xArray, const QVector<double> &yArray);
-
+	QList<QCPGraph *> *functionGraphList = new QList<QCPGraph *>; // stored pointers of the function graph
 };
 
 #endif //GUI_APP_MAINWINDOW_H
