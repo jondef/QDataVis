@@ -3,10 +3,15 @@
 //
 
 #include "MainWindow.h"
+#include "Resources/icon.xpm" // import icon as static const array *
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
+
+	// save icon in exe // https://convertio.co/png-xpm/
+	// comes from the xpm icon file
+	setWindowIcon(QIcon(QPixmap(window_icon_xpm)));
 
 	initGraph();
 
@@ -32,7 +37,7 @@ void MainWindow::initGraph() {
 
 	// configure tle title
 	ui->customPlot->plotLayout()->insertRow(0);
-	QCPTextElement *title = new QCPTextElement(ui->customPlot, "Plot", QFont("sans", 17, QFont::Bold));
+	QCPTextElement *title = new QCPTextElement(ui->customPlot, "Title", QFont("sans", 17, QFont::Bold));
 	ui->customPlot->plotLayout()->addElement(0, 0, title);
 
 	// axes configuration
@@ -96,35 +101,36 @@ void MainWindow::initGraph() {
 }
 
 
-void MainWindow::statusBarMsg(QString msg, int time) {
+void MainWindow::statusBarMsg(const QString &msg, int time) {
 	ui->statusBar->showMessage(msg, time);
 }
 
 
 void MainWindow::savePlotImage() {
-	QString save_path_filename = QFileDialog::getSaveFileName(this, tr("Save plot"), "",
-															  tr("*.jpg;;*.png;;*.bmp;;*.pdf"));
+	// fixme: save as jpg doesn't correctly save in release mode
+	QString savePathFilename = QFileDialog::getSaveFileName(this, tr("Save plot"), "",
+															tr("*.jpg;;*.png;;*.bmp;;*.pdf"));
 
-	if (save_path_filename.isEmpty()) {
+	if (savePathFilename.isEmpty()) {
 		return;
 	}
 
-	QFile file(save_path_filename);
+	QFile file(savePathFilename);
 
 	if (!file.open(QIODevice::WriteOnly)) {
 		QMessageBox::warning(nullptr, "Error", tr("\n Could not create image file on disk"));
 	}
 
-	QString ext = save_path_filename.mid(save_path_filename.length() - 4);
+	QString ext = savePathFilename.mid(savePathFilename.length() - 4);
 	bool savedOk = false;
 	if (ext == ".png") {
-		savedOk = ui->customPlot->savePng(save_path_filename, 0, 0, 3.0, 100);
+		savedOk = ui->customPlot->savePng(savePathFilename, 0, 0, 3.0, 100);
 	} else if (ext == ".jpg") {
-		savedOk = ui->customPlot->saveJpg(save_path_filename, 0, 0, 3.0, 100);
+		savedOk = ui->customPlot->saveJpg(savePathFilename, 0, 0, 3.0, 100);
 	} else if (ext == ".bmp") {
-		savedOk = ui->customPlot->saveBmp(save_path_filename, 0, 0, 3.0);
+		savedOk = ui->customPlot->saveBmp(savePathFilename, 0, 0, 3.0);
 	} else if (ext == ".pdf") {
-		savedOk = ui->customPlot->savePdf(save_path_filename, 0, 0, QCP::epAllowCosmetic, QString(""),
+		savedOk = ui->customPlot->savePdf(savePathFilename, 0, 0, QCP::epAllowCosmetic, QString(""),
 										  QString("Title"));
 	}
 

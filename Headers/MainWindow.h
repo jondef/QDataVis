@@ -60,7 +60,7 @@ private:
 
 	void initGraph();
 
-	void statusBarMsg(QString msg, int time = 2000);
+	void statusBarMsg(const QString &msg, int time = 2000);
 
     static QVector<double> generateXArray(int lowerLim, int upperLim, unsigned int length);
 
