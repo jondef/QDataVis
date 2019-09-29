@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14) # current version 3.14.5
+cmake_minimum_required(VERSION 3.14)
 message("CMAKE VERSION IS " ${CMAKE_VERSION})
 set(CMAKE_CXX_STANDARD 17)
 
@@ -36,7 +36,7 @@ file(GLOB UI_FILES
 
 #SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 #SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.3\\mingw73_64")
+set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.3\\mingw73_64\\lib\\cmake")
 
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -static-libgcc -static-libstdc++") # enable static linking of libstdc++
@@ -49,7 +49,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF) # enable verbose output
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
-set(CMAKE_AUTORCC ON) # ^^
+set(CMAKE_AUTORCC ON) # ^
 
 
 # prepare dlls to be linked to exe
@@ -61,8 +61,9 @@ elseif (${CMAKE_BUILD_TYPE} STREQUAL Release)
     set(PROJECT_LINK_LIBS qcustomplot2)
 endif ()
 
+SET(QT_USE_QTNETWORK true)
+FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network REQUIRED)
 
-find_package(Qt5 5.12.3 EXACT REQUIRED PATHS C:/Qt/5.12.3/mingw73_64/lib/cmake COMPONENTS Core Gui Widgets REQUIRED)
 set(DEPENDENCIES qcustomplot)
 
 foreach (dependency ${DEPENDENCIES})
@@ -80,5 +81,5 @@ else ()
 endif ()
 
 # link dlls to exe
-target_link_libraries(Application PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
+target_link_libraries(Application PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 target_link_libraries(Application PUBLIC ${PROJECT_LINK_LIBS})

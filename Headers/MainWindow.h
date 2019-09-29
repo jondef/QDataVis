@@ -6,13 +6,19 @@
 #define GUI_APP_MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QtNetwork>
 #include "ui_mainwindow.h"
 #include "dependencies/qcustomplot/include/qcustomplot.h"
 #include "Thread.h"
 #include "BinaryTree.h"
+#include "PlotPropertiesWindow.h"
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
 
+
+namespace Ui {
+	class MainWindow;
+}
 
 class MainWindow : public QMainWindow {
 Q_OBJECT // enable signals and slots
@@ -49,6 +55,14 @@ public slots:
 
 	void savePlotImage();
 
+	void Test();
+
+	void onResult(QNetworkReply *reply);
+
+	void replyFini(QNetworkReply *reply);
+
+	void openPlotProperties();
+
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -56,6 +70,11 @@ public:
 	~MainWindow();
 
 private:
+
+	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
+
+	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow();
+
 	Ui::MainWindow *ui;
 
 	void initGraph();
@@ -67,6 +86,7 @@ private:
 	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
 
 	QList<QCPGraph *> *functionGraphList = new QList<QCPGraph *>; // stored pointers of the function graph
+
 
 };
 

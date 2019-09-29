@@ -166,7 +166,14 @@
     <addaction name="separator"/>
     <addaction name="actionAbout_2"/>
    </widget>
+         <widget class="QMenu" name="menuGraph">
+             <property name="title">
+                 <string>Plot</string>
+             </property>
+             <addaction name="actionProperies"/>
+         </widget>
    <addaction name="menuFile"/>
+         <addaction name="menuGraph"/>
    <addaction name="menuHelp"/>
   </widget>
      <widget class="QStatusBar" name="statusBar"/>
@@ -193,6 +200,11 @@
      <action name="actionSave_as">
          <property name="text">
              <string>Save as...</string>
+         </property>
+     </action>
+     <action name="actionProperies">
+         <property name="text">
+             <string>Properties</string>
          </property>
      </action>
  </widget>

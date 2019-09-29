@@ -3,11 +3,12 @@
 //
 
 #include <QtWidgets/QProgressBar>
+#include <utility>
 #include "BinaryTree.h"
 
 
 BinaryTree::BinaryTree(QString expression) {
-    pRoot = new Node(expression);
+	pRoot = new Node(std::move(expression));
 }
 
 

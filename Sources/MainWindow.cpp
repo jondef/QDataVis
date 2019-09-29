@@ -21,12 +21,134 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->QLineEdit_addFunction, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
 	connect(ui->QLineEdit_functionParam, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
 	connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
+	connect(ui->actionProperies, SIGNAL(triggered()), this, SLOT(openPlotProperties()));
 	connect(ui->actionSave_as, SIGNAL(triggered()), this, SLOT(savePlotImage()));
+	connect(ui->QPushButton_FormattingHelp, SIGNAL(clicked()), this, SLOT(Test()));
+
+	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
+
+	// Connect networkManager response to the handler
+	connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::onResult);
+	// We get the data, namely JSON file from a site on a particular url
+	networkManager->get(QNetworkRequest(
+			QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
+//	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 }
 
 
 MainWindow::~MainWindow() {
 	delete ui;
+}
+
+void MainWindow::openPlotProperties() {
+	plotWindow->show();
+	qDebug() << plotWindow;
+}
+
+void MainWindow::onResult(QNetworkReply *reply) {
+	// If there are no errors
+	if (!reply->error()) {
+
+		// So create an object Json Document, by reading into it all the data from the response
+		QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
+		QJsonArray array = document.array();
+
+
+		QVector<double> date;
+		QVector<double> avg;
+		QVector<double> low;
+		QVector<double> high;
+
+
+		// Taking from the document root object
+		QJsonObject root = document.object();
+		for (auto &&transactions : array) {
+			date.append(transactions.toObject().take("date").toInt());
+			avg.append(transactions.toObject().take("weightedAverage").toDouble());
+			high.append(transactions.toObject().take("high").toDouble());
+			low.append(transactions.toObject().take("low").toDouble());
+		}
+		qDebug() << array.size();
+
+		QList<QColor> colors = {
+				QColor(qRgb(31, 119, 180)),
+				QColor(qRgb(255, 127, 14)),
+				QColor(qRgb(44, 160, 44)),
+				QColor(qRgb(214, 39, 40)),
+				QColor(qRgb(148, 103, 189)),
+				QColor(qRgb(140, 86, 75)),
+				QColor(qRgb(244, 119, 194)),
+				QColor(qRgb(127, 127, 127)),
+				QColor(qRgb(188, 189, 34)),
+				QColor(qRgb(23, 190, 207))
+		};
+		QPen graphPen;
+		graphPen.setColor(QColor(colors.at(0)));
+		graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
+
+
+
+		// * high
+		functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+		functionGraphList->last()->setData(date, high);
+		graphPen.setColor(QColor(colors.at(2)));
+		functionGraphList->last()->setPen(graphPen); // apply color to graph
+		// * low
+		functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+		functionGraphList->last()->setData(date, low);
+		graphPen.setColor(QColor(colors.at(1)));
+		functionGraphList->last()->setPen(graphPen); // apply color to graph
+		// * avg
+		functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+		functionGraphList->last()->setData(date, avg);
+		graphPen.setColor(QColor(colors.at(0)));
+		functionGraphList->last()->setPen(graphPen); // apply color to graph
+
+		ui->customPlot->replot();
+
+		/* We find the object "departament", which is the very first in the root object.
+		 * Use the keys() method gets a list of all objects and the first index
+		 * Take away the name of the object on which we obtain its value
+		 * */
+//		ui->textEdit->append(root.keys().at(0) + ": " + root.value(root.keys().at(0)).toString());
+//
+//		// The second value prescribe line
+//		QJsonValue jv = root.value("employees");
+//		// If the value is an array, ...
+//		if (jv.isArray()) {
+//			// ... then pick from an array of properties
+//			QJsonArray ja = jv.toArray();
+//			// Going through all the elements of the array ...
+//			for (int i = 0; i < ja.count(); i++) {
+//				QJsonObject subtree = ja.at(i).toObject();
+//				// Taking the values of the properties and last name by adding them to textEdit
+//				ui->textEdit->append(subtree.value("firstName").toString() +
+//									 " " +
+//									 subtree.value("lastName").toString());
+//			}
+//		}
+//		// At the end we take away the property of the number of employees of the department and also to output textEdit
+//		ui->textEdit->append(QString::number(root.value("number").toInt()));
+	}
+	reply->deleteLater();
+}
+
+void MainWindow::Test() {
+//	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
+//	networkManager->get(QNetworkRequest(QUrl("http://www.evileg.ru/it_example.json")));
+
+	QNetworkRequest request(QUrl("https://httpbin.org/get"));
+	QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+	connect(manager, SIGNAL(finished(QNetworkReply * )), this, SLOT(replyFini(QNetworkReply * )));
+	connect(manager, &QNetworkAccessManager::finished, manager, &QNetworkAccessManager::deleteLater);
+	manager->get(request);
+}
+
+void MainWindow::replyFini(QNetworkReply *reply) {
+	QString answer = QString::fromUtf8(reply->readAll());
+	qDebug() << "answer------------>" << answer;
+	qDebug() << QSslSocket::supportsSsl();
+	reply->deleteLater();
 }
 
 
@@ -96,6 +218,13 @@ void MainWindow::initGraph() {
 	ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
 
+
+	QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+	dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+	ui->customPlot->xAxis->setTicker(dateTicker);
+	double now = QDateTime::currentDateTime().toTime_t();
+	ui->customPlot->xAxis->setRange(now - now / 10, now);
+	ui->customPlot->yAxis->setRange(0, 10000);
 
 	ui->customPlot->replot();
 }
@@ -182,7 +311,7 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 			QColor(qRgb(23, 190, 207))
 	};
 
-	// ? GCPCurve has performance issues
+	// ! GCPCurve has performance issues
 	/*Graphs are used to display single-valued data.
 	 * Single-valued means that there should only be one data point per unique key coordinate.
 	 * In other words, the graph can't have loops. If you do want to plot non-single-valued curves,

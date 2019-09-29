@@ -17,8 +17,7 @@ public:
 
 	QVector<double> calculateTree(QVector<double> xArray, QProgressBar *progessBar);
 
-private:
-    Node *pRoot;
+	Node *pRoot;
 };
 
 
