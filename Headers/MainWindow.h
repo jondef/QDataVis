@@ -12,13 +12,10 @@
 #include "Thread.h"
 #include "BinaryTree.h"
 #include "PlotPropertiesWindow.h"
+#include <QObject>
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
 
-
-namespace Ui {
-	class MainWindow;
-}
 
 class MainWindow : public QMainWindow {
 Q_OBJECT // enable signals and slots
@@ -41,8 +38,6 @@ public slots:
 
 	void plotContextMenuRequest(QPoint pos);
 
-	void plotTitleDoubleClicked(QMouseEvent *event);
-
 	void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
 
 	void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
@@ -60,8 +55,6 @@ public slots:
 	void onResult(QNetworkReply *reply);
 
 	void replyFini(QNetworkReply *reply);
-
-	void openPlotProperties();
 
 
 public:
@@ -87,7 +80,10 @@ private:
 
 	QList<QCPGraph *> *functionGraphList = new QList<QCPGraph *>; // stored pointers of the function graph
 
+	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
+
+	void changeAxisTicker(QCPAxis *axis, const QString &value);
 };
 
 #endif //GUI_APP_MAINWINDOW_H

@@ -41,7 +41,7 @@ set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.3\\mingw73_64\\lib\\cmake")
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -static-libgcc -static-libstdc++") # enable static linking of libstdc++
 #set(CMAKE_CXX_FLAGS "-pthread") # enable multiple threads
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 set(CMAKE_VERBOSE_MAKEFILE OFF) # enable verbose output
 
 # need this to include the auto generated ui_mainwindow.h

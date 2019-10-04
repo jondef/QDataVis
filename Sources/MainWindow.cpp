@@ -13,25 +13,217 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// comes from the xpm icon file
 	setWindowIcon(QIcon(QPixmap(window_icon_xpm)));
 
+
+	auto pixmap = QPixmap(16, 16);
+	pixmap.fill(QColorDialog::getColor());
+	ui->customPlot->setBackground(pixmap);
+
 	initGraph();
 
-	// ! CONNECTIONS
-	connect(ui->QPushButton_PlotPoints, SIGNAL(clicked()), this, SLOT(QPushButton_PlotPoints_clicked()));
-	connect(ui->QPushButton_deleteFunction, SIGNAL(clicked()), this, SLOT(QPushButton_deleteFunction_clicked()));
-	connect(ui->QLineEdit_addFunction, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
-	connect(ui->QLineEdit_functionParam, SIGNAL(returnPressed()), this, SLOT(QLineEdit_addFunction_returnPressed()));
-	connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
-	connect(ui->actionProperies, SIGNAL(triggered()), this, SLOT(openPlotProperties()));
-	connect(ui->actionSave_as, SIGNAL(triggered()), this, SLOT(savePlotImage()));
-	connect(ui->QPushButton_FormattingHelp, SIGNAL(clicked()), this, SLOT(Test()));
 
-	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
+	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
+	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this,
+			&MainWindow::QPushButton_deleteFunction_clicked);
+	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this,
+			&MainWindow::QLineEdit_addFunction_returnPressed);
+	connect(ui->QLineEdit_functionParam, &QLineEdit::returnPressed, this,
+			&MainWindow::QLineEdit_addFunction_returnPressed);
+	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
+	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
+	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, &MainWindow::Test);
+	connect(ui->actionProperies, &QAction::triggered, this, [=]() {
+		plotWindow->show();
+	});
+
+
+	// ! /////////////////////////////
+	// !	PLOT WINDOW TITLE TAB	//
+	// ! /////////////////////////////
+
+
+	// * add title
+	connect(plotWindow->ui->pushButton_addTitle, &QPushButton::clicked, this, [=]() {
+		plotWindow->ui->listWidget_titleList->addItem("Title");
+
+		graphTextElements->insert(
+				plotWindow->ui->listWidget_titleList->item(plotWindow->ui->listWidget_titleList->count() - 1),
+				new QCPTextElement(ui->customPlot, "Title", plotWindow->titleFontDialog->currentFont()));
+
+		// make each item editable by double clicking
+		QListWidgetItem *item = plotWindow->ui->listWidget_titleList->item(
+				plotWindow->ui->listWidget_titleList->count() - 1);
+		item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+		// add title instantly
+		ui->customPlot->plotLayout()->insertRow(graphTextElements->count());
+		ui->customPlot->plotLayout()->addElement(graphTextElements->count(), 0, graphTextElements->value(
+				plotWindow->ui->listWidget_titleList->item(plotWindow->ui->listWidget_titleList->count() - 1)));
+
+		ui->customPlot->replot();
+	});
+
+	// * when user renamed listWidgetItem
+	connect(plotWindow->ui->listWidget_titleList, &QListWidget::itemChanged, this, [=](QListWidgetItem *changedItem) {
+		graphTextElements->value(changedItem)->setText(changedItem->text());
+		ui->customPlot->replot();
+	});
+
+
+	// * delete title
+	connect(plotWindow->ui->pushButton_removeTitle, &QPushButton::clicked, this, [=]() {
+		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
+		if (selectedItem != nullptr) {
+			ui->customPlot->plotLayout()->remove(graphTextElements->value(selectedItem));
+			ui->customPlot->plotLayout()->simplify();
+
+			graphTextElements->remove(selectedItem);
+			delete selectedItem;
+
+			ui->customPlot->replot();
+		}
+	});
+
+	// * update the widgets on the right when a title is clicked
+	connect(plotWindow->ui->listWidget_titleList, &QListWidget::itemClicked, this, [=]() {
+		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
+		if (selectedItem != nullptr) {
+			QCPTextElement *titleElement = graphTextElements->value(selectedItem);
+			// update QFontWidget
+			plotWindow->titleFontDialog->setCurrentFont(titleElement->font());
+			// update QColorWidget
+			plotWindow->titleColorDialog->setCurrentColor(titleElement->textColor());
+		}
+	});
+
+
+	// * when user changed font in QFontDialog - any font option
+	connect(plotWindow->titleFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
+		if (selectedItem != nullptr) {
+			graphTextElements->value(selectedItem)->setFont(plotWindow->titleFontDialog->currentFont());
+			ui->customPlot->replot();
+		}
+	});
+
+	// * when user changed the color in QColorDialog
+	connect(plotWindow->titleColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
+		if (selectedItem != nullptr) {
+			graphTextElements->value(selectedItem)->setTextColor(plotWindow->titleColorDialog->currentColor());
+			//graphTextElements->value(plotWindow->ui->listWidget_titleList->item(plotWindow->ui->listWidget_titleList->count() - 1))->setTextColor(QColorDialog::getColor());
+			ui->customPlot->replot();
+		}
+	});
+
+
+	// * Title order changed
+	connect(plotWindow->ui->listWidget_titleList->model(), &QAbstractItemModel::rowsMoved, this, [=]() {
+		// remove all of the titles except the plot
+		for (int j = 0; j < graphTextElements->count() + 1; ++j) {
+			if (plotWindow->ui->listWidget_titleList->item(j)->text() == "Plot") {
+				continue;
+			}
+			ui->customPlot->plotLayout()->take(graphTextElements->value(plotWindow->ui->listWidget_titleList->item(j)));
+		}
+		ui->customPlot->plotLayout()->simplify();
+
+		int index = 0;
+
+		// ! count() + 1 because we need to account for the plot item.
+		for (int i = 0; i < graphTextElements->count() + 1; ++i) {
+			// check if current item is the plot item
+			if (plotWindow->ui->listWidget_titleList->item(i)->text() == "Plot") {
+				index++;
+				continue;
+			}
+			ui->customPlot->plotLayout()->insertRow(index);
+			ui->customPlot->plotLayout()->addElement(index, 0, graphTextElements->value(
+					plotWindow->ui->listWidget_titleList->item(i)));
+			index++;
+		}
+		ui->customPlot->replot();
+	});
+
+
+	QPen graphPen;
+	graphPen.setColor(QColor(qRgb(0, 0, 0)));
+	graphPen.setWidth(1);
+
+	ui->customPlot->yAxis->grid()->setSubGridVisible(true);
+	ui->customPlot->yAxis->grid()->setZeroLinePen(graphPen);
+	ui->customPlot->xAxis->grid()->setZeroLinePen(graphPen);
+	ui->customPlot->xAxis->grid()->setSubGridVisible(true);
+//	ui->customPlot->yAxis->setScaleType(QCPAxis::stLogarithmic);
+//	ui->customPlot->yAxis2->setScaleType(QCPAxis::stLogarithmic);
+
+	ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
+	ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
+
+	connect(plotWindow->ui->checkBox_xAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis->setVisible(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_xAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis2->setVisible(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis->setVisible(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis2->setVisible(checked);
+		ui->customPlot->replot();
+	});
+
+
+	connect(plotWindow->ui->checkBox_xAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_xAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis2->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis2->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+
+
+	connect(plotWindow->ui->comboBox_xAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->xAxis, value);
+			});
+	connect(plotWindow->ui->comboBox_xAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->xAxis2, value);
+			});
+	connect(plotWindow->ui->comboBox_yAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->yAxis, value);
+			});
+	connect(plotWindow->ui->comboBox_yAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->yAxis2, value);
+			});
+
+
+	connect(plotWindow, &PlotPropertiesWindow::windowClosed, this, [=]() {
+		qDebug() << "saved";
+		plotWindow->close();
+	});
+//	dumpObjectInfo();
+//	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
 
 	// Connect networkManager response to the handler
-	connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::onResult);
+	//connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::onResult);
 	// We get the data, namely JSON file from a site on a particular url
-	networkManager->get(QNetworkRequest(
-			QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
+	//networkManager->get(QNetworkRequest(QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 }
 
@@ -40,10 +232,37 @@ MainWindow::~MainWindow() {
 	delete ui;
 }
 
-void MainWindow::openPlotProperties() {
-	plotWindow->show();
-	qDebug() << plotWindow;
+
+void MainWindow::changeAxisTicker(QCPAxis *axis, const QString &value) {
+	if (value == "QCPAxisTicker") {
+		QSharedPointer<QCPAxisTicker> fixedTicker(new QCPAxisTicker);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerPi") {
+		QSharedPointer<QCPAxisTickerPi> fixedTicker(new QCPAxisTickerPi);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerDateTime") {
+		QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+//		dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+		axis->setTicker(dateTicker);
+//		double now = QDateTime::currentDateTime().toTime_t();
+//		axis->setRange(now - now / 10, now);
+//		axis->setRange(0, 10000);
+	} else if (value == "QCPAxisTickerFixed") {
+		QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerLog") {
+		QSharedPointer<QCPAxisTickerLog> fixedTicker(new QCPAxisTickerLog);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerText") {
+		QSharedPointer<QCPAxisTickerText> fixedTicker(new QCPAxisTickerText);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerTime") {
+		QSharedPointer<QCPAxisTickerTime> fixedTicker(new QCPAxisTickerTime);
+		axis->setTicker(fixedTicker);
+	}
+	ui->customPlot->replot();
 }
+
 
 void MainWindow::onResult(QNetworkReply *reply) {
 	// If there are no errors
@@ -157,10 +376,6 @@ void MainWindow::initGraph() {
 	ui->customPlot->setOpenGl(true, 16); // enable openGL
 	statusBarMsg(ui->customPlot->openGl() ? "openGL enabled" : "openGL disabled", 5000);
 
-	// configure tle title
-	ui->customPlot->plotLayout()->insertRow(0);
-	QCPTextElement *title = new QCPTextElement(ui->customPlot, "Title", QFont("sans", 17, QFont::Bold));
-	ui->customPlot->plotLayout()->addElement(0, 0, title);
 
 	// axes configuration
 	ui->customPlot->xAxis->setLabel("x Axis");
@@ -171,9 +386,9 @@ void MainWindow::initGraph() {
 	// configure right and top axis to show ticks but no labels:
 	// (see QCPAxisRect::setupFullAxesBox for a quicker method to do this)
 	ui->customPlot->xAxis2->setVisible(true);
-	ui->customPlot->xAxis2->setTickLabels(false); // show numbers
+	ui->customPlot->xAxis2->setTickLabels(true); // show numbers
 	ui->customPlot->yAxis2->setVisible(true);
-	ui->customPlot->yAxis2->setTickLabels(false); // show numbers
+	ui->customPlot->yAxis2->setTickLabels(true); // show numbers
 
 	// legend initialization
 	ui->customPlot->legend->setVisible(true);
@@ -207,8 +422,7 @@ void MainWindow::initGraph() {
 	// legend double click
 	connect(ui->customPlot, SIGNAL(legendDoubleClick(QCPLegend * , QCPAbstractLegendItem * , QMouseEvent * )), this,
 			SLOT(plotLegendGraphDoubleClick(QCPLegend * , QCPAbstractLegendItem * )));
-	// title double click
-	connect(title, SIGNAL(doubleClicked(QMouseEvent * )), this, SLOT(plotTitleDoubleClicked(QMouseEvent * )));
+
 	// graph clicked statusbar message
 	connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable * , int, QMouseEvent * )), this,
 			SLOT(plotGraphClicked(QCPAbstractPlottable * , int)));
@@ -219,12 +433,12 @@ void MainWindow::initGraph() {
 	connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
 
 
-	QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-	dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
-	ui->customPlot->xAxis->setTicker(dateTicker);
-	double now = QDateTime::currentDateTime().toTime_t();
-	ui->customPlot->xAxis->setRange(now - now / 10, now);
-	ui->customPlot->yAxis->setRange(0, 10000);
+//	QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+//	dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+//	ui->customPlot->xAxis->setTicker(dateTicker);
+//	double now = QDateTime::currentDateTime().toTime_t();
+//	ui->customPlot->xAxis->setRange(now - now / 10, now);
+//	ui->customPlot->yAxis->setRange(0, 10000);
 
 	ui->customPlot->replot();
 }
@@ -540,19 +754,6 @@ void MainWindow::QPushButton_deleteFunction_clicked() {
 	}
 }
 
-void MainWindow::plotTitleDoubleClicked(QMouseEvent *event) {
-	Q_UNUSED(event)
-	if (QCPTextElement *title = qobject_cast<QCPTextElement *>(sender())) {
-		// Set the plot title by double clicking on it
-		bool ok;
-		QString newTitle = QInputDialog::getText(this, "QCustomPlot example", "New plot title:", QLineEdit::Normal,
-												 title->text(), &ok);
-		if (ok) {
-			title->setText(newTitle);
-			ui->customPlot->replot();
-		}
-	}
-}
 
 void MainWindow::plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part) {
 	// Set an axis label by double clicking on it

@@ -7,26 +7,30 @@
 
 #include <QWidget>
 #include <QtCore>
-#include <QMainWindow>
+#include <QColorDialog>
+#include <QFontDialog>
 #include "ui_plotpropertieswindow.h"
 
 
 class PlotPropertiesWindow : public QWidget {
 Q_OBJECT
 
+signals:
+
+	void windowClosed();
+
 public slots:
 
+	void okButtonPressed();
 
 public:
 	explicit PlotPropertiesWindow(QWidget *parent = nullptr);
 
 	~PlotPropertiesWindow();
-
-
-private:
 	Ui::Form *ui;
 
-
+	QFontDialog *titleFontDialog = new QFontDialog();
+	QColorDialog *titleColorDialog = new QColorDialog();
 };
 
 
