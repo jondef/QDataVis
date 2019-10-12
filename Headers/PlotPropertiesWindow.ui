@@ -24,7 +24,7 @@
             <item row="0" column="0" colspan="2">
                 <widget class="QTabWidget" name="tabWidget">
                     <property name="currentIndex">
-                        <number>1</number>
+                        <number>4</number>
                     </property>
                     <widget class="QWidget" name="tab_2">
                         <attribute name="title">
@@ -618,14 +618,13 @@
                                                         <rect>
                                                             <x>0</x>
                                                             <y>0</y>
-                                                            <width>209</width>
-                                                            <height>449</height>
+                                                            <width>208</width>
+                                                            <height>428</height>
                                                         </rect>
                                                     </property>
                                                     <layout class="QGridLayout" name="gridLayout_6">
                                                         <item row="3" column="0">
-                                                            <widget class="QComboBox"
-                                                                    name="comboBox_xAxis_QCPAxisTicker">
+                                                            <widget class="QComboBox" name="comboBox_xAxis_QCPAxisTicker">
                                                                 <item>
                                                                     <property name="text">
                                                                         <string>QCPAxisTicker</string>
@@ -664,8 +663,7 @@
                                                             </widget>
                                                         </item>
                                                         <item row="1" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_xAxis_setTickLabels">
+                                                            <widget class="QCheckBox" name="checkBox_xAxis_setTickLabels">
                                                                 <property name="text">
                                                                     <string>Show tick label</string>
                                                                 </property>
@@ -682,8 +680,7 @@
                                                             </widget>
                                                         </item>
                                                         <item row="4" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_xAxis_LogarithmicScale">
+                                                            <widget class="QCheckBox" name="checkBox_xAxis_LogarithmicScale">
                                                                 <property name="text">
                                                                     <string>Logarithmic Scale</string>
                                                                 </property>
@@ -1167,14 +1164,13 @@
                                                         <rect>
                                                             <x>0</x>
                                                             <y>0</y>
-                                                            <width>207</width>
-                                                            <height>447</height>
+                                                            <width>200</width>
+                                                            <height>420</height>
                                                         </rect>
                                                     </property>
                                                     <layout class="QGridLayout" name="gridLayout_9">
                                                         <item row="4" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_yAxis2_LogarithmicScale">
+                                                            <widget class="QCheckBox" name="checkBox_yAxis2_LogarithmicScale">
                                                                 <property name="text">
                                                                     <string>Logarithmic Scale</string>
                                                                 </property>
@@ -1188,8 +1184,7 @@
                                                             </widget>
                                                         </item>
                                                         <item row="3" column="0">
-                                                            <widget class="QComboBox"
-                                                                    name="comboBox_yAxis2_QCPAxisTicker">
+                                                            <widget class="QComboBox" name="comboBox_yAxis2_QCPAxisTicker">
                                                                 <item>
                                                                     <property name="text">
                                                                         <string>QCPAxisTicker</string>
@@ -1228,8 +1223,7 @@
                                                             </widget>
                                                         </item>
                                                         <item row="1" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_yAxis2_setTickLabels">
+                                                            <widget class="QCheckBox" name="checkBox_yAxis2_setTickLabels">
                                                                 <property name="text">
                                                                     <string>Show tick label</string>
                                                                 </property>
@@ -1710,22 +1704,20 @@
                                                         <rect>
                                                             <x>0</x>
                                                             <y>0</y>
-                                                            <width>207</width>
-                                                            <height>447</height>
+                                                            <width>200</width>
+                                                            <height>420</height>
                                                         </rect>
                                                     </property>
                                                     <layout class="QGridLayout" name="gridLayout_10">
                                                         <item row="5" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_xAxis2_LogarithmicScale">
+                                                            <widget class="QCheckBox" name="checkBox_xAxis2_LogarithmicScale">
                                                                 <property name="text">
                                                                     <string>Logarithmic Scale</string>
                                                                 </property>
                                                             </widget>
                                                         </item>
                                                         <item row="1" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_xAxis2_setTickLabels">
+                                                            <widget class="QCheckBox" name="checkBox_xAxis2_setTickLabels">
                                                                 <property name="text">
                                                                     <string>Show tick label</string>
                                                                 </property>
@@ -1739,8 +1731,7 @@
                                                             </widget>
                                                         </item>
                                                         <item row="4" column="0">
-                                                            <widget class="QComboBox"
-                                                                    name="comboBox_xAxis2_QCPAxisTicker">
+                                                            <widget class="QComboBox" name="comboBox_xAxis2_QCPAxisTicker">
                                                                 <item>
                                                                     <property name="text">
                                                                         <string>QCPAxisTicker</string>
@@ -2256,14 +2247,13 @@
                                                         <rect>
                                                             <x>0</x>
                                                             <y>0</y>
-                                                            <width>207</width>
-                                                            <height>447</height>
+                                                            <width>200</width>
+                                                            <height>420</height>
                                                         </rect>
                                                     </property>
                                                     <layout class="QGridLayout" name="gridLayout_2">
                                                         <item row="3" column="0">
-                                                            <widget class="QComboBox"
-                                                                    name="comboBox_yAxis_QCPAxisTicker">
+                                                            <widget class="QComboBox" name="comboBox_yAxis_QCPAxisTicker">
                                                                 <item>
                                                                     <property name="text">
                                                                         <string>QCPAxisTicker</string>
@@ -2302,8 +2292,7 @@
                                                             </widget>
                                                         </item>
                                                         <item row="4" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_yAxis_LogarithmicScale">
+                                                            <widget class="QCheckBox" name="checkBox_yAxis_LogarithmicScale">
                                                                 <property name="text">
                                                                     <string>Logarithmic Scale</string>
                                                                 </property>
@@ -2317,8 +2306,7 @@
                                                             </widget>
                                                         </item>
                                                         <item row="1" column="0">
-                                                            <widget class="QCheckBox"
-                                                                    name="checkBox_yAxis_setTickLabels">
+                                                            <widget class="QCheckBox" name="checkBox_yAxis_setTickLabels">
                                                                 <property name="text">
                                                                     <string>Show tick label</string>
                                                                 </property>
@@ -2363,17 +2351,8 @@
                                     <layout class="QVBoxLayout" name="verticalLayout">
                                         <item>
                                             <widget class="QCheckBox" name="checkBox_RangeDrag">
-                                                <property name="toolTip">
-                                                    <string/>
-                                                </property>
-                                                <property name="whatsThis">
-                                                    <string/>
-                                                </property>
                                                 <property name="text">
-                                                    <string>RangeDrag</string>
-                                                </property>
-                                                <property name="checked">
-                                                    <bool>false</bool>
+                                                    <string>CheckBox</string>
                                                 </property>
                                             </widget>
                                         </item>

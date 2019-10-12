@@ -20,14 +20,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	initGraph();
 
-
 	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
-	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this,
-			&MainWindow::QPushButton_deleteFunction_clicked);
-	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this,
-			&MainWindow::QLineEdit_addFunction_returnPressed);
-	connect(ui->QLineEdit_functionParam, &QLineEdit::returnPressed, this,
-			&MainWindow::QLineEdit_addFunction_returnPressed);
+	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
+	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
+	connect(ui->QLineEdit_functionParam, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
 	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, &MainWindow::Test);
@@ -85,7 +81,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// We get the data, namely JSON file from a site on a particular url
 	//networkManager->get(QNetworkRequest(QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
-
 }
 
 
@@ -96,37 +91,37 @@ MainWindow::~MainWindow() {
 
 inline void MainWindow::setUpAxesPageConnections() {
 	// * set axis visible
-	connect(plotWindow->ui->checkBox_xAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis_setVisible, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->xAxis->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_xAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis2_setVisible, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->xAxis2->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis_setVisible, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->yAxis->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis2_setVisible, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->yAxis2->setVisible(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set ticks visible
-	connect(plotWindow->ui->checkBox_xAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis_setTickLabels, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->xAxis->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_xAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis2_setTickLabels, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->xAxis2->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis_setTickLabels, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->yAxis->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis2_setTickLabels, &QCheckBox::toggled, this, [=](bool checked) {
 		ui->customPlot->yAxis2->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
@@ -135,42 +130,25 @@ inline void MainWindow::setUpAxesPageConnections() {
 	connect(plotWindow->ui->comboBox_xAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
 			[=](const QString &value) {
 				changeAxisTicker(ui->customPlot->xAxis, value);
-				if (value == "QCPAxisTickerLog") {
-					plotWindow->ui->checkBox_xAxis_LogarithmicScale->setChecked(true);
-				} else {
-					plotWindow->ui->checkBox_xAxis_LogarithmicScale->setChecked(false);
-				}
+				plotWindow->ui->checkBox_xAxis_LogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 			});
 	connect(plotWindow->ui->comboBox_xAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
 			[=](const QString &value) {
 				changeAxisTicker(ui->customPlot->xAxis2, value);
-				if (value == "QCPAxisTickerLog") {
-					plotWindow->ui->checkBox_xAxis2_LogarithmicScale->setChecked(true);
-				} else {
-					plotWindow->ui->checkBox_xAxis2_LogarithmicScale->setChecked(false);
-				}
+				plotWindow->ui->checkBox_xAxis2_LogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 			});
-	connect(plotWindow->ui->comboBox_yAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
-			[=](const QString &value) {
-				changeAxisTicker(ui->customPlot->yAxis, value);
-				if (value == "QCPAxisTickerLog") {
-					plotWindow->ui->checkBox_yAxis_LogarithmicScale->setChecked(true);
-				} else {
-					plotWindow->ui->checkBox_yAxis_LogarithmicScale->setChecked(false);
-				}
-			});
+	connect(plotWindow->ui->comboBox_yAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this, [=](const QString &value) {
+		changeAxisTicker(ui->customPlot->yAxis, value);
+		plotWindow->ui->checkBox_yAxis_LogarithmicScale->setChecked(value == "QCPAxisTickerLog");
+	});
 	connect(plotWindow->ui->comboBox_yAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
 			[=](const QString &value) {
 				changeAxisTicker(ui->customPlot->yAxis2, value);
-				if (value == "QCPAxisTickerLog") {
-					plotWindow->ui->checkBox_yAxis2_LogarithmicScale->setChecked(true);
-				} else {
-					plotWindow->ui->checkBox_yAxis2_LogarithmicScale->setChecked(false);
-				}
+				plotWindow->ui->checkBox_yAxis2_LogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 			});
 
 	// * set logarithmic scale
-	connect(plotWindow->ui->checkBox_xAxis_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis_LogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->xAxis->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -179,7 +157,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 		ui->customPlot->replot();
 	});
 
-	connect(plotWindow->ui->checkBox_xAxis2_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis2_LogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->xAxis2->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -188,7 +166,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 		ui->customPlot->replot();
 	});
 
-	connect(plotWindow->ui->checkBox_yAxis_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis_LogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->yAxis->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -197,7 +175,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 		ui->customPlot->replot();
 	});
 
-	connect(plotWindow->ui->checkBox_yAxis2_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis2_LogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->yAxis2->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -210,6 +188,8 @@ inline void MainWindow::setUpAxesPageConnections() {
 	plotWindow->ui->checkBox_yAxis_setVisible->setChecked(true);
 	plotWindow->ui->checkBox_xAxis_setTickLabels->setChecked(true);
 	plotWindow->ui->checkBox_yAxis_setTickLabels->setChecked(true);
+	plotWindow->ui->checkBox_xAxis2_setTickLabels->setChecked(true);
+	plotWindow->ui->checkBox_yAxis2_setTickLabels->setChecked(true);
 }
 
 
@@ -320,7 +300,7 @@ inline void MainWindow::setUpTitlePageConnections() {
 
 
 inline void MainWindow::setUpInteractionsPageConnections() {
-	connect(plotWindow->ui->checkBox_MultiSelect, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_MultiSelect, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iMultiSelect);
 		} else {
@@ -328,8 +308,7 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_RangeDrag, &QCheckBox::clicked, this, [=](bool checked) {
-		qDebug() << "checkbox is " << checked;
+	connect(plotWindow->ui->checkBox_RangeDrag, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iRangeDrag);
 		} else {
@@ -337,7 +316,7 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_RangeZoom, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_RangeZoom, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iRangeZoom);
 		} else {
@@ -345,7 +324,7 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectPlottables, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectPlottables, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectPlottables);
 		} else {
@@ -353,7 +332,7 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectAxes, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectAxes, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectAxes);
 		} else {
@@ -361,7 +340,7 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectItems, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectItems, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectItems);
 		} else {
@@ -369,7 +348,7 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectLegend, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectLegend, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectLegend);
 		} else {
@@ -377,7 +356,7 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectOther, &QCheckBox::clicked, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectOther, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectOther);
 		} else {
@@ -393,7 +372,6 @@ inline void MainWindow::setUpInteractionsPageConnections() {
 	plotWindow->ui->checkBox_SelectLegend->setChecked(true);
 	plotWindow->ui->checkBox_SelectItems->setChecked(true);
 	plotWindow->ui->checkBox_SelectOther->setChecked(true);
-
 }
 
 
