@@ -31,6 +31,7 @@ public:
 
 	QFontDialog *titleFontDialog = new QFontDialog();
 	QColorDialog *titleColorDialog = new QColorDialog();
+	QColorDialog *generalTabColorDialog = new QColorDialog();
 };
 
 

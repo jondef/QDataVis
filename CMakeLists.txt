@@ -36,7 +36,7 @@ file(GLOB UI_FILES
 
 #SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 #SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.3\\mingw73_64\\lib\\cmake")
+set(CMAKE_PREFIX_PATH "C:\\Qt\\5.13.1\\mingw73_64\\lib\\cmake")
 
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -static-libgcc -static-libstdc++") # enable static linking of libstdc++

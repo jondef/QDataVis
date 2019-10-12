@@ -50,6 +50,7 @@ void Node::splitNodeValue(QString string) {
 	for (const QString &operation : operations) {
 		QList<int> indexOfOperators = findAllOccurences(string, operation);
 
+
 		//qDebug() << indexOfOperators << parenthesesArray;
 
 		for (int i : indexOfOperators) {

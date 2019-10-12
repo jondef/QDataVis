@@ -14,9 +14,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setWindowIcon(QIcon(QPixmap(window_icon_xpm)));
 
 
-	auto pixmap = QPixmap(16, 16);
-	pixmap.fill(QColorDialog::getColor());
-	ui->customPlot->setBackground(pixmap);
+	//auto pixmap = QPixmap(16, 16);
+	//pixmap.fill(QColorDialog::getColor());
+	//ui->customPlot->setBackground(pixmap);
 
 	initGraph();
 
@@ -33,15 +33,188 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, &MainWindow::Test);
 	connect(ui->actionProperies, &QAction::triggered, this, [=]() {
 		plotWindow->show();
+		plotWindow->raise(); // bring it to front
+		plotWindow->activateWindow(); // select it
+		plotWindow->setWindowState(
+				plotWindow->windowState() & ~Qt::WindowMinimized | Qt::WindowActive); // set to active
 	});
 
 
-	// ! /////////////////////////////
-	// !	PLOT WINDOW TITLE TAB	//
-	// ! /////////////////////////////
+	QPen graphPen;
+	graphPen.setColor(QColor(qRgb(0, 0, 0)));
+	graphPen.setWidth(1);
+
+	ui->customPlot->yAxis->grid()->setSubGridVisible(true);
+	ui->customPlot->yAxis->grid()->setZeroLinePen(graphPen);
+	ui->customPlot->xAxis->grid()->setZeroLinePen(graphPen);
+
+	graphPen.setColor(QColor(qRgb(255, 0, 0)));
+	ui->customPlot->yAxis->grid()->setPen(graphPen);
+	ui->customPlot->xAxis->grid()->setPen(graphPen);
+	graphPen.setColor(QColor(qRgb(0, 0, 255)));
+	ui->customPlot->xAxis->grid()->setSubGridPen(graphPen);
+	ui->customPlot->yAxis->grid()->setSubGridPen(graphPen);
+	// todo: add setLabelColor & setlabelfont support (axis)
+	// todo: add customPlot->xAxis->setTickLabelColor() and font support
+	// todo: add xaxis2 and yaxis2 label support
 
 
-	// * add title
+	//ui->customPlot->xAxis->grid()->setVisible(false);
+	//ui->customPlot->yAxis->grid()->setVisible(false);
+	ui->customPlot->xAxis->grid()->setSubGridVisible(true);
+
+	ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
+	ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
+
+
+	setUpAxesPageConnections();
+	setUpInteractionsPageConnections();
+	setUpTitlePageConnections();
+	setUpGeneralPageConnections();
+
+
+	connect(plotWindow, &PlotPropertiesWindow::windowClosed, this, [=]() {
+		qDebug() << "saved";
+		plotWindow->close();
+	});
+//	dumpObjectInfo();
+//	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
+
+	// Connect networkManager response to the handler
+	//connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::onResult);
+	// We get the data, namely JSON file from a site on a particular url
+	//networkManager->get(QNetworkRequest(QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
+//	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
+
+}
+
+
+MainWindow::~MainWindow() {
+	delete ui;
+}
+
+
+inline void MainWindow::setUpAxesPageConnections() {
+	// * set axis visible
+	connect(plotWindow->ui->checkBox_xAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis->setVisible(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_xAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis2->setVisible(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis->setVisible(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis2->setVisible(checked);
+		ui->customPlot->replot();
+	});
+
+	// * set ticks visible
+	connect(plotWindow->ui->checkBox_xAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_xAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->xAxis2->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+	connect(plotWindow->ui->checkBox_yAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
+		ui->customPlot->yAxis2->setTickLabels(checked);
+		ui->customPlot->replot();
+	});
+
+	// * select axis ticker type (pi, date, etc...)
+	connect(plotWindow->ui->comboBox_xAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->xAxis, value);
+				if (value == "QCPAxisTickerLog") {
+					plotWindow->ui->checkBox_xAxis_LogarithmicScale->setChecked(true);
+				} else {
+					plotWindow->ui->checkBox_xAxis_LogarithmicScale->setChecked(false);
+				}
+			});
+	connect(plotWindow->ui->comboBox_xAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->xAxis2, value);
+				if (value == "QCPAxisTickerLog") {
+					plotWindow->ui->checkBox_xAxis2_LogarithmicScale->setChecked(true);
+				} else {
+					plotWindow->ui->checkBox_xAxis2_LogarithmicScale->setChecked(false);
+				}
+			});
+	connect(plotWindow->ui->comboBox_yAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->yAxis, value);
+				if (value == "QCPAxisTickerLog") {
+					plotWindow->ui->checkBox_yAxis_LogarithmicScale->setChecked(true);
+				} else {
+					plotWindow->ui->checkBox_yAxis_LogarithmicScale->setChecked(false);
+				}
+			});
+	connect(plotWindow->ui->comboBox_yAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
+			[=](const QString &value) {
+				changeAxisTicker(ui->customPlot->yAxis2, value);
+				if (value == "QCPAxisTickerLog") {
+					plotWindow->ui->checkBox_yAxis2_LogarithmicScale->setChecked(true);
+				} else {
+					plotWindow->ui->checkBox_yAxis2_LogarithmicScale->setChecked(false);
+				}
+			});
+
+	// * set logarithmic scale
+	connect(plotWindow->ui->checkBox_xAxis_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->xAxis->setScaleType(QCPAxis::stLogarithmic);
+		} else {
+			ui->customPlot->xAxis->setScaleType(QCPAxis::stLinear);
+		}
+		ui->customPlot->replot();
+	});
+
+	connect(plotWindow->ui->checkBox_xAxis2_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->xAxis2->setScaleType(QCPAxis::stLogarithmic);
+		} else {
+			ui->customPlot->xAxis2->setScaleType(QCPAxis::stLinear);
+		}
+		ui->customPlot->replot();
+	});
+
+	connect(plotWindow->ui->checkBox_yAxis_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->yAxis->setScaleType(QCPAxis::stLogarithmic);
+		} else {
+			ui->customPlot->yAxis->setScaleType(QCPAxis::stLinear);
+		}
+		ui->customPlot->replot();
+	});
+
+	connect(plotWindow->ui->checkBox_yAxis2_LogarithmicScale, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->yAxis2->setScaleType(QCPAxis::stLogarithmic);
+		} else {
+			ui->customPlot->yAxis2->setScaleType(QCPAxis::stLinear);
+		}
+		ui->customPlot->replot();
+	});
+
+	plotWindow->ui->checkBox_xAxis_setVisible->setChecked(true);
+	plotWindow->ui->checkBox_yAxis_setVisible->setChecked(true);
+	plotWindow->ui->checkBox_xAxis_setTickLabels->setChecked(true);
+	plotWindow->ui->checkBox_yAxis_setTickLabels->setChecked(true);
+}
+
+
+inline void MainWindow::setUpTitlePageConnections() {
+	// * add title button clicked
 	connect(plotWindow->ui->pushButton_addTitle, &QPushButton::clicked, this, [=]() {
 		plotWindow->ui->listWidget_titleList->addItem("Title");
 
@@ -143,93 +316,103 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		}
 		ui->customPlot->replot();
 	});
-
-
-	QPen graphPen;
-	graphPen.setColor(QColor(qRgb(0, 0, 0)));
-	graphPen.setWidth(1);
-
-	ui->customPlot->yAxis->grid()->setSubGridVisible(true);
-	ui->customPlot->yAxis->grid()->setZeroLinePen(graphPen);
-	ui->customPlot->xAxis->grid()->setZeroLinePen(graphPen);
-	ui->customPlot->xAxis->grid()->setSubGridVisible(true);
-//	ui->customPlot->yAxis->setScaleType(QCPAxis::stLogarithmic);
-//	ui->customPlot->yAxis2->setScaleType(QCPAxis::stLogarithmic);
-
-	ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
-	ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
-
-	connect(plotWindow->ui->checkBox_xAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->xAxis->setVisible(checked);
-		ui->customPlot->replot();
-	});
-	connect(plotWindow->ui->checkBox_xAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->xAxis2->setVisible(checked);
-		ui->customPlot->replot();
-	});
-	connect(plotWindow->ui->checkBox_yAxis_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->yAxis->setVisible(checked);
-		ui->customPlot->replot();
-	});
-	connect(plotWindow->ui->checkBox_yAxis2_setVisible, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->yAxis2->setVisible(checked);
-		ui->customPlot->replot();
-	});
-
-
-	connect(plotWindow->ui->checkBox_xAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->xAxis->setTickLabels(checked);
-		ui->customPlot->replot();
-	});
-	connect(plotWindow->ui->checkBox_xAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->xAxis2->setTickLabels(checked);
-		ui->customPlot->replot();
-	});
-	connect(plotWindow->ui->checkBox_yAxis_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->yAxis->setTickLabels(checked);
-		ui->customPlot->replot();
-	});
-	connect(plotWindow->ui->checkBox_yAxis2_setTickLabels, &QCheckBox::clicked, this, [=](bool checked) {
-		ui->customPlot->yAxis2->setTickLabels(checked);
-		ui->customPlot->replot();
-	});
-
-
-	connect(plotWindow->ui->comboBox_xAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
-			[=](const QString &value) {
-				changeAxisTicker(ui->customPlot->xAxis, value);
-			});
-	connect(plotWindow->ui->comboBox_xAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
-			[=](const QString &value) {
-				changeAxisTicker(ui->customPlot->xAxis2, value);
-			});
-	connect(plotWindow->ui->comboBox_yAxis_QCPAxisTicker, &QComboBox::currentTextChanged, this,
-			[=](const QString &value) {
-				changeAxisTicker(ui->customPlot->yAxis, value);
-			});
-	connect(plotWindow->ui->comboBox_yAxis2_QCPAxisTicker, &QComboBox::currentTextChanged, this,
-			[=](const QString &value) {
-				changeAxisTicker(ui->customPlot->yAxis2, value);
-			});
-
-
-	connect(plotWindow, &PlotPropertiesWindow::windowClosed, this, [=]() {
-		qDebug() << "saved";
-		plotWindow->close();
-	});
-//	dumpObjectInfo();
-//	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
-
-	// Connect networkManager response to the handler
-	//connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::onResult);
-	// We get the data, namely JSON file from a site on a particular url
-	//networkManager->get(QNetworkRequest(QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
-//	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 }
 
 
-MainWindow::~MainWindow() {
-	delete ui;
+inline void MainWindow::setUpInteractionsPageConnections() {
+	connect(plotWindow->ui->checkBox_MultiSelect, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iMultiSelect);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iMultiSelect);
+		}
+	});
+
+	connect(plotWindow->ui->checkBox_RangeDrag, &QCheckBox::clicked, this, [=](bool checked) {
+		qDebug() << "checkbox is " << checked;
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iRangeDrag);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iRangeDrag);
+		}
+	});
+
+	connect(plotWindow->ui->checkBox_RangeZoom, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iRangeZoom);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iRangeZoom);
+		}
+	});
+
+	connect(plotWindow->ui->checkBox_SelectPlottables, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectPlottables);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iSelectPlottables);
+		}
+	});
+
+	connect(plotWindow->ui->checkBox_SelectAxes, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectAxes);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iSelectAxes);
+		}
+	});
+
+	connect(plotWindow->ui->checkBox_SelectItems, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectItems);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iSelectItems);
+		}
+	});
+
+	connect(plotWindow->ui->checkBox_SelectLegend, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectLegend);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iSelectLegend);
+		}
+	});
+
+	connect(plotWindow->ui->checkBox_SelectOther, &QCheckBox::clicked, this, [=](bool checked) {
+		if (checked) {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectOther);
+		} else {
+			ui->customPlot->setInteractions(ui->customPlot->interactions() & ~QCP::iSelectOther);
+		}
+	});
+
+	plotWindow->ui->checkBox_RangeDrag->setChecked(true);
+	plotWindow->ui->checkBox_RangeZoom->setChecked(true);
+	plotWindow->ui->checkBox_MultiSelect->setChecked(true);
+	plotWindow->ui->checkBox_SelectPlottables->setChecked(true);
+	plotWindow->ui->checkBox_SelectAxes->setChecked(true);
+	plotWindow->ui->checkBox_SelectLegend->setChecked(true);
+	plotWindow->ui->checkBox_SelectItems->setChecked(true);
+	plotWindow->ui->checkBox_SelectOther->setChecked(true);
+
+}
+
+
+inline void MainWindow::setUpGeneralPageConnections() {
+	connect(plotWindow->generalTabColorDialog, &QColorDialog::currentColorChanged, this, [=](QColor color) {
+		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_generalTab->currentItem();
+		if (selectedItem != nullptr) {
+			if (selectedItem->text() == "Background") {
+				QPixmap pixmap = QPixmap(16, 16);
+				pixmap.fill(color);
+				selectedItem->setIcon(QIcon(pixmap));
+				ui->customPlot->setBackground(pixmap);
+				ui->customPlot->replot();
+			}
+		}
+
+		//graphTextElements->value(selectedItem)->setTextColor(plotWindow->titleColorDialog->currentColor());
+		//graphTextElements->value(p
+	});
 }
 
 
@@ -385,10 +568,7 @@ void MainWindow::initGraph() {
 	ui->customPlot->yAxis->setRange(-10, 10);
 	// configure right and top axis to show ticks but no labels:
 	// (see QCPAxisRect::setupFullAxesBox for a quicker method to do this)
-	ui->customPlot->xAxis2->setVisible(true);
-	ui->customPlot->xAxis2->setTickLabels(true); // show numbers
-	ui->customPlot->yAxis2->setVisible(true);
-	ui->customPlot->yAxis2->setTickLabels(true); // show numbers
+
 
 	// legend initialization
 	ui->customPlot->legend->setVisible(true);
@@ -400,8 +580,8 @@ void MainWindow::initGraph() {
 			QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
 	// Set interations
-	ui->customPlot->setInteractions(
-			QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectLegend | QCP::iSelectPlottables);
+//	ui->customPlot->setInteractions(
+//			QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes | QCP::iSelectLegend | QCP::iSelectPlottables);
 
 
 	// ! GRAPH RELATED CONNECTIONS

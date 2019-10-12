@@ -84,6 +84,14 @@ private:
 
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
+
+	inline void setUpTitlePageConnections();
+
+	inline void setUpInteractionsPageConnections();
+
+	inline void setUpAxesPageConnections();
+
+	inline void setUpGeneralPageConnections();
 };
 
 #endif //GUI_APP_MAINWINDOW_H
