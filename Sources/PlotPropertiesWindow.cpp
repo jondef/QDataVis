@@ -9,8 +9,6 @@ PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), u
 	ui->setupUi(this);
 
 	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okButtonPressed())); // clicked ok
-	connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(close())); // clicked cancel
-
 
 	titleFontDialog->setOption(QFontDialog::NoButtons);
 	titleFontDialog->setOption(QFontDialog::ProportionalFonts);
@@ -44,5 +42,6 @@ PlotPropertiesWindow::~PlotPropertiesWindow() {
 
 void PlotPropertiesWindow::okButtonPressed() {
 	emit windowClosed();
+	close();
 }
 

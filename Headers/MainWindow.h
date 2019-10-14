@@ -7,12 +7,14 @@
 
 #include <QMainWindow>
 #include <QtNetwork>
+#include <QObject>
 #include "ui_mainwindow.h"
 #include "dependencies/qcustomplot/include/qcustomplot.h"
 #include "Thread.h"
 #include "BinaryTree.h"
 #include "PlotPropertiesWindow.h"
-#include <QObject>
+#include "qpendialog.h"
+
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
 
@@ -81,6 +83,11 @@ private:
 	QList<QCPGraph *> *functionGraphList = new QList<QCPGraph *>; // stored pointers of the function graph
 
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
+
+
+	QColorDialog *popUpColorDialog = new QColorDialog;
+	QFontDialog *popUpFontDialog = new QFontDialog;
+	QPenDialog *popUpPenDialog = new QPenDialog;
 
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
