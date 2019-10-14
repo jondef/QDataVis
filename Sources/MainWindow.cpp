@@ -112,6 +112,8 @@ inline void MainWindow::setUpAxesPageConnections() {
 //	pen.setCapStyle(Qt::RoundCap);
 	pen.setJoinStyle(Qt::RoundJoin);
 	ui->customPlot->xAxis->setBasePen(pen);
+	ui->customPlot->xAxis->setTickPen(pen);
+	ui->customPlot->xAxis->setSubTickPen(pen);
 
 	// * set ticks visible
 	connect(plotWindow->ui->groupBox_xAxis_setTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
@@ -130,6 +132,18 @@ inline void MainWindow::setUpAxesPageConnections() {
 		ui->customPlot->yAxis2->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
+
+	// * set tick base pen
+	connect(plotWindow->ui->pushButton, &QPushButton::clicked, this, [=]() {
+		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
+		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis->basePen());
+		popUpPenDialog->open();
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+			ui->customPlot->xAxis->setBasePen(popUpPenDialog->currentPen());
+			ui->customPlot->replot();
+		});
+	});
+
 
 	// * set tick color
 	connect(plotWindow->ui->pushButton_xAxis_setTickColor, &QPushButton::clicked, this, [=]() {

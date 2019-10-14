@@ -17,12 +17,10 @@ public:
 	Ui::Dialog *ui;
 
 	explicit QPenDialog(QWidget *parent = nullptr);
-
 	//explicit QPenDialog(const QPen &initial, QWidget *parent = nullptr);
 	~QPenDialog();
 
-	void setPenColor(const QPen &pen);
-
+	void setCurrentPen(const QPen &pen);
 	QPen currentPen() const;
 
 Q_SIGNALS:

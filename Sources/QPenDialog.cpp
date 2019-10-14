@@ -10,7 +10,7 @@ QPenDialog::QPenDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Dialog) {
 
 }
 
-void QPenDialog::setPenColor(const QPen &pen) {
+void QPenDialog::setCurrentPen(const QPen &pen) {
 
 }
 

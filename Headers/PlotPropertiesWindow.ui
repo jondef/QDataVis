@@ -30,7 +30,7 @@
                         <enum>QTabWidget::Rounded</enum>
                     </property>
                     <property name="currentIndex">
-                        <number>0</number>
+                        <number>1</number>
                     </property>
                     <widget class="QWidget" name="tab_2">
                         <attribute name="title">
@@ -101,11 +101,6 @@
                                         </property>
                                         <property name="flags">
                                             <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsEnabled</set>
-                                        </property>
-                                    </item>
-                                    <item>
-                                        <property name="text">
-                                            <string>Neues Element</string>
                                         </property>
                                     </item>
                                 </widget>
@@ -643,6 +638,13 @@
                                                         </rect>
                                                     </property>
                                                     <layout class="QGridLayout" name="gridLayout_6">
+                                                        <item row="3" column="0">
+                                                            <widget class="QGroupBox" name="groupBox">
+                                                                <property name="title">
+                                                                    <string>Base axis</string>
+                                                                </property>
+                                                            </widget>
+                                                        </item>
                                                         <item row="1" column="0">
                                                             <widget class="QGroupBox" name="groupBox_xAxis_setTicksVisible">
                                                                 <property name="title">
@@ -655,10 +657,22 @@
                                                                     <bool>false</bool>
                                                                 </property>
                                                                 <layout class="QGridLayout" name="gridLayout_21">
-                                                                    <item row="3" column="0">
-                                                                        <widget class="QPushButton" name="pushButton_xAxis_setTickFont">
-                                                                            <property name="text">
-                                                                                <string>Change Tick Font</string>
+                                                                    <item row="5" column="0">
+                                                                        <widget class="QDoubleSpinBox" name="doubleSpinBox_xAxis_setTickRotation">
+                                                                            <property name="toolTip">
+                                                                                <string>Tick rotation</string>
+                                                                            </property>
+                                                                            <property name="showGroupSeparator" stdset="0">
+                                                                                <bool>false</bool>
+                                                                            </property>
+                                                                            <property name="minimum">
+                                                                                <double>-90.000000000000000</double>
+                                                                            </property>
+                                                                            <property name="maximum">
+                                                                                <double>90.000000000000000</double>
+                                                                            </property>
+                                                                            <property name="stepType">
+                                                                                <enum>QAbstractSpinBox::DefaultStepType</enum>
                                                                             </property>
                                                                         </widget>
                                                                     </item>
@@ -669,6 +683,13 @@
                                                                             </property>
                                                                             <property name="checkable">
                                                                                 <bool>true</bool>
+                                                                            </property>
+                                                                        </widget>
+                                                                    </item>
+                                                                    <item row="3" column="0">
+                                                                        <widget class="QPushButton" name="pushButton_xAxis_setTickFont">
+                                                                            <property name="text">
+                                                                                <string>Change Tick Font</string>
                                                                             </property>
                                                                         </widget>
                                                                     </item>
@@ -711,29 +732,17 @@
                                                                             </item>
                                                                         </widget>
                                                                     </item>
-                                                                    <item row="4" column="0">
-                                                                        <widget class="QDoubleSpinBox" name="doubleSpinBox_xAxis_setTickRotation">
-                                                                            <property name="toolTip">
-                                                                                <string>Tick rotation</string>
-                                                                            </property>
-                                                                            <property name="showGroupSeparator" stdset="0">
-                                                                                <bool>false</bool>
-                                                                            </property>
-                                                                            <property name="minimum">
-                                                                                <double>-90.000000000000000</double>
-                                                                            </property>
-                                                                            <property name="maximum">
-                                                                                <double>90.000000000000000</double>
-                                                                            </property>
-                                                                            <property name="stepType">
-                                                                                <enum>QAbstractSpinBox::DefaultStepType</enum>
-                                                                            </property>
-                                                                        </widget>
-                                                                    </item>
                                                                     <item row="2" column="0">
                                                                         <widget class="QPushButton" name="pushButton_xAxis_setTickColor">
                                                                             <property name="text">
                                                                                 <string>Change Tick Color</string>
+                                                                            </property>
+                                                                        </widget>
+                                                                    </item>
+                                                                    <item row="4" column="0">
+                                                                        <widget class="QPushButton" name="pushButton">
+                                                                            <property name="text">
+                                                                                <string>Change Tick Pen</string>
                                                                             </property>
                                                                         </widget>
                                                                     </item>
@@ -810,6 +819,20 @@
                                                                         </widget>
                                                                     </item>
                                                                 </layout>
+                                                            </widget>
+                                                        </item>
+                                                        <item row="4" column="0">
+                                                            <widget class="QGroupBox" name="groupBox_2">
+                                                                <property name="title">
+                                                                    <string>Grid</string>
+                                                                </property>
+                                                            </widget>
+                                                        </item>
+                                                        <item row="5" column="0">
+                                                            <widget class="QGroupBox" name="groupBox_3">
+                                                                <property name="title">
+                                                                    <string>Subgrid</string>
+                                                                </property>
                                                             </widget>
                                                         </item>
                                                     </layout>
