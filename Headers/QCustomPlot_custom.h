@@ -21,9 +21,6 @@ struct QCPCursor {
 
 class QCustomPlot_custom : public QCustomPlot {
 Q_OBJECT
-public slots:
-
-	void mouseMove(QMouseEvent *);
 
 public:
 	QCustomPlot_custom(QWidget *parent = NULL);
@@ -31,8 +28,6 @@ public:
 	~QCustomPlot_custom() {}
 
 public:
-	void init(QVector<double> xdata, QVector<double> ydata);
-
 	void manageCursor(double x, double y);
 
 	QCPLayer *cursorLayer;

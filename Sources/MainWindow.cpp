@@ -5,7 +5,7 @@
 #include "MainWindow.h"
 #include "Resources/icon.xpm" // import icon as static const array *
 
-QList<QColor> colors = {
+const QList<QColor> colors = {
 		QColor(qRgb(31, 119, 180)),
 		QColor(qRgb(255, 127, 14)),
 		QColor(qRgb(44, 160, 44)),
@@ -32,13 +32,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	initGraph();
 
-	connect(ui->customPlot, &QCustomPlot_custom::mouseMove, this, [=](QMouseEvent *event) {
-
+	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [=]() {
+		ui->customPlot->xAxis->setRange(-10, 10);
+		ui->customPlot->yAxis->setRange(-10, 10);
+		ui->customPlot->replot();
 	});
 
-
 	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMove(QMouseEvent * )));
-
 
 
 	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
@@ -64,7 +64,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	graphPen.setColor(QColor(qRgb(0, 0, 0)));
 	graphPen.setWidth(1);
 	// todo: add ui->customPlot->xAxis->antialiased();
-	qDebug() << ui->customPlot->xAxis->grid()->antialiased();
+	// todo: add theme https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
+	// todo: add theme https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
+	//() << ui->customPlot->xAxis->grid()->antialiased();
 //	ui->customPlot->yAxis->grid()->setSubGridVisible(true);
 //	ui->customPlot->yAxis->grid()->setZeroLinePen(graphPen);
 //	ui->customPlot->xAxis->grid()->setZeroLinePen(graphPen);
@@ -103,8 +105,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 }
 
+
+MainWindow::~MainWindow() {
+	delete ui;
+}
+
+
 void MainWindow::onMouseMove(QMouseEvent *event) {
-	//Cursor coordinates:
+	// Cursor coordinates:
 	double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
 	double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
 	ui->customPlot->manageCursor(x, y);
@@ -112,11 +120,26 @@ void MainWindow::onMouseMove(QMouseEvent *event) {
 		ui->customPlot->layer("cursorLayer")->replot();
 	else
 		ui->customPlot->replot();
+
+	// todo: add tracing option only on selected graph
+//	double mouseX = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
+//	//for the  graph values #####
+//	for (int i = 0; i < ui->customPlot->graphCount(); ++i) {
+//		int index = ui->customPlot->graph(i)->findBegin(mouseX);
+//		double x = ui->customPlot->graph(i)->dataMainKey(index);
+//		double y = ui->customPlot->graph(i)->dataMainValue(index);
+//
+//		if (mouseX >= 0) {
+//			qDebug() << index << "X:" << x << "Y:" << y;
+//		} else {
+//			qDebug() << index << "X:" << 0 << "Y:" << 0;
+//		}
+//	}
+	ui->customPlot->replot();
+
+
 }
 
-MainWindow::~MainWindow() {
-	delete ui;
-}
 
 void MainWindow::GraphParametersChanged() {
 	auto functions = QList<QString>();
@@ -1045,12 +1068,12 @@ inline void MainWindow::setUpTitlePageConnections() {
 		}
 	});
 	//connect(plot, SIGNAL(beforeReplot()), this, SLOT(beforeReplot()));
-	connect(ui->customPlot, &QCustomPlot::beforeReplot, this, [=]() {
-		int pxx = ui->customPlot->yAxis->coordToPixel(0);
-		int pxy = ui->customPlot->xAxis->coordToPixel(0);
-		ui->customPlot->xAxis->setOffset(-ui->customPlot->axisRect()->height() - ui->customPlot->axisRect()->top() + pxx);
-		ui->customPlot->yAxis->setOffset(ui->customPlot->axisRect()->left() - pxy);
-	});
+	//connect(ui->customPlot, &QCustomPlot::beforeReplot, this, [=]() {
+	//	int pxx = ui->customPlot->yAxis->coordToPixel(0);
+	//	int pxy = ui->customPlot->xAxis->coordToPixel(0);
+	//	ui->customPlot->xAxis->setOffset(-ui->customPlot->axisRect()->height() - ui->customPlot->axisRect()->top() + pxx);
+	//	ui->customPlot->yAxis->setOffset(ui->customPlot->axisRect()->left() - pxy);
+	//});
 
 
 
@@ -1334,9 +1357,8 @@ void MainWindow::initGraph() {
 	ui->customPlot->setOpenGl(true, 16); // enable openGL
 	statusBarMsg(ui->customPlot->openGl() ? "openGL enabled" : "openGL disabled", 5000);
 
-	//ui->customPlot->init(generateXArray(-10,10,10), generateXArray(-10,10,10));
 	if (USING_LAYER) {
-		ui->customPlot->addLayer("cursorLayer", 0, QCustomPlot::limAbove);
+		ui->customPlot->addLayer("cursorLayer", nullptr, QCustomPlot::limAbove);
 		ui->customPlot->cursorLayer = ui->customPlot->layer("cursorLayer");
 		//cursorLayer = new QCPLayer(this, "cursorLayer");
 		ui->customPlot->cursorLayer->setMode(QCPLayer::lmBuffered);
@@ -1346,10 +1368,17 @@ void MainWindow::initGraph() {
 	QPen qpen = QPen(Qt::DashDotLine);
 	ui->customPlot->cursor.hLine = new QCPItemLine(ui->customPlot);
 	ui->customPlot->cursor.hLine->setPen(qpen);
+	ui->customPlot->cursor.hLine->start->setCoords(0, 0);
+	ui->customPlot->cursor.hLine->end->setCoords(0, 0);
+
 	ui->customPlot->cursor.vLine = new QCPItemLine(ui->customPlot);
 	ui->customPlot->cursor.vLine->setPen(qpen);
+	ui->customPlot->cursor.vLine->start->setCoords(0, 0);
+	ui->customPlot->cursor.vLine->end->setCoords(0, 0);
+
 	ui->customPlot->cursor.cursorText = new QCPItemText(ui->customPlot);
 	ui->customPlot->cursor.cursorText->setFont(QFont(font().family(), 8));
+	ui->customPlot->cursor.cursorText->position->setPixelPosition(QPointF(-100.0, -100.0));
 
 	//Add to layer:
 	if (USING_LAYER) {

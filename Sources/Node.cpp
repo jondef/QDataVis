@@ -164,32 +164,24 @@ double Node::computeOperation(double &xPlug) {
 		// todo: add check for division by zero?
 		return doubleValueLeft / doubleValueRight;
 	} else if (mathOperation == "^") {
-		//qDebug() << "-------------";
-		//double _Complex a = cpow(-10, 1.0/2.0);
-		//qDebug() << creal(a) << "+" << cimag(a) << "i =" << cabs(a) << conj(a) << carg(a);
-		//double _Complex b = cpow(-10, 1.0/3.0);
-		//qDebug() << creal(b) << "+" << cimag(b) << "i =" << cabs(b) << conj(b) << carg(b);
-		//double _Complex c = cpow(-10, 1.0/4.0);
-		//qDebug() << creal(c) << "+" << cimag(c) << "i =" << cabs(c) << conj(c) << carg(c);
-		//double _Complex d = cpow(-10, 1.0/5.0);
-		//qDebug() << creal(d) << "+" << cimag(d) << "i =" << cabs(d) << conj(d) << carg(d);
-
-		// ! don't use std::pow because it doesn't support negative
-		// ! roots, however cubic_root(-6.5) should still work
-		auto lam = [](double number) {
-			auto number_timesTen = number * 10;
-			auto numerator = number_timesTen - number;
-			auto denominator = 9;
-			qDebug() << numerator << "/" << denominator;
-		};
-
-//		lam(0.1234);
-
-		//if (doubleValueLeft < 0) {
-		//	return -qPow(-doubleValueLeft, doubleValueRight);
-		//}
+		// ! all the even denominator roots have imaginary negative
+		// ! while odd denominator roots have real negatives
+		// check if exponent is a root
+		if (strValueRight.contains("/")) {
+			// check if denominator is even
+			if (int(1 / doubleValueRight) % 2 == 0) {
+				// if it's even, the negative values are imaginary
+				return qPow(doubleValueLeft, doubleValueRight);
+			} else { // odd denominator
+				// if it's odd, the negative values are real
+				if (xPlug < 0) {
+					return -qPow(-doubleValueLeft, doubleValueRight);
+				} else {
+					return qPow(doubleValueLeft, doubleValueRight);
+				}
+			}
+		}
 		return qPow(doubleValueLeft, doubleValueRight);
-//		return cabs(cpow(doubleValueLeft, doubleValueRight));
 	} else if (mathOperation == "sin") {
 		return sin(doubleValueRight);
 	} else if (mathOperation == "asin") {
