@@ -32,6 +32,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	initGraph();
 
+	connect(ui->customPlot, &QCustomPlot_custom::mouseMove, this, [=](QMouseEvent *event) {
+
+	});
+
+
+	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMove(QMouseEvent * )));
+
+
+
 	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
@@ -94,6 +103,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 }
 
+void MainWindow::onMouseMove(QMouseEvent *event) {
+	//Cursor coordinates:
+	double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
+	double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
+	ui->customPlot->manageCursor(x, y);
+	if (USING_LAYER)
+		ui->customPlot->layer("cursorLayer")->replot();
+	else
+		ui->customPlot->replot();
+}
 
 MainWindow::~MainWindow() {
 	delete ui;
@@ -1314,6 +1333,30 @@ void MainWindow::initGraph() {
 	// enable openGL
 	ui->customPlot->setOpenGl(true, 16); // enable openGL
 	statusBarMsg(ui->customPlot->openGl() ? "openGL enabled" : "openGL disabled", 5000);
+
+	//ui->customPlot->init(generateXArray(-10,10,10), generateXArray(-10,10,10));
+	if (USING_LAYER) {
+		ui->customPlot->addLayer("cursorLayer", 0, QCustomPlot::limAbove);
+		ui->customPlot->cursorLayer = ui->customPlot->layer("cursorLayer");
+		//cursorLayer = new QCPLayer(this, "cursorLayer");
+		ui->customPlot->cursorLayer->setMode(QCPLayer::lmBuffered);
+	}
+
+	//Cursor:
+	QPen qpen = QPen(Qt::DashDotLine);
+	ui->customPlot->cursor.hLine = new QCPItemLine(ui->customPlot);
+	ui->customPlot->cursor.hLine->setPen(qpen);
+	ui->customPlot->cursor.vLine = new QCPItemLine(ui->customPlot);
+	ui->customPlot->cursor.vLine->setPen(qpen);
+	ui->customPlot->cursor.cursorText = new QCPItemText(ui->customPlot);
+	ui->customPlot->cursor.cursorText->setFont(QFont(font().family(), 8));
+
+	//Add to layer:
+	if (USING_LAYER) {
+		ui->customPlot->cursor.hLine->setLayer("cursorLayer");  //"cursorLayer"
+		ui->customPlot->cursor.vLine->setLayer("cursorLayer");
+		ui->customPlot->cursor.cursorText->setLayer("cursorLayer");
+	}
 
 
 	// axes configuration

@@ -2,6 +2,10 @@
 // Created by John on 19.10.2019.
 //
 
+// ! Taken and modified from
+// https://stackoverflow.com/questions/49477877/qcustomplot-replot-qcplayer
+//
+
 #ifndef GUI_APP_QCUSTOMPLOT_CUSTOM_H
 #define GUI_APP_QCUSTOMPLOT_CUSTOM_H
 
@@ -17,7 +21,7 @@ struct QCPCursor {
 
 class QCustomPlot_custom : public QCustomPlot {
 Q_OBJECT
-private slots:
+public slots:
 
 	void mouseMove(QMouseEvent *);
 
@@ -26,14 +30,13 @@ public:
 
 	~QCustomPlot_custom() {}
 
-private:
-	QCPLayer *cursorLayer;
-	QCPCursor cursor;
+public:
+	void init(QVector<double> xdata, QVector<double> ydata);
 
 	void manageCursor(double x, double y);
 
-public:
-	void init(QVector<double> xdata, QVector<double> ydata);
+	QCPLayer *cursorLayer;
+	QCPCursor cursor;
 };
 
 

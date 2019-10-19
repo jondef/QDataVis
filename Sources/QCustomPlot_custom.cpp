@@ -2,11 +2,15 @@
 // Created by John on 19.10.2019.
 //
 
+// ! Taken and modified from
+// https://stackoverflow.com/questions/49477877/qcustomplot-replot-qcplayer
+//
+
 #include "QCustomPlot_custom.h"
 
 
 QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
-	connect(this, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(mouseMove(QMouseEvent * )));
+
 }
 
 void QCustomPlot_custom::init(QVector<double> xdata, QVector<double> ydata) {

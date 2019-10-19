@@ -60,6 +60,8 @@ public slots:
 
 	void replyFini(QNetworkReply *reply);
 
+	void onMouseMove(QMouseEvent *event);
+
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -103,6 +105,8 @@ private:
 	void addFunction(QString &function);
 
 	static QColor getGraphColor(int colorIndex);
+
+
 };
 
 #endif //GUI_APP_MAINWINDOW_H

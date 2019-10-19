@@ -65,7 +65,7 @@
           <item>
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Minimum</string>
+             <string>Minimum domain point</string>
             </property>
            </widget>
           </item>
@@ -89,7 +89,7 @@
           <item>
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Maximum</string>
+             <string>Maximum domain point</string>
             </property>
            </widget>
           </item>
@@ -120,7 +120,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Points</string>
+             <string>Points density</string>
             </property>
            </widget>
           </item>
@@ -195,7 +195,14 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QCustomPlot_custom" name="customPlot" native="true"/>
+     <widget class="QCustomPlot_custom" name="customPlot" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
