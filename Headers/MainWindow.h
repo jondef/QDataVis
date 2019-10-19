@@ -24,6 +24,8 @@ Q_OBJECT // enable signals and slots
 
 public slots:
 
+	void GraphParametersChanged();
+
 	void QLineEdit_addFunction_returnPressed();
 
 	void QPushButton_PlotPoints_clicked();
@@ -85,20 +87,22 @@ private:
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
 
-	QColorDialog *popUpColorDialog = new QColorDialog;
-	QFontDialog *popUpFontDialog = new QFontDialog;
-	QPenDialog *popUpPenDialog = new QPenDialog;
+	QColorDialog *popUpColorDialog = new QColorDialog(plotWindow);
+	QFontDialog *popUpFontDialog = new QFontDialog(plotWindow);
+	QPenDialog *popUpPenDialog = new QPenDialog(plotWindow);
 
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 
 	inline void setUpTitlePageConnections();
 
-	inline void setUpInteractionsPageConnections();
+	inline void setUpGeneralPageConnections();
 
 	inline void setUpAxesPageConnections();
 
-	inline void setUpGeneralPageConnections();
+	void addFunction(QString &function);
+
+	static QColor getGraphColor(int colorIndex);
 };
 
 #endif //GUI_APP_MAINWINDOW_H

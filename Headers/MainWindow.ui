@@ -21,24 +21,24 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-       <item row="2" column="1" colspan="2">
+    <item row="2" column="1" colspan="2">
      <widget class="Line" name="line">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
-       <item row="1" column="1">
-           <widget class="QCustomPlot" name="customPlot" native="true">
-               <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                   </sizepolicy>
-               </property>
-           </widget>
-       </item>
-       <item row="1" column="2">
+    <item row="1" column="1">
+     <widget class="QCustomPlot" name="customPlot" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
      <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
@@ -47,37 +47,14 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-          <number>0</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Function_tab">
        <attribute name="title">
         <string>Functions</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="3" column="0">
-         <widget class="QLineEdit" name="QLineEdit_addFunction">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="inputMask">
-           <string/>
-          </property>
-          <property name="placeholderText">
-           <string>Add function here</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLineEdit" name="QLineEdit_functionParam">
-          <property name="placeholderText">
-           <string>min;max;length</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
+        <item row="10" column="0">
          <widget class="QProgressBar" name="progressBar">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -93,10 +70,98 @@
         <item row="1" column="0">
          <widget class="QListWidget" name="QListWidget_functionList"/>
         </item>
+        <item row="5" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_setGraphMinimum">
+            <property name="minimum">
+             <number>-999999999</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>-10</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="7" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Maximum</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_setGraphMaximum">
+            <property name="minimum">
+             <number>-999999999</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
         <item row="2" column="0">
          <widget class="QPushButton" name="QPushButton_deleteFunction">
           <property name="text">
            <string>Delete function</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Points</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_setGraphLength">
+            <property name="minimum">
+             <number>2</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="value">
+             <number>1000</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLineEdit" name="QLineEdit_addFunction">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>Add function here</string>
           </property>
          </widget>
         </item>
@@ -141,21 +206,21 @@
     </item>
    </layout>
   </widget>
-     <widget class="QMenuBar" name="menuBar">
+  <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>943</width>
-        <height>17</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-       <addaction name="actionSave_as"/>
-       <addaction name="separator"/>
+    <addaction name="actionSave_as"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -166,17 +231,17 @@
     <addaction name="separator"/>
     <addaction name="actionAbout_2"/>
    </widget>
-         <widget class="QMenu" name="menuGraph">
-             <property name="title">
-                 <string>Plot</string>
-             </property>
-             <addaction name="actionProperies"/>
-         </widget>
+   <widget class="QMenu" name="menuGraph">
+    <property name="title">
+     <string>Plot</string>
+    </property>
+    <addaction name="actionProperies"/>
+   </widget>
    <addaction name="menuFile"/>
-         <addaction name="menuGraph"/>
+   <addaction name="menuGraph"/>
    <addaction name="menuHelp"/>
   </widget>
-     <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
@@ -197,19 +262,19 @@
     <string>About</string>
    </property>
   </action>
-     <action name="actionSave_as">
-         <property name="text">
-             <string>Save as...</string>
-         </property>
-     </action>
-     <action name="actionProperies">
-         <property name="text">
-             <string>Properties</string>
-         </property>
-         <property name="shortcut">
-             <string>Ctrl+W</string>
-         </property>
-     </action>
+  <action name="actionSave_as">
+   <property name="text">
+    <string>Save as...</string>
+   </property>
+  </action>
+  <action name="actionProperies">
+   <property name="text">
+    <string>Properties</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

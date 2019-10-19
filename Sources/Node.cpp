@@ -4,21 +4,19 @@
 
 #include "Node.h"
 
-#include <utility>
 
-
-Node::Node(QString aInput, Node *aParent) {
+Node::Node(QString &aInput, Node *aParent) {
 
 	if (aParent != nullptr) {
 		pParent = aParent;
 	}
 
-	splitNodeValue(std::move(aInput));
+	splitNodeValue(aInput);
 	convertToDouble();
 }
 
 
-void Node::splitNodeValue(QString string) {
+void Node::splitNodeValue(QString &string) {
 	// todo: add support for log, sin, etc...
 	// job: define attributes mathOperation, strValueLeft and strValueRight
 
@@ -144,7 +142,7 @@ void Node::getNodeStats(double xPlug) {
 	}
 }
 
-double Node::computeOperation(double xPlug) {
+double Node::computeOperation(double &xPlug) {
 
 	// replace x with the number
 	if (!valueLeftOk) {
@@ -163,9 +161,35 @@ double Node::computeOperation(double xPlug) {
 	} else if (mathOperation == "*") {
 		return doubleValueLeft * doubleValueRight;
 	} else if (mathOperation == "/") {
+		// todo: add check for division by zero?
 		return doubleValueLeft / doubleValueRight;
 	} else if (mathOperation == "^") {
+		//qDebug() << "-------------";
+		//double _Complex a = cpow(-10, 1.0/2.0);
+		//qDebug() << creal(a) << "+" << cimag(a) << "i =" << cabs(a) << conj(a) << carg(a);
+		//double _Complex b = cpow(-10, 1.0/3.0);
+		//qDebug() << creal(b) << "+" << cimag(b) << "i =" << cabs(b) << conj(b) << carg(b);
+		//double _Complex c = cpow(-10, 1.0/4.0);
+		//qDebug() << creal(c) << "+" << cimag(c) << "i =" << cabs(c) << conj(c) << carg(c);
+		//double _Complex d = cpow(-10, 1.0/5.0);
+		//qDebug() << creal(d) << "+" << cimag(d) << "i =" << cabs(d) << conj(d) << carg(d);
+
+		// ! don't use std::pow because it doesn't support negative
+		// ! roots, however cubic_root(-6.5) should still work
+		auto lam = [](double number) {
+			auto number_timesTen = number * 10;
+			auto numerator = number_timesTen - number;
+			auto denominator = 9;
+			qDebug() << numerator << "/" << denominator;
+		};
+
+//		lam(0.1234);
+
+		//if (doubleValueLeft < 0) {
+		//	return -qPow(-doubleValueLeft, doubleValueRight);
+		//}
 		return qPow(doubleValueLeft, doubleValueRight);
+//		return cabs(cpow(doubleValueLeft, doubleValueRight));
 	} else if (mathOperation == "sin") {
 		return sin(doubleValueRight);
 	} else if (mathOperation == "asin") {
@@ -187,10 +211,10 @@ double Node::computeOperation(double xPlug) {
 }
 
 
-QList<int> Node::findAllOccurences(QString string, const QString &ofWhat) {
+QList<int> Node::findAllOccurences(QString &string, const QString &ofWhat) {
 	QList<int> operatorIndex;
 
-	QString temp = std::move(string);
+	QString temp = string;
 	int cutAwayParts = 0;
 
 	while (temp.indexOf(ofWhat) != -1) {

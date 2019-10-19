@@ -7,42 +7,44 @@
 
 #include <QtCore>
 #include <QtMath>
+#include <complex.h>
+
 
 class Node {
 public:
-    explicit Node(QString input, Node *aParent = nullptr);
+	explicit Node(QString &input, Node *aParent = nullptr);
 
-    void splitNodeValue(QString string);
+	void splitNodeValue(QString &string);
 
 	void getNodeStats(double xPlug);
 
-    double computeOperation(double xPlug);
+	double computeOperation(double &xPlug);
 
-    Node *pParent = nullptr;
+	Node *pParent = nullptr;
 
-    Node *pLeftChild = nullptr;
-    Node *pRightChild = nullptr;
+	Node *pLeftChild = nullptr;
+	Node *pRightChild = nullptr;
 
-    bool hasLeftChild = false;
-    bool hasRightChild = false;
+	bool hasLeftChild = false;
+	bool hasRightChild = false;
 
-    double doubleValueLeft;
-    double doubleValueRight;
+	double doubleValueLeft;
+	double doubleValueRight;
 
-    bool valueLeftOk;
-    bool valueRightOk;
+	bool valueLeftOk;
+	bool valueRightOk;
 
 private:
-    QString strValueLeft;
-    QString strValueRight;
+	QString strValueLeft;
+	QString strValueRight;
 
-    QString mathOperation;
+	QString mathOperation;
 
-    void convertToDouble();
+	void convertToDouble();
 
-    static QList<int> getParenthesesArray(const QString &string);
+	static QList<int> getParenthesesArray(const QString &string);
 
-    static QList<int> findAllOccurences(QString string, const QString &ofWhat);
+	static QList<int> findAllOccurences(QString &string, const QString &ofWhat);
 };
 
 

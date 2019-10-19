@@ -11,11 +11,11 @@
 
 class BinaryTree {
 public:
-    explicit BinaryTree(QString input);
+	explicit BinaryTree(QString &input);
 
-    double calculateTree(double xPlug);
+	double calculateTree(double &xPlug);
 
-	QVector<double> calculateTree(QVector<double> xArray, QProgressBar *progessBar);
+	QVector<double> calculateTree(QVector<double> &xArray, QProgressBar *progessBar);
 
 	Node *pRoot;
 };

@@ -5,8 +5,9 @@
 #ifndef GUI_APP_QPENDIALOG_H
 #define GUI_APP_QPENDIALOG_H
 
-#include <QtGui/QPen>
-#include <QtWidgets/QDialog>
+#include <QtGui>
+#include <QtCore>
+#include <QtWidgets>
 #include "ui_qpendialog.h"
 
 
@@ -17,17 +18,25 @@ public:
 	Ui::Dialog *ui;
 
 	explicit QPenDialog(QWidget *parent = nullptr);
-	//explicit QPenDialog(const QPen &initial, QWidget *parent = nullptr);
+
+	explicit QPenDialog(const QPen &initial, QWidget *parent = nullptr);
 	~QPenDialog();
 
-	void setCurrentPen(const QPen &pen);
+	void setCurrentPen(const QPen &apen);
 	QPen currentPen() const;
+
+private:
+	QPen *pen = new QPen;
+
+private slots:
+
+	void penChanged();
 
 Q_SIGNALS:
 
-	void currentPenChanged(const QPen &pen);
+	void currentPenChanged(const QPen &apen);
 
-	void penSelected(const QPen &pen);
+	void penSelected(const QPen &apen);
 };
 
 
