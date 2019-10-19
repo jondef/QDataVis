@@ -28,16 +28,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QCustomPlot" name="customPlot" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="2">
      <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
@@ -204,6 +194,9 @@
       </widget>
      </widget>
     </item>
+    <item row="1" column="1">
+     <widget class="QCustomPlot_custom" name="customPlot" native="true"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -278,9 +271,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>QCustomPlot_custom</class>
    <extends>QWidget</extends>
-   <header>../../dependencies/qcustomplot/include/qcustomplot.h</header>
+   <header>../../Headers/qcustomplot_custom.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

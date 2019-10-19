@@ -9,7 +9,7 @@
 #include <QtNetwork>
 #include <QObject>
 #include "ui_mainwindow.h"
-#include "dependencies/qcustomplot/include/qcustomplot.h"
+#include "QCustomPlot_custom.h"
 #include "Thread.h"
 #include "BinaryTree.h"
 #include "PlotPropertiesWindow.h"
