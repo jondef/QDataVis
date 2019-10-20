@@ -49,7 +49,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF) # enable verbose output
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
-set(CMAKE_AUTORCC ON) # ^
+#set(CMAKE_AUTORCC ON) # ^
 
 
 # prepare dlls to be linked to exe
@@ -62,7 +62,7 @@ elseif (${CMAKE_BUILD_TYPE} STREQUAL Release)
 endif ()
 
 SET(QT_USE_QTNETWORK true)
-FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport Test QuickTest REQUIRED)
 
 set(DEPENDENCIES qcustomplot)
 
@@ -83,3 +83,14 @@ endif ()
 # link dlls to exe
 target_link_libraries(Application PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 target_link_libraries(Application PUBLIC ${PROJECT_LINK_LIBS})
+
+
+# ! QCUSTOMPLOT TARGET
+add_library(QCustomPlot SHARED dependencies//qcustomplot//include//qcustomplot.cpp)
+target_link_libraries(QCustomPlot PUBLIC Qt5::Core Qt5::PrintSupport)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplotd2" PREFIX "")
+elseif (${CMAKE_BUILD_TYPE} STREQUAL Release)
+    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplot2" PREFIX "")
+endif ()

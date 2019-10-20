@@ -24,8 +24,10 @@
 ****************************************************************************/
 
 #ifndef QCUSTOMPLOT_H
-#define QCUSTOMPLOT_USE_OPENGL
 #define QCUSTOMPLOT_H
+
+#define QCUSTOMPLOT_USE_OPENGL
+#define QCUSTOMPLOT_COMPILE_LIBRARY
 
 #include <QtCore/qglobal.h>
 

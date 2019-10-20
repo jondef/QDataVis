@@ -166,6 +166,7 @@ double Node::computeOperation(double &xPlug) {
 	} else if (mathOperation == "^") {
 		// ! all the even denominator roots have imaginary negative
 		// ! while odd denominator roots have real negatives
+		//qDebug() << doubleValueLeft << doubleValueRight << -qPow(-doubleValueLeft, doubleValueRight);
 		// check if exponent is a root
 		if (strValueRight.contains("/")) {
 			// check if denominator is even
@@ -174,9 +175,11 @@ double Node::computeOperation(double &xPlug) {
 				return qPow(doubleValueLeft, doubleValueRight);
 			} else { // odd denominator
 				// if it's odd, the negative values are real
-				if (xPlug < 0) {
+				if (doubleValueLeft < 0) {
+					//qDebug() << xPlug << doubleValueLeft << doubleValueRight << -qPow(-doubleValueLeft, doubleValueRight);
 					return -qPow(-doubleValueLeft, doubleValueRight);
 				} else {
+					//qDebug() << xPlug << qPow(doubleValueLeft, doubleValueRight);
 					return qPow(doubleValueLeft, doubleValueRight);
 				}
 			}
