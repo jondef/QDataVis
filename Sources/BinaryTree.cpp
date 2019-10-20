@@ -75,16 +75,6 @@ double BinaryTree::calculateTree(double &xPlug) {
 }
 
 
-void BinaryTree::getNodeStats(Node *node) {
-	bool debug = true;
-	if (debug) {
-		qDebug() << "pParent: " << node->pParent << "\tpLeft_child: " << node->pLeftChild << "\tpRight_child: " << node->pRightChild;
-		qDebug() << "operation: [" << node->pLeftChild->strValue << " (" << node->pLeftChild->doubleValue << ")] " << node->mathOperation << " ["
-				 << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
-	}
-}
-
-
 QVector<double> BinaryTree::calculateTree(QVector<double> &xArray, QProgressBar *progressBar) {
 	QVector<double> yArray(xArray.length());
 
@@ -96,9 +86,10 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray, QProgressBar 
 	return yArray;
 }
 
+
 double BinaryTree::computeOperation(Node *node, double xPlug) {
-	double doubleValueLeft;
-	double doubleValueRight;
+	double doubleValueLeft = 0;
+	double doubleValueRight = 0;
 
 	// replace x with the number
 	if (node->pLeftChild != nullptr) {
@@ -175,4 +166,11 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 		return qLn(doubleValueRight);
 	}
 	return 0;
+}
+
+
+void BinaryTree::getNodeStats(Node *node) {
+	qDebug() << "pParent: " << node->pParent << "\tpLeft_child: " << node->pLeftChild << "\tpRight_child: " << node->pRightChild;
+	qDebug() << "operation: [" << node->pLeftChild->strValue << " (" << node->pLeftChild->doubleValue << ")] " << node->mathOperation << " ["
+			 << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
 }

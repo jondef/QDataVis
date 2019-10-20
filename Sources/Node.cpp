@@ -4,6 +4,9 @@
 
 #include "Node.h"
 
+const QList<QString> operators = {"+", "-", "*", "/", "^"};
+const QList<QString> specialOperators = {"sin", "asin", "cos", "acos", "tan", "atan", "log", "ln"};
+
 
 Node::Node(QString &aInput, Node *aParent) {
 	pParent = aParent;
@@ -18,10 +21,9 @@ Node::Node(QString &aInput, Node *aParent) {
 
 bool Node::createChildren(QString string) {
 	// returns true if split successful, otherwise false
-	// todo: add support for log, sin, etc...
-	// job: define attributes mathOperation, strValueLeft and strValueRight
+	// job: define attributes mathOperation and doubleValue
 
-	// remove parentheses only if there are one of them at beginning and end
+	// remove parentheses only if there are one of them at beginning and end without any other
 	// handle cases such as (x*2+x*4)
 	if (findAllOccurences(string, "(").length() == 1 && string.at(0) == "(") {
 		if (findAllOccurences(string, ")").length() == 1 && string.at(string.length() - 1) == ")") {
@@ -34,7 +36,8 @@ bool Node::createChildren(QString string) {
 		QList<int> parenthesesArray = getParenthesesArray(string);
 		// handle cases such as ((-x^2-4*x+46)^(1/2)-4)
 		// developed expressions / not entirely factored
-		if (parenthesesArray.contains(2)) {
+		// aka if the whole expression is in useless parentheses
+		if (!parenthesesArray.contains(0)) {
 			if (string.at(0) == "(" && string.at(string.length() - 1) == ")") {
 				QString x = string.mid(1);
 				string = x.left(x.length() - 1);
@@ -44,19 +47,15 @@ bool Node::createChildren(QString string) {
 
 	QList<int> parenthesesArray = getParenthesesArray(string);
 
-	QList<QString> operations = {"+", "-", "*", "/", "^"};
+	// * normal operators
+	for (const QString &Operator : operators) {
+		QList<int> allOperatorOccurences = findAllOccurences(string, Operator);
 
-	for (const QString &operation : operations) {
-		QList<int> indexOfOperators = findAllOccurences(string, operation);
-
-
-		//qDebug() << indexOfOperators << parenthesesArray;
-
-		for (int i : indexOfOperators) {
-			// check if found operator is in a parentheses or not
-			if (parenthesesArray.at(i) == 0) {
-				QString leftSide = string.left(i);
-				QString rightSide = string.mid(i + 1);
+		for (const int &operatorOccurence : allOperatorOccurences) {
+			// check if operator is in a parentheses or not.
+			if (parenthesesArray.at(operatorOccurence) == 0) {
+				QString leftSide = string.left(operatorOccurence);
+				QString rightSide = string.mid(operatorOccurence + 1);
 
 				// if you have -2*x you gotta add a zero on the left side
 				if (leftSide.isEmpty()) {
@@ -68,10 +67,26 @@ bool Node::createChildren(QString string) {
 						continue;
 					}
 				}
-				mathOperation = operation;
+				mathOperation = Operator;
 				qDebug() << leftSide << mathOperation << rightSide;
 				pLeftChild = new Node(leftSide, this);
 				pRightChild = new Node(rightSide, this);
+				return true; // success
+			}
+		}
+	}
+
+	// * special operators | must be after normal operators!
+	for (const auto &operation : specialOperators) {
+		QList<int> allOperatorOccurences = findAllOccurences(string, operation);
+
+		for (const int &operatorOccurence : allOperatorOccurences) {
+			if (parenthesesArray.at(operatorOccurence) == 0) {
+				QString parenthesesContent = string.left(string.length() - 1).mid(operatorOccurence + operation.length() + 1);
+
+				mathOperation = operation;
+				qDebug() << mathOperation << parenthesesContent;
+				pRightChild = new Node(parenthesesContent, this);
 				return true; // success
 			}
 		}
@@ -107,7 +122,7 @@ QList<int> Node::getParenthesesArray(const QString &string) {
 	QList<int> list;
 
 	int insideHowManyParentheses = 0;
-	for (auto &&i : string) {
+	for (auto &i : string) {
 		if (i == '(') {
 			insideHowManyParentheses++;
 			list.append(insideHowManyParentheses);
@@ -118,7 +133,6 @@ QList<int> Node::getParenthesesArray(const QString &string) {
 			list.append(insideHowManyParentheses);
 		}
 	}
-
 	return list;
 }
 
