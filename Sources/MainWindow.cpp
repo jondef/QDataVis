@@ -210,7 +210,6 @@ void MainWindow::addFunction(QString &function) {
 	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
 	functionGraphList->last()->setPen(graphPen); // apply color to graph
 	//functionGraphList->last()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
-	ui->customPlot->replot();
 }
 
 QColor MainWindow::getGraphColor(int colorIndex) {
@@ -1489,6 +1488,7 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 	QString text = ui->QLineEdit_addFunction->text();
 	text.remove(" ");
 	addFunction(text);
+	ui->customPlot->replot();
 
 	// * add item to widget and set the appropriate icon color
 	QColor color = getGraphColor(functionGraphList->length() - 1);

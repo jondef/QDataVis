@@ -18,6 +18,11 @@ public:
 	QVector<double> calculateTree(QVector<double> &xArray, QProgressBar *progessBar);
 
 	Node *pRoot;
+
+private:
+	double computeOperation(Node *node, double xPlug);
+
+	void getNodeStats(Node *node);
 };
 
 

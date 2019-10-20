@@ -6,21 +6,17 @@
 
 
 Node::Node(QString &aInput, Node *aParent) {
+	pParent = aParent;
+	strValue = aInput;
 
-	if (aParent != nullptr) {
-		pParent = aParent;
+	// check if the node needs children
+	if (needsChildren()) {
+		createChildren(aInput);
 	}
-
-	if (splitNodeValue(aInput)) {
-		createChildren();
-	} else {
-		qDebug() << "ffucK";
-	}
-
 }
 
 
-bool Node::splitNodeValue(QString &string) {
+bool Node::createChildren(QString string) {
 	// returns true if split successful, otherwise false
 	// todo: add support for log, sin, etc...
 	// job: define attributes mathOperation, strValueLeft and strValueRight
@@ -72,47 +68,37 @@ bool Node::splitNodeValue(QString &string) {
 						continue;
 					}
 				}
-				strValueLeft = leftSide;
-				strValueRight = rightSide;
 				mathOperation = operation;
-				qDebug() << strValueLeft << mathOperation << strValueRight;
-				return true;
+				qDebug() << leftSide << mathOperation << rightSide;
+				pLeftChild = new Node(leftSide, this);
+				pRightChild = new Node(rightSide, this);
+				return true; // success
 			}
 		}
 	}
-	return false; // failed to find split
+	return false; // failed
 }
 
-void Node::createChildren() {
-	doubleValueLeft = strValueLeft.toDouble(&valueLeftOk);
-	doubleValueRight = strValueRight.toDouble(&valueRightOk);
+bool Node::needsChildren() {
+	// returns false if node does'nt need children
+	bool valueOk;
+	doubleValue = strValue.toDouble(&valueOk);
 
-	// creation of children
-	// if value left is not ok and value is not x
-	if (!valueLeftOk && strValueLeft != "x") {
-		if (strValueLeft == "e") {
-			valueLeftOk = true;
-			doubleValueLeft = M_E;
-		} else if (strValueLeft == "pi") {
-			valueLeftOk = true;
-			doubleValueLeft = M_PI;
-		} else {
-			hasLeftChild = true;
-			pLeftChild = new Node(strValueLeft, this);
+	// does'nt need children
+	if (valueOk) {
+		return false;
+	} else {
+		if (strValue == "x") {
+			return false;
+		} else if (strValue == "e") {
+			doubleValue = M_E;
+			return false;
+		} else if (strValue == "pi") {
+			doubleValue = M_PI;
+			return false;
 		}
-	}
-
-	if (!valueRightOk && strValueRight != "x") {
-		if (strValueRight == "e") {
-			valueRightOk = true;
-			doubleValueRight = 2.718281828459045;
-		} else if (strValueRight == "pi") {
-			valueRightOk = true;
-			doubleValueRight = 3.141592653589793;
-		} else {
-			hasRightChild = true;
-			pRightChild = new Node(strValueRight, this);
-		}
+		// needs children for real
+		return true;
 	}
 }
 
@@ -137,87 +123,6 @@ QList<int> Node::getParenthesesArray(const QString &string) {
 }
 
 
-void Node::getNodeStats(double xPlug) {
-	bool debug = false;
-	if (debug) {
-		qDebug() << "pParent: " << pParent << "\thasLeftChild: " << hasLeftChild << "\tpLeft_child: " << pLeftChild
-				 << "\thasRightChild: " << hasRightChild << "\tpRight_child: " << pRightChild;
-		qDebug() << "operation: [" << strValueLeft << " (" << doubleValueLeft << ")] " << mathOperation << " ["
-				 << strValueRight << " (" << doubleValueRight << ")]\n";
-	}
-}
-
-double Node::computeOperation(double &xPlug) {
-
-	// replace x with the number
-	if (!valueLeftOk) {
-		doubleValueLeft = xPlug;
-	}
-	if (!valueRightOk) {
-		doubleValueRight = xPlug;
-	}
-
-	if (mathOperation == "+") {
-		return doubleValueLeft + doubleValueRight;
-	} else if (mathOperation == "-") {
-		return doubleValueLeft - doubleValueRight;
-	} else if (mathOperation == "-") {
-		return doubleValueLeft - doubleValueRight;
-	} else if (mathOperation == "*") {
-		return doubleValueLeft * doubleValueRight;
-	} else if (mathOperation == "/") {
-		// todo: add check for division by zero?
-		return doubleValueLeft / doubleValueRight;
-	} else if (mathOperation == "^") {
-		// ! all the even denominator roots have imaginary negative
-		// ! while odd denominator roots have real negatives
-		// check if exponent is a root
-		if (strValueRight.contains("/")) {
-			int numerator = 1;
-			double denominator = numerator / doubleValueRight;
-
-			double originalNumerator = strValueRight.split("/").at(0).toDouble();
-			numerator = numerator * originalNumerator;
-			denominator = denominator * originalNumerator;
-
-			// check if denominator is even
-			if (int(denominator) % 2 == 0) {
-				// if it's even, the negative values are imaginary
-				return qPow(doubleValueLeft, doubleValueRight);
-			} else { // odd denominator
-				// if it's odd, the negative values are real
-				if (doubleValueLeft < 0) {
-					if (numerator % 2 == 0) {
-						return qPow(doubleValueLeft, doubleValueRight);
-					}
-					return -qPow(-doubleValueLeft, doubleValueRight);
-				} else {
-					return qPow(doubleValueLeft, doubleValueRight);
-				}
-			}
-		}
-		return qPow(doubleValueLeft, doubleValueRight);
-	} else if (mathOperation == "sin") {
-		return sin(doubleValueRight);
-	} else if (mathOperation == "asin") {
-		return asin(doubleValueRight);
-	} else if (mathOperation == "cos") {
-		return cos(doubleValueRight);
-	} else if (mathOperation == "acos") {
-		return acos(doubleValueRight);
-	} else if (mathOperation == "tan") {
-		return tan(doubleValueRight);
-	} else if (mathOperation == "atan") {
-		return atan(doubleValueRight);
-	} else if (mathOperation == "log") {
-		return log10(doubleValueRight);
-	} else if (mathOperation == "ln") {
-		return qLn(doubleValueRight);
-	}
-	return 0;
-}
-
-
 QList<int> Node::findAllOccurences(QString string, const QString &ofWhat) {
 	QList<int> operatorIndex;
 
@@ -229,6 +134,5 @@ QList<int> Node::findAllOccurences(QString string, const QString &ofWhat) {
 
 		string = string.mid(string.indexOf(ofWhat) + 1);
 	}
-
 	return operatorIndex;
 }

@@ -12,39 +12,25 @@
 
 class Node {
 public:
-	explicit Node(QString &input, Node *aParent = nullptr);
-
-	bool splitNodeValue(QString &string);
-
-	void getNodeStats(double xPlug);
-
-	double computeOperation(double &xPlug);
-
 	Node *pParent = nullptr;
-
 	Node *pLeftChild = nullptr;
 	Node *pRightChild = nullptr;
 
-	bool hasLeftChild = false;
-	bool hasRightChild = false;
+	QString strValue;
+	double doubleValue;
+	QString mathOperation = nullptr;
 
-	double doubleValueLeft;
-	double doubleValueRight;
+public:
+	explicit Node(QString &input, Node *aParent = nullptr);
 
-	bool valueLeftOk;
-	bool valueRightOk;
+	bool createChildren(QString string);
 
 private:
-	QString strValueLeft;
-	QString strValueRight;
-
-	QString mathOperation;
-
-	void createChildren();
-
 	static QList<int> getParenthesesArray(const QString &string);
 
 	static QList<int> findAllOccurences(QString string, const QString &ofWhat);
+
+	bool needsChildren();
 };
 
 
