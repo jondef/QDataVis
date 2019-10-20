@@ -14,7 +14,7 @@ class Node {
 public:
 	explicit Node(QString &input, Node *aParent = nullptr);
 
-	void splitNodeValue(QString &string);
+	bool splitNodeValue(QString &string);
 
 	void getNodeStats(double xPlug);
 
@@ -40,11 +40,11 @@ private:
 
 	QString mathOperation;
 
-	void convertToDouble();
+	void createChildren();
 
 	static QList<int> getParenthesesArray(const QString &string);
 
-	static QList<int> findAllOccurences(QString &string, const QString &ofWhat);
+	static QList<int> findAllOccurences(QString string, const QString &ofWhat);
 };
 
 

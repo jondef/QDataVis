@@ -11,12 +11,17 @@ Node::Node(QString &aInput, Node *aParent) {
 		pParent = aParent;
 	}
 
-	splitNodeValue(aInput);
-	convertToDouble();
+	if (splitNodeValue(aInput)) {
+		createChildren();
+	} else {
+		qDebug() << "ffucK";
+	}
+
 }
 
 
-void Node::splitNodeValue(QString &string) {
+bool Node::splitNodeValue(QString &string) {
+	// returns true if split successful, otherwise false
 	// todo: add support for log, sin, etc...
 	// job: define attributes mathOperation, strValueLeft and strValueRight
 
@@ -71,14 +76,14 @@ void Node::splitNodeValue(QString &string) {
 				strValueRight = rightSide;
 				mathOperation = operation;
 				qDebug() << strValueLeft << mathOperation << strValueRight;
-				return;
+				return true;
 			}
 		}
 	}
-	throw std::logic_error("Error @ split nodeValue function: Unable to find split");
+	return false; // failed to find split
 }
 
-void Node::convertToDouble() {
+void Node::createChildren() {
 	doubleValueLeft = strValueLeft.toDouble(&valueLeftOk);
 	doubleValueRight = strValueRight.toDouble(&valueRightOk);
 
@@ -213,17 +218,16 @@ double Node::computeOperation(double &xPlug) {
 }
 
 
-QList<int> Node::findAllOccurences(QString &string, const QString &ofWhat) {
+QList<int> Node::findAllOccurences(QString string, const QString &ofWhat) {
 	QList<int> operatorIndex;
 
-	QString temp = string;
 	int cutAwayParts = 0;
 
-	while (temp.indexOf(ofWhat) != -1) {
-		operatorIndex.append(temp.indexOf(ofWhat) + cutAwayParts);
-		cutAwayParts += temp.left(temp.indexOf(ofWhat) + 1).length();
+	while (string.indexOf(ofWhat) != -1) {
+		operatorIndex.append(string.indexOf(ofWhat) + cutAwayParts);
+		cutAwayParts += string.left(string.indexOf(ofWhat) + 1).length();
 
-		temp = temp.mid(temp.indexOf(ofWhat) + 1);
+		string = string.mid(string.indexOf(ofWhat) + 1);
 	}
 
 	return operatorIndex;
