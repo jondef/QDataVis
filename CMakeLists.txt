@@ -49,7 +49,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF) # enable verbose output
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
-#set(CMAKE_AUTORCC ON) # ^
+set(CMAKE_AUTORCC ON) # ^
 
 
 # prepare dlls to be linked to exe
