@@ -1,5 +1,6 @@
 # Default ignored files
 build/
+.idea/
 
 # Prerequisites
 *.d
