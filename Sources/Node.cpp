@@ -4,8 +4,9 @@
 
 #include "Node.h"
 
-const QList<QString> operators = {"+", "-", "*", "/", "^"};
+const QList<QString> operators = {"+", "-", "*", "/", "%", "^"};
 const QList<QString> specialOperators = {"sin", "asin", "cos", "acos", "tan", "atan", "log", "ln"};
+// todo: add more functions, operators: http://www.partow.net/programming/exprtk/
 
 
 Node::Node(QString &aInput, Node *aParent) {

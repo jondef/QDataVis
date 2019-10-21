@@ -73,9 +73,13 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray, QProgressBar 
 
 	for (int i = 0; i < xArray.length(); ++i) {
 		yArray[i] = calculateTree(xArray[i]);
-		progressBar->setValue(i / float(xArray.length()) * 100);
+		if (progressBar != nullptr) {
+			progressBar->setValue(i / float(xArray.length()) * 100);
+		}
 	}
-	progressBar->setValue(0);
+	if (progressBar != nullptr) {
+		progressBar->setValue(0);
+	}
 	return yArray;
 }
 
@@ -111,16 +115,45 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 		return doubleValueLeft * doubleValueRight;
 	} else if (node->mathOperation == "/") {
 		return doubleValueLeft / doubleValueRight;
-	} else if (node->mathOperation == "^") {
-		// ! all the even denominator roots have imaginary negative
-		// ! while odd denominator roots have real negatives
-		double _Complex d = cpow(doubleValueLeft, doubleValueRight);
-//		qDebug() << creal(d) << "+" << cimag(d) << "i =" << cabs(d) << conj(d) << carg(d);
-		if (carg(d) == 0) {
-			return creal(cpow(doubleValueLeft, doubleValueRight));
+	} else if (node->mathOperation == "%") {
+		if (int(doubleValueRight) != 0) {
+			return int(doubleValueLeft) % int(doubleValueRight);
 		}
 		return _nan();
-//		return qPow(doubleValueLeft, doubleValueRight);
+	} else if (node->mathOperation == "^") {
+		// only change if the base is negative
+		// ref: https://stackoverflow.com/a/8493081/10450514
+		if (doubleValueLeft < 0) {
+			// check whether the exponent is a fraction
+			if (node->pRightChild->mathOperation == "/") {
+				// It is not required to check whether doubleValue has been assigned
+				// a value, because is will be already computed by the time the
+				// program is here.
+				double numerator = node->pRightChild->pLeftChild->doubleValue;
+				double denominator = node->pRightChild->pRightChild->doubleValue;
+
+				// ! all the even denominator roots have imaginary negative
+				// ! while odd denominator roots have real negatives
+				// check if denominator is an int + check if denominator is odd
+				if (round(denominator) == denominator && int(denominator) % 2 != 0) {
+					// if the denominator is odd, the negative values are real
+					// if numerator is an int
+					if (round(numerator) == numerator) {
+						if (int(numerator) % 2 == 0) {
+							// if numerator is even simply flip the
+							// function above the y axis
+							return qPow(-doubleValueLeft, doubleValueRight);
+						} else {
+							// if the numerator is odd, we need to calculate the points
+							// by making them positive, because a negative base is not
+							// possible.
+							return -qPow(-doubleValueLeft, doubleValueRight);
+						}
+					}
+				}
+			}
+		}
+		return qPow(doubleValueLeft, doubleValueRight);
 	} else if (node->mathOperation == "sin") {
 		return sin(doubleValueRight);
 	} else if (node->mathOperation == "asin") {
@@ -138,7 +171,7 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 	} else if (node->mathOperation == "ln") {
 		return qLn(doubleValueRight);
 	}
-	return 0;
+	throw std::logic_error("Invalid math operation");
 }
 
 

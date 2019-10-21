@@ -15,7 +15,7 @@ public:
 
 	double calculateTree(double &xPlug);
 
-	QVector<double> calculateTree(QVector<double> &xArray, QProgressBar *progessBar);
+	QVector<double> calculateTree(QVector<double> &xArray, QProgressBar *progessBar = nullptr);
 
 	Node *pRoot;
 

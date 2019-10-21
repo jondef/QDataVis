@@ -14,13 +14,16 @@
 #include "BinaryTree.h"
 #include "PlotPropertiesWindow.h"
 #include "qpendialog.h"
+#include <future>
 
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
 
 
 class MainWindow : public QMainWindow {
-Q_OBJECT // enable signals and slots
+Q_OBJECT
+public:
+	static QVector<double> generateXArray(int lowerLim, int upperLim, unsigned int length); // enable signals and slots
 
 public slots:
 
@@ -80,13 +83,13 @@ private:
 
 	void statusBarMsg(const QString &msg, int time = 2000);
 
-    static QVector<double> generateXArray(int lowerLim, int upperLim, unsigned int length);
-
 	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
 
 	QList<QCPGraph *> *functionGraphList = new QList<QCPGraph *>; // stored pointers of the function graph
 
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
+
+	std::vector<std::future<void>> m_Futures;
 
 
 	QColorDialog *popUpColorDialog = new QColorDialog(plotWindow);

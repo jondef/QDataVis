@@ -5,6 +5,19 @@
 #include "MainWindow.h"
 #include "Resources/icon.xpm" // import icon as static const array *
 
+static std::mutex s_MeshesMutex;
+
+
+static void LoadMeshes(QCPGraph *graphPointer, QString function, QVector<double> xArray) {
+	BinaryTree tree(function);
+
+	QVector<double> *yArray = new QVector<double>();
+	*yArray = tree.calculateTree(xArray);
+
+	std::lock_guard<std::mutex> lock(s_MeshesMutex);
+	graphPointer->setData(xArray, *yArray);
+}
+
 const QList<QColor> colors = {
 		QColor(qRgb(31, 119, 180)),
 		QColor(qRgb(255, 127, 14)),
@@ -39,7 +52,26 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	});
 
 	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMove(QMouseEvent * )));
-	connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(Test()));
+	//connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(Test()));
+	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [=]() {
+#define ASYNC 1
+		QElapsedTimer timer;
+		timer.start();
+#if ASYNC
+//		for (auto &function : functions) {
+//			functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+//			m_Futures.push_back(std::async(std::launch::async, LoadMeshes, functionGraphList->last(), function));
+//		}
+#else
+		for (auto &function : functions) {
+			BinaryTree tree(function);
+
+			yArray.append(tree.calculateTree(xArray, ui->progressBar));
+		}
+#endif
+		qDebug() << "The operation took" << timer.nsecsElapsed() << "nanoseconds";
+		qDebug() << "The operation took" << timer.elapsed() << "milliseconds";
+	});
 
 
 	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
@@ -116,6 +148,10 @@ void MainWindow::onMouseMove(QMouseEvent *event) {
 	// Cursor coordinates:
 	double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
 	double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
+
+	//double dataIndex = functionGraphList->last()->findBegin(x);
+//	qDebug() << dataIndex << functionGraphList->last()->dataMainValue(dataIndex);
+
 	ui->customPlot->manageCursor(x, y);
 	if (USING_LAYER)
 		ui->customPlot->layer("cursorLayer")->replot();
@@ -171,7 +207,6 @@ void MainWindow::GraphParametersChanged() {
 	ui->customPlot->xAxis->setSubTickPen(pen);*/
 
 void MainWindow::addFunction(QString &function) {
-
 	BinaryTree tree(function);
 
 	int min = ui->spinBox_setGraphMinimum->value();
@@ -179,17 +214,7 @@ void MainWindow::addFunction(QString &function) {
 	int len = ui->spinBox_setGraphLength->value();
 
 	QVector<double> xArray = generateXArray(min, max, len);
-//	QElapsedTimer timer;
-//	timer.start();
-	//Thread myThread;
-	QVector<double> yArray = tree.calculateTree(xArray, ui->progressBar);
-//	qDebug() << "The slow operation took" << timer.elapsed() << "milliseconds";
-//	qDebug() << "The slow operation took" << timer.nsecsElapsed() << "nanoseconds";
-
-	//////////////////////////////////
-	//	PLOTTING AND ADDING
-	//////////////////////////////////
-
+//	QVector<double> yArray = tree.calculateTree(xArray, ui->progressBar);
 
 	// ! GCPCurve has performance issues
 	/*Graphs are used to display single-valued data.
@@ -197,7 +222,9 @@ void MainWindow::addFunction(QString &function) {
 	 * In other words, the graph can't have loops. If you do want to plot non-single-valued curves,
 	 * rather use the QCPCurve plottable.*/
 	functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-	functionGraphList->last()->setData(xArray, yArray);
+	// send it to another thread
+	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, functionGraphList->last(), function, xArray));
+//	functionGraphList->last()->setData(xArray, yArray);
 	functionGraphList->last()->setName(function);
 	functionGraphList->last()->setProperty("Function string", function);
 	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
