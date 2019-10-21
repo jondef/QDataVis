@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	});
 
 	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMove(QMouseEvent * )));
+	connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(Test()));
 
 
 	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
@@ -1335,12 +1336,19 @@ void MainWindow::onResult(QNetworkReply *reply) {
 void MainWindow::Test() {
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 //	networkManager->get(QNetworkRequest(QUrl("http://www.evileg.ru/it_example.json")));
+	ui->customPlot->axisRect()->setAutoMargins(QCP::msNone);
 
-	QNetworkRequest request(QUrl("https://httpbin.org/get"));
-	QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-	connect(manager, SIGNAL(finished(QNetworkReply * )), this, SLOT(replyFini(QNetworkReply * )));
-	connect(manager, &QNetworkAccessManager::finished, manager, &QNetworkAccessManager::deleteLater);
-	manager->get(request);
+	int pxx = ui->customPlot->yAxis->coordToPixel(0);
+	int pxy = ui->customPlot->xAxis->coordToPixel(0);
+	ui->customPlot->xAxis->setOffset(-ui->customPlot->axisRect()->height() - ui->customPlot->axisRect()->top() + pxx);
+	ui->customPlot->yAxis->setOffset(ui->customPlot->axisRect()->left() - pxy);
+
+
+//	QNetworkRequest request(QUrl("https://httpbin.org/get"));
+//	QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+//	connect(manager, SIGNAL(finished(QNetworkReply * )), this, SLOT(replyFini(QNetworkReply * )));
+//	connect(manager, &QNetworkAccessManager::finished, manager, &QNetworkAccessManager::deleteLater);
+//	manager->get(request);
 }
 
 void MainWindow::replyFini(QNetworkReply *reply) {

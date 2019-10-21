@@ -43,7 +43,6 @@ double BinaryTree::calculateTree(double &xPlug) {
 			//50+(x+1)*(x+1)+10
 			// try to go right
 			if (movement.last() == 1) {
-				//currentNode->doubleValue = computeOperation(currentNode->pLeftChild, xPlug);
 				movement.removeLast();
 
 				if (currentNode->pRightChild != nullptr) {
@@ -63,12 +62,6 @@ double BinaryTree::calculateTree(double &xPlug) {
 		}
 
 	}
-	// ? might be useless
-	// compute the values of root's children
-	//if (currentNode->hasLeftChild) {
-	//    currentNode->doubleValueLeft = currentNode->pLeftChild->computeOperation(xPlug);
-	//    currentNode->valueLeftOk = true;
-	//}
 	currentNode->doubleValue = computeOperation(currentNode, xPlug);
 
 	return currentNode->doubleValue;
@@ -117,37 +110,17 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 	} else if (node->mathOperation == "*") {
 		return doubleValueLeft * doubleValueRight;
 	} else if (node->mathOperation == "/") {
-		// todo: add check for division by zero?
 		return doubleValueLeft / doubleValueRight;
 	} else if (node->mathOperation == "^") {
 		// ! all the even denominator roots have imaginary negative
 		// ! while odd denominator roots have real negatives
-		// check if exponent is a root
-//		if (strValueRight.contains("/")) {
-//			int numerator = 1;
-//			double denominator = numerator / doubleValueRight;
-//
-//			double originalNumerator = strValueRight.split("/").at(0).toDouble();
-//			numerator = numerator * originalNumerator;
-//			denominator = denominator * originalNumerator;
-//
-//			// check if denominator is even
-//			if (int(denominator) % 2 == 0) {
-//				// if it's even, the negative values are imaginary
-//				return qPow(doubleValueLeft, doubleValueRight);
-//			} else { // odd denominator
-//				// if it's odd, the negative values are real
-//				if (doubleValueLeft < 0) {
-//					if (numerator % 2 == 0) {
-//						return qPow(doubleValueLeft, doubleValueRight);
-//					}
-//					return -qPow(-doubleValueLeft, doubleValueRight);
-//				} else {
-//					return qPow(doubleValueLeft, doubleValueRight);
-//				}
-//			}
-//		}
-		return qPow(doubleValueLeft, doubleValueRight);
+		double _Complex d = cpow(doubleValueLeft, doubleValueRight);
+//		qDebug() << creal(d) << "+" << cimag(d) << "i =" << cabs(d) << conj(d) << carg(d);
+		if (carg(d) == 0) {
+			return creal(cpow(doubleValueLeft, doubleValueRight));
+		}
+		return _nan();
+//		return qPow(doubleValueLeft, doubleValueRight);
 	} else if (node->mathOperation == "sin") {
 		return sin(doubleValueRight);
 	} else if (node->mathOperation == "asin") {
