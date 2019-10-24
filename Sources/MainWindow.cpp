@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	});
 
 	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMove(QMouseEvent * )));
-	//connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(Test()));
+	connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(Test()));
 	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [=]() {
 #define ASYNC 1
 		QElapsedTimer timer;
@@ -119,7 +119,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	//ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
 	//ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
 
-
 	setUpAxesPageConnections();
 	setUpGeneralPageConnections();
 	setUpTitlePageConnections();
@@ -130,7 +129,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	});
 //	dumpObjectInfo();
 //	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
-
+//	qDebug() << __FILE__ <<  __LINE__ << Q_FUNC_INFO;
+//	qDebug() << __FILE__ <<  __LINE__ << Q_FUNC_INFO;
 	// Connect networkManager response to the handler
 	//connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::onResult);
 	// We get the data, namely JSON file from a site on a particular url
@@ -224,6 +224,7 @@ void MainWindow::addFunction(QString &function) {
 	functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
 	// send it to another thread
 	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, functionGraphList->last(), function, xArray));
+
 //	functionGraphList->last()->setData(xArray, yArray);
 	functionGraphList->last()->setName(function);
 	functionGraphList->last()->setProperty("Function string", function);

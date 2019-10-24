@@ -171,7 +171,12 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 	} else if (node->mathOperation == "ln") {
 		return qLn(doubleValueRight);
 	}
-	throw std::logic_error("Invalid math operation");
+	// node has no children, but has a value
+	// functions that are just a number like 2
+	// fixme: what if you just enter x?
+	return node->doubleValue;
+
+	throw std::logic_error("No math operation defined");
 }
 
 

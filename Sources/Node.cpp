@@ -5,7 +5,8 @@
 #include "Node.h"
 
 const QList<QString> operators = {"+", "-", "*", "/", "%", "^"};
-const QList<QString> specialOperators = {"sin", "asin", "cos", "acos", "tan", "atan", "log", "ln"};
+// ! all "arc" trigo functions need to be before the normal ones
+const QList<QString> specialOperators = {"asin", "acos", "atan", "sin", "cos", "tan", "log", "ln"};
 // todo: add more functions, operators: http://www.partow.net/programming/exprtk/
 
 
@@ -113,7 +114,7 @@ bool Node::needsChildren() {
 			doubleValue = M_PI;
 			return false;
 		}
-		// needs children for real
+		// needs children
 		return true;
 	}
 }
