@@ -9,7 +9,7 @@
 #ifndef GUI_APP_QCUSTOMPLOT_CUSTOM_H
 #define GUI_APP_QCUSTOMPLOT_CUSTOM_H
 
-#include "dependencies/qcustomplot/include/qcustomplot.h"
+#include "qcustomplot.h"
 
 #define USING_LAYER true
 

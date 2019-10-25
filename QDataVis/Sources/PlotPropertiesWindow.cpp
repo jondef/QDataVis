@@ -2,7 +2,7 @@
 // Created by John on 29.09.2019.
 //
 
-#include <dependencies/qcustomplot/include/qcustomplot.h>
+#include "qcustomplot.h"
 #include "PlotPropertiesWindow.h"
 
 
