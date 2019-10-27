@@ -2,8 +2,9 @@
 // Created by John on 29.09.2019.
 //
 
-#include "qcustomplot.h"
+
 #include "PlotPropertiesWindow.h"
+//#include "MainWindow.h" // check https://stackoverflow.com/a/50205573/10450514 for more info
 
 
 PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), ui(new Ui::Form) {
@@ -28,15 +29,14 @@ PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), u
 	titleFontDialog->setOption(QFontDialog::ScalableFonts);
 	titleFontDialog->setWindowFlags(Qt::Widget);
 	titleFontDialog->setSizeGripEnabled(false);
+	QGridLayout *gridLayoutFont = new QGridLayout(ui->widget_titleFont);
+	gridLayoutFont->addWidget(titleFontDialog);
 
 	titleColorDialog->setOption(QColorDialog::NoButtons);
 	titleColorDialog->setOption(QColorDialog::ShowAlphaChannel);
 	titleColorDialog->setWindowFlags(Qt::Widget);
 	titleColorDialog->setSizeGripEnabled(false);
-
-	QGridLayout *gridLayoutFont = new QGridLayout(ui->widget_titleFont);
 	QGridLayout *gridLayoutColor = new QGridLayout(ui->widget_titleColor);
-	gridLayoutFont->addWidget(titleFontDialog);
 	gridLayoutColor->addWidget(titleColorDialog);
 }
 
@@ -48,4 +48,3 @@ void PlotPropertiesWindow::okButtonPressed() {
 	emit windowClosed();
 	close();
 }
-

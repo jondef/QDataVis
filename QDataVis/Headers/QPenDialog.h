@@ -20,13 +20,17 @@ public:
 	explicit QPenDialog(QWidget *parent = nullptr);
 
 	explicit QPenDialog(const QPen &initial, QWidget *parent = nullptr);
+
 	~QPenDialog();
 
 	void setCurrentPen(const QPen &apen);
+
 	QPen currentPen() const;
 
 private:
 	QPen *pen = new QPen;
+
+	QColorDialog *penColorDialog = new QColorDialog();
 
 private slots:
 

@@ -23,9 +23,9 @@ class QCustomPlot_custom : public QCustomPlot {
 Q_OBJECT
 
 public:
-	QCustomPlot_custom(QWidget *parent = NULL);
+	explicit QCustomPlot_custom(QWidget *parent = nullptr);
 
-	~QCustomPlot_custom() {}
+	~QCustomPlot_custom() = default;
 
 public:
 	void manageCursor(double x, double y);

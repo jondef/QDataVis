@@ -10,6 +10,7 @@
 #include <QColorDialog>
 #include <QFontDialog>
 #include "ui_plotpropertieswindow.h"
+#include "QCustomPlot_custom.h"
 
 
 class PlotPropertiesWindow : public QWidget {
@@ -27,10 +28,12 @@ public:
 	explicit PlotPropertiesWindow(QWidget *parent = nullptr);
 
 	~PlotPropertiesWindow();
+
 	Ui::Form *ui;
 
 	QFontDialog *titleFontDialog = new QFontDialog();
 	QColorDialog *titleColorDialog = new QColorDialog();
+
 };
 
 

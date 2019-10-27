@@ -12,9 +12,9 @@
 #include "QCustomPlot_custom.h"
 #include "Thread.h"
 #include "BinaryTree.h"
-#include "PlotPropertiesWindow.h"
 #include "qpendialog.h"
 #include <future>
+#include "PlotPropertiesWindow.h"
 
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
@@ -22,10 +22,16 @@
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
+
+
 public:
 	static QVector<double> generateXArray(int lowerLim, int upperLim, unsigned int length); // enable signals and slots
 
+	Ui::MainWindow *ui;
+
 public slots:
+
+	void stickAxisToZeroLines();
 
 	void GraphParametersChanged();
 
@@ -67,17 +73,20 @@ public slots:
 
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+	explicit MainWindow(QWidget *parent = nullptr);
 
 	~MainWindow();
+
+	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow();
+
+	QColorDialog *popUpColorDialog = new QColorDialog(plotWindow);
+	QFontDialog *popUpFontDialog = new QFontDialog(plotWindow);
+	QPenDialog *popUpPenDialog = new QPenDialog(plotWindow);
 
 private:
 
 	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
 
-	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow();
-
-	Ui::MainWindow *ui;
 
 	void initGraph();
 
@@ -92,11 +101,6 @@ private:
 	std::vector<std::future<void>> m_Futures;
 
 
-	QColorDialog *popUpColorDialog = new QColorDialog(plotWindow);
-	QFontDialog *popUpFontDialog = new QFontDialog(plotWindow);
-	QPenDialog *popUpPenDialog = new QPenDialog(plotWindow);
-
-
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 
 	inline void setUpTitlePageConnections();
@@ -109,7 +113,7 @@ private:
 
 	static QColor getGraphColor(int colorIndex);
 
-
 };
+
 
 #endif //GUI_APP_MAINWINDOW_H

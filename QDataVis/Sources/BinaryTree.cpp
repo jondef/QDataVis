@@ -9,6 +9,12 @@ BinaryTree::BinaryTree(QString &expression) {
 	pRoot = new Node(expression);
 }
 
+BinaryTree::BinaryTree() = default;
+
+
+void BinaryTree::setPRoot(QString &expression) {
+	pRoot = new Node(expression);
+}
 
 double BinaryTree::calculateTree(double &xPlug) {
 	// returns f(x)
@@ -202,3 +208,4 @@ void BinaryTree::getNodeStats(Node *node) {
 	qDebug() << "operation: [" << node->pLeftChild->strValue << " (" << node->pLeftChild->doubleValue << ")] " << node->mathOperation << " ["
 	         << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
 }
+

@@ -12,14 +12,19 @@
 
 
 class BinaryTree {
+
 public:
 	explicit BinaryTree(QString &expression);
+
+	explicit BinaryTree();
 
 	double calculateTree(double &xPlug);
 
 	QVector<double> calculateTree(QVector<double> &xArray);
 
 	Node *pRoot;
+
+	void setPRoot(QString &expression);
 
 private:
 	double computeOperation(Node *node, double xPlug);
