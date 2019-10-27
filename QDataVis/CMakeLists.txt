@@ -1,4 +1,4 @@
-
+project(qdatavis)
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/Headers
@@ -50,11 +50,11 @@ qt5_wrap_ui(ui_wrap ${UI_FILES})
 
 # compile exe
 if (DISABLE_CMD_WINDOW)
-    add_executable(Application WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
+    add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
 else ()
-    add_executable(Application ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
+    add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
 endif ()
 
 # link dlls to exe
-target_link_libraries(Application PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
-target_link_libraries(Application PUBLIC ${PROJECT_LINK_LIBS})
+target_link_libraries(QDataVis PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
+target_link_libraries(QDataVis PUBLIC ${PROJECT_LINK_LIBS})

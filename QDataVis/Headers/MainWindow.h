@@ -105,7 +105,7 @@ private:
 
 	inline void setUpAxesPageConnections();
 
-	void addFunction(QString &function);
+	void calculateAndDrawFunction(QString &function);
 
 	static QColor getGraphColor(int colorIndex);
 

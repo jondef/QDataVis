@@ -4,9 +4,12 @@
 
 #include "Node.h"
 
-const QList<QString> operators = {"+", "-", "*", "/", "%", "^"};
+const QList<QString> operators = {"+", "-", "*", "/", "%", "^", "!"};
 // ! all "arc" trigo functions need to be before the normal ones
-const QList<QString> specialOperators = {"asin", "acos", "atan", "sin", "cos", "tan", "log", "ln"};
+// csc = 1/sin(x) | sec = 1/cos(x) | cot = 1/tan(x)
+const QList<QString> specialOperators = {"arcsinh", "arccosh", "arctanh", "arcsin", "arccos", "arctan",
+                                         "sinh", "cosh", "tanh", "sin", "cos", "tan",
+                                         "log10", "ln", "log"};
 // todo: add more functions, operators: http://www.partow.net/programming/exprtk/
 
 
@@ -72,7 +75,9 @@ bool Node::createChildren(QString string) {
 				mathOperation = Operator;
 				qDebug() << leftSide << mathOperation << rightSide;
 				pLeftChild = new Node(leftSide, this);
-				pRightChild = new Node(rightSide, this);
+				if (!rightSide.isEmpty()) {
+					pRightChild = new Node(rightSide, this);
+				}
 				return true; // success
 			}
 		}
@@ -85,6 +90,19 @@ bool Node::createChildren(QString string) {
 		for (const int &operatorOccurence : allOperatorOccurences) {
 			if (parenthesesArray.at(operatorOccurence) == 0) {
 				QString parenthesesContent = string.left(string.length() - 1).mid(operatorOccurence + operation.length() + 1);
+
+				if (operation == "log") {
+					QString logBaseString = parenthesesContent.split(",").at(1);
+					if (logBaseString == "e") {
+						logBase = M_E;
+					} else if (logBaseString == "pi") {
+						logBase = M_PI;
+					} else {
+						logBase = logBaseString.toDouble();
+					}
+					parenthesesContent = parenthesesContent.split(",").at(0);
+
+				}
 
 				mathOperation = operation;
 				qDebug() << mathOperation << parenthesesContent;

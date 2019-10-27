@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 
-project(GUI_APP)
-set(DISABLE_CMD_WINDOW OFF)
+project(QDataVis)
+set(DISABLE_CMD_WINDOW ON)
 
 message("CMAKE VERSION IS " ${CMAKE_VERSION})
 message("BUILD TYPE SET TO " ${CMAKE_BUILD_TYPE})
@@ -22,7 +22,9 @@ FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport Test QuickTest
 
 # QCustomPlot stuff
 include_directories(QCustomPlot)
+include_directories(qdatavis/Headers)
 
 # add subdirectories
 add_subdirectory(QCustomPlot)
 add_subdirectory(QDataVis)
+add_subdirectory(QDataVis_tests)

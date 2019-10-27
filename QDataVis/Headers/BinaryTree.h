@@ -6,16 +6,18 @@
 #define GUI_APP_BINARYTREE_H
 
 
-#include "Node.h"
 #include <QtCore>
+#include <QtMath>
+#include "Node.h"
+
 
 class BinaryTree {
 public:
-	explicit BinaryTree(QString &input);
+	explicit BinaryTree(QString &expression);
 
 	double calculateTree(double &xPlug);
 
-	QVector<double> calculateTree(QVector<double> &xArray, QProgressBar *progessBar = nullptr);
+	QVector<double> calculateTree(QVector<double> &xArray);
 
 	Node *pRoot;
 

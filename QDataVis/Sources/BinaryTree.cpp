@@ -2,7 +2,6 @@
 // Created by John on 12/06/2019.
 //
 
-#include <QtWidgets/QProgressBar>
 #include "BinaryTree.h"
 
 
@@ -68,17 +67,11 @@ double BinaryTree::calculateTree(double &xPlug) {
 }
 
 
-QVector<double> BinaryTree::calculateTree(QVector<double> &xArray, QProgressBar *progressBar) {
+QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
 	QVector<double> yArray(xArray.length());
 
 	for (int i = 0; i < xArray.length(); ++i) {
 		yArray[i] = calculateTree(xArray[i]);
-		if (progressBar != nullptr) {
-			progressBar->setValue(i / float(xArray.length()) * 100);
-		}
-	}
-	if (progressBar != nullptr) {
-		progressBar->setValue(0);
 	}
 	return yArray;
 }
@@ -154,20 +147,44 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 			}
 		}
 		return qPow(doubleValueLeft, doubleValueRight);
+	} else if (node->mathOperation == "!") {
+		doubleValueLeft = int(doubleValueLeft);
+		long long int result = 1;
+		if (doubleValueLeft >= 0) {
+			for (int x = doubleValueLeft; x > 0; --x) {
+				result *= x;
+			}
+			return result;
+		}
+		return _nan();
 	} else if (node->mathOperation == "sin") {
 		return sin(doubleValueRight);
-	} else if (node->mathOperation == "asin") {
+	} else if (node->mathOperation == "arcsin") {
 		return asin(doubleValueRight);
 	} else if (node->mathOperation == "cos") {
 		return cos(doubleValueRight);
-	} else if (node->mathOperation == "acos") {
+	} else if (node->mathOperation == "arccos") {
 		return acos(doubleValueRight);
 	} else if (node->mathOperation == "tan") {
 		return tan(doubleValueRight);
-	} else if (node->mathOperation == "atan") {
+	} else if (node->mathOperation == "sinh") {
+		return sinh(doubleValueRight);
+	} else if (node->mathOperation == "cosh") {
+		return cosh(doubleValueRight);
+	} else if (node->mathOperation == "tanh") {
+		return tanh(doubleValueRight);
+	} else if (node->mathOperation == "arcsinh") {
+		return asinh(doubleValueRight);
+	} else if (node->mathOperation == "arccosh") {
+		return acosh(doubleValueRight);
+	} else if (node->mathOperation == "arctanh") {
+		return atanh(doubleValueRight);
+	} else if (node->mathOperation == "arctan") {
 		return atan(doubleValueRight);
-	} else if (node->mathOperation == "log") {
+	} else if (node->mathOperation == "log10") {
 		return log10(doubleValueRight);
+	} else if (node->mathOperation == "log") {
+		return log10(doubleValueRight) / log10(node->logBase);
 	} else if (node->mathOperation == "ln") {
 		return qLn(doubleValueRight);
 	}
@@ -183,5 +200,5 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 void BinaryTree::getNodeStats(Node *node) {
 	qDebug() << "pParent: " << node->pParent << "\tpLeft_child: " << node->pLeftChild << "\tpRight_child: " << node->pRightChild;
 	qDebug() << "operation: [" << node->pLeftChild->strValue << " (" << node->pLeftChild->doubleValue << ")] " << node->mathOperation << " ["
-			 << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
+	         << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
 }

@@ -6,7 +6,6 @@
 #define GUI_APP_NODE_H
 
 #include <QtCore>
-#include <QtMath>
 
 
 class Node {
@@ -18,6 +17,7 @@ public:
 	QString strValue;
 	double doubleValue;
 	QString mathOperation = nullptr;
+	double logBase;
 
 	enum RefreshPriority {
 		rpImmediateRefresh ///< Replots immediately and repaints the widget immediately by calling QWidget::repaint() after the replot

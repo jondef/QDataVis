@@ -5,7 +5,8 @@
 #include "MainWindow.h"
 #include "Resources/icon.xpm" // import icon as static const array *
 
-static std::mutex s_MeshesMutex;
+#define ASYNC 1
+static std::mutex graphMutex;
 
 
 static void LoadMeshes(QCPGraph *graphPointer, QString function, QVector<double> xArray) {
@@ -14,7 +15,7 @@ static void LoadMeshes(QCPGraph *graphPointer, QString function, QVector<double>
 	QVector<double> *yArray = new QVector<double>();
 	*yArray = tree.calculateTree(xArray);
 
-	std::lock_guard<std::mutex> lock(s_MeshesMutex);
+	std::lock_guard<std::mutex> lock(graphMutex);
 	graphPointer->setData(xArray, *yArray);
 }
 
@@ -54,21 +55,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMove(QMouseEvent * )));
 	connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(Test()));
 	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [=]() {
-#define ASYNC 1
+
 		QElapsedTimer timer;
 		timer.start();
-#if ASYNC
-//		for (auto &function : functions) {
-//			functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-//			m_Futures.push_back(std::async(std::launch::async, LoadMeshes, functionGraphList->last(), function));
-//		}
-#else
-		for (auto &function : functions) {
-			BinaryTree tree(function);
 
-			yArray.append(tree.calculateTree(xArray, ui->progressBar));
-		}
-#endif
 		qDebug() << "The operation took" << timer.nsecsElapsed() << "nanoseconds";
 		qDebug() << "The operation took" << timer.elapsed() << "milliseconds";
 	});
@@ -188,7 +178,7 @@ void MainWindow::GraphParametersChanged() {
 	functionGraphList->clear();
 
 	for (int j = 0; j < functions.length(); ++j) {
-		addFunction(const_cast<QString &>(functions.at(j)));
+		calculateAndDrawFunction(const_cast<QString &>(functions.at(j)));
 	}
 	ui->customPlot->replot();
 }
@@ -206,7 +196,7 @@ void MainWindow::GraphParametersChanged() {
 	ui->customPlot->xAxis->setTickPen(pen);
 	ui->customPlot->xAxis->setSubTickPen(pen);*/
 
-void MainWindow::addFunction(QString &function) {
+void MainWindow::calculateAndDrawFunction(QString &function) {
 	BinaryTree tree(function);
 
 	int min = ui->spinBox_setGraphMinimum->value();
@@ -222,8 +212,14 @@ void MainWindow::addFunction(QString &function) {
 	 * In other words, the graph can't have loops. If you do want to plot non-single-valued curves,
 	 * rather use the QCPCurve plottable.*/
 	functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+
+
+#if ASYNC
 	// send it to another thread
 	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, functionGraphList->last(), function, xArray));
+#else
+
+#endif
 
 //	functionGraphList->last()->setData(xArray, yArray);
 	functionGraphList->last()->setName(function);
@@ -1523,7 +1519,7 @@ void MainWindow::savePlotImage() {
 void MainWindow::QLineEdit_addFunction_returnPressed() {
 	QString text = ui->QLineEdit_addFunction->text();
 	text.remove(" ");
-	addFunction(text);
+	calculateAndDrawFunction(text);
 	ui->customPlot->replot();
 
 	// * add item to widget and set the appropriate icon color
