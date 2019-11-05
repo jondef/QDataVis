@@ -17,32 +17,34 @@ void BinaryTree::setPRoot(QString &expression) {
 }
 
 double BinaryTree::calculateTree(double &xPlug) {
+	// todo: rewrite this function
+	// todo: instead of string x use struct
 	// returns f(x)
 	Node *currentNode = pRoot;
 
 	bool returning = false;
+	bool hasBeenLeft = false;
 
 	// append 1 if moved to left or 2 if moved to right
 	// 0 is only a placeholder to avoid empty list
 	QList<int> movement = {0};
 
 	while (true) {
-		// explore the tree
-		if (currentNode->pLeftChild != nullptr && !returning) {
+		if (currentNode->pLeftChild && !returning) {
 			movement.append(1);
 			currentNode = currentNode->pLeftChild;
-		} else if (currentNode->pRightChild != nullptr && !returning) {
+		} else if (currentNode->pRightChild && !returning) {
 			movement.append(2);
 			currentNode = currentNode->pRightChild;
 		}
 
 		// if node has no children
-		if (currentNode->pLeftChild == nullptr && currentNode->pRightChild == nullptr) {
+		if (!currentNode->pLeftChild && !currentNode->pRightChild) {
 			returning = true;
 		}
 
 		if (returning) {
-			if (currentNode->pParent != nullptr) {
+			if (currentNode->pParent) {
 				currentNode = currentNode->pParent;
 			}
 			//50+(x+1)*(x+1)+10
@@ -50,13 +52,15 @@ double BinaryTree::calculateTree(double &xPlug) {
 			if (movement.last() == 1) {
 				movement.removeLast();
 
-				if (currentNode->pRightChild != nullptr) {
+				if (currentNode->pRightChild) {
 					returning = false;
 					movement.append(2);
 					currentNode = currentNode->pRightChild;
+				} else {
+					currentNode->doubleValue = computeOperation(currentNode, xPlug);
 				}
 
-			} else if (movement.last() == 2 && currentNode->pParent != nullptr) {
+			} else if (movement.last() == 2 && currentNode->pParent) {
 				movement.removeLast();
 				currentNode->doubleValue = computeOperation(currentNode, xPlug);
 			}
@@ -76,10 +80,32 @@ double BinaryTree::calculateTree(double &xPlug) {
 QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
 	QVector<double> yArray(xArray.length());
 
+	bool firstPass = false;
 	for (int i = 0; i < xArray.length(); ++i) {
 		yArray[i] = calculateTree(xArray[i]);
+		qDebug() << yArray[i];
+		if (firstPass && yArray[i - 1] == -yArray[i]) {
+			qDebug() << yArray[i - 1] << -yArray[i];
+			yArray[i] = _nan();
+		}
+		firstPass = true;
 	}
 	return yArray;
+}
+
+
+QPointF BinaryTree::getClosestPoint(QPoint point) {
+	double x = point.x();
+	double y = point.y();
+
+	double closestPoint_x;
+	double closestPoint_y;
+
+
+	closestPoint_y = calculateTree(closestPoint_x);
+
+
+	return QPointF(closestPoint_x, closestPoint_y);
 }
 
 
@@ -88,7 +114,7 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 	double doubleValueRight = 0;
 
 	// replace x with the number
-	if (node->pLeftChild != nullptr) {
+	if (node->pLeftChild) {
 		if (node->pLeftChild->strValue == "x") {
 			doubleValueLeft = xPlug;
 		} else {
@@ -96,7 +122,7 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 		}
 	}
 
-	if (node->pRightChild != nullptr) {
+	if (node->pRightChild) {
 		if (node->pRightChild->strValue == "x") {
 			doubleValueRight = xPlug;
 		} else {
@@ -154,15 +180,8 @@ double BinaryTree::computeOperation(Node *node, double xPlug) {
 		}
 		return qPow(doubleValueLeft, doubleValueRight);
 	} else if (node->mathOperation == "!") {
-		doubleValueLeft = int(doubleValueLeft);
-		long long int result = 1;
-		if (doubleValueLeft >= 0) {
-			for (int x = doubleValueLeft; x > 0; --x) {
-				result *= x;
-			}
-			return result;
-		}
-		return _nan();
+		// + 1 to match x!
+		return tgamma(doubleValueLeft + 1);
 	} else if (node->mathOperation == "sin") {
 		return sin(doubleValueRight);
 	} else if (node->mathOperation == "arcsin") {

@@ -63,13 +63,13 @@ public slots:
 
 	void savePlotImage();
 
-	void Test();
+	void Test(QMouseEvent *event);
 
 	void onResult(QNetworkReply *reply);
 
 	void replyFini(QNetworkReply *reply);
 
-	void onMouseMove(QMouseEvent *event);
+	void onMouseMoveReplotCursor(QMouseEvent *event);
 
 
 public:
@@ -100,6 +100,8 @@ private:
 
 	std::vector<std::future<void>> m_Futures;
 
+	QCPItemText *textLabel;
+	QCPItemTracer *graphTracer;
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 

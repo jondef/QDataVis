@@ -11,6 +11,7 @@ const QList<QString> specialOperators = {"arcsinh", "arccosh", "arctanh", "arcsi
                                          "sinh", "cosh", "tanh", "sin", "cos", "tan",
                                          "log10", "ln", "log"};
 // todo: add more functions, operators: http://www.partow.net/programming/exprtk/
+// todo: add abs()
 
 
 Node::Node(QString &aInput, Node *aParent) {

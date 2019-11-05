@@ -30,6 +30,8 @@ private:
 	double computeOperation(Node *node, double xPlug);
 
 	void getNodeStats(Node *node);
+
+	QPointF getClosestPoint(QPoint point);
 };
 
 

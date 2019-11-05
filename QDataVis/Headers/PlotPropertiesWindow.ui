@@ -154,7 +154,7 @@
                                         <property name="geometry">
                                             <rect>
                                                 <x>0</x>
-                                                <y>-257</y>
+                                                <y>0</y>
                                                 <width>684</width>
                                                 <height>931</height>
                                             </rect>
@@ -2070,7 +2070,51 @@
                                 <item row="0" column="0">
                                     <widget class="QPushButton" name="pushButton_setBackgroundColor">
                                         <property name="text">
-                                            <string>Set Color</string>
+                                            <string>Pick color</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </widget>
+                        <widget class="QGroupBox" name="groupBox_11">
+                            <property name="geometry">
+                                <rect>
+                                    <x>290</x>
+                                    <y>10</y>
+                                    <width>141</width>
+                                    <height>81</height>
+                                </rect>
+                            </property>
+                            <property name="title">
+                                <string>Cursor</string>
+                            </property>
+                            <layout class="QGridLayout" name="gridLayout_9">
+                                <item row="0" column="0">
+                                    <widget class="QCheckBox" name="checkBox_enableCursor">
+                                        <property name="text">
+                                            <string>Enable cursor</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </widget>
+                        <widget class="QGroupBox" name="groupBox_12">
+                            <property name="geometry">
+                                <rect>
+                                    <x>160</x>
+                                    <y>110</y>
+                                    <width>181</width>
+                                    <height>81</height>
+                                </rect>
+                            </property>
+                            <property name="title">
+                                <string>Axes</string>
+                            </property>
+                            <layout class="QGridLayout" name="gridLayout_10">
+                                <item row="0" column="0">
+                                    <widget class="QCheckBox" name="checkBox_stickAxisToZeroLines">
+                                        <property name="text">
+                                            <string>Stick axis to zero line</string>
                                         </property>
                                     </widget>
                                 </item>

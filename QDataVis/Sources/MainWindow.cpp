@@ -3,9 +3,10 @@
 //
 
 #include "MainWindow.h"
+#include "exprtk.hpp"
 #include "Resources/icon.xpm" // import icon as static const array *
 
-#define ASYNC 1
+#define ASYNC 0
 static std::mutex graphMutex;
 
 
@@ -48,8 +49,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		ui->customPlot->replot();
 	});
 
-	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMove(QMouseEvent * )));
-	connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(stickAxisToZeroLines()));
+
 	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [=]() {
 
 		QElapsedTimer timer;
@@ -59,6 +59,83 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		qDebug() << "The operation took" << timer.elapsed() << "milliseconds";
 	});
 
+	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
+
+	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, [=](bool checked) {
+		if (checked) { // enable dark mode
+			// from: https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
+			// set style
+			qApp->setStyle(QStyleFactory::create("Fusion"));
+			// increase font size for better reading
+			QFont defaultFont = QApplication::font();
+			defaultFont.setPointSize(defaultFont.pointSize());
+			qApp->setFont(defaultFont);
+			// modify palette to dark
+			QPalette darkPalette;
+			darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+			darkPalette.setColor(QPalette::WindowText, Qt::white);
+			darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+			darkPalette.setColor(QPalette::Base, QColor(42, 42, 42));
+			darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+			darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+			darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+			darkPalette.setColor(QPalette::Text, Qt::white);
+			darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+			darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
+			darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+			darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+			darkPalette.setColor(QPalette::ButtonText, Qt::white);
+			darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+			darkPalette.setColor(QPalette::BrightText, Qt::red);
+			darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+			darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+			darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+			darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+			darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+			qApp->setPalette(darkPalette);
+
+			// set plot colors
+			ui->customPlot->setBackground(QBrush(QColor(53, 53, 53)));
+			QPen pen = ui->customPlot->xAxis->tickPen();
+			QColor color = QColor(255, 255, 255);
+			pen.setColor(QColor(255, 255, 255));
+			QVector<QCPAxis *> axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
+			for (auto &i : axes) {
+				i->setTickPen(pen);
+//				i->grid()->setPen(pen);
+//				i->grid()->setSubGridPen(pen);
+				i->setSubTickPen(pen);
+				i->setBasePen(pen);
+				i->setLabelColor(color);
+				i->setTickLabelColor(color);
+			}
+
+			ui->customPlot->replot();
+		} else {
+			qApp->setPalette(QApplication::style()->standardPalette());
+			QFont defaultFont = QApplication::font();
+			defaultFont.setFamily(defaultFont.defaultFamily());
+			defaultFont.setPointSize(8); // 8 is the default font size
+			qApp->setFont(defaultFont);
+
+			ui->customPlot->setBackground(QBrush(QColor(255, 255, 255)));
+			QPen pen = ui->customPlot->xAxis->tickPen();
+			QColor color = QColor(0, 0, 0);
+			pen.setColor(QColor(0, 0, 0));
+			QVector<QCPAxis *> axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
+			for (auto &i : axes) {
+				i->setTickPen(pen);
+//				i->grid()->setPen(pen);
+//				i->grid()->setSubGridPen(pen);
+				i->setSubTickPen(pen);
+				i->setBasePen(pen);
+				i->setLabelColor(color);
+				i->setTickLabelColor(color);
+			}
+
+			ui->customPlot->replot();
+		}
+	});
 
 	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
@@ -70,7 +147,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
-	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, &MainWindow::Test);
+//	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, &MainWindow::Test);
 	connect(ui->actionProperies, &QAction::triggered, this, [=]() {
 		plotWindow->show();
 		plotWindow->raise(); // bring it to front
@@ -78,29 +155,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		plotWindow->setWindowState(plotWindow->windowState() & ~Qt::WindowMinimized | Qt::WindowActive); // set to active
 	});
 
-
-	QPen graphPen;
-	graphPen.setColor(QColor(qRgb(0, 0, 0)));
-	graphPen.setWidth(1);
 	// todo: add ui->customPlot->xAxis->antialiased();
 	// todo: add theme https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
 	// todo: add theme https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
-	//() << ui->customPlot->xAxis->grid()->antialiased();
-//	ui->customPlot->yAxis->grid()->setSubGridVisible(true);
-//	ui->customPlot->yAxis->grid()->setZeroLinePen(graphPen);
-//	ui->customPlot->xAxis->grid()->setZeroLinePen(graphPen);
-//
-//	graphPen.setColor(QColor(qRgb(0, 0, 0)));
-//	ui->customPlot->yAxis->grid()->setPen(graphPen);
-//	ui->customPlot->xAxis->grid()->setPen(graphPen);
-//	graphPen.setColor(QColor(qRgb(0, 0, 0)));
-//	ui->customPlot->xAxis->grid()->setSubGridPen(graphPen);
-//	ui->customPlot->yAxis->grid()->setSubGridPen(graphPen);
 
-	//ui->customPlot->xAxis->grid()->setVisible(false);
-	//ui->customPlot->yAxis->grid()->setVisible(false);
-	//ui->customPlot->xAxis2->grid()->setSubGridVisible(true);
-	//ui->customPlot->xAxis2->grid()->setVisible(true);
 
 	//ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
 	//ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
@@ -130,7 +188,7 @@ MainWindow::~MainWindow() {
 }
 
 
-void MainWindow::onMouseMove(QMouseEvent *event) {
+void MainWindow::onMouseMoveReplotCursor(QMouseEvent *event) {
 	// Cursor coordinates:
 	double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
 	double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
@@ -179,22 +237,8 @@ void MainWindow::GraphParametersChanged() {
 	ui->customPlot->replot();
 }
 
-/*	QPen pen;  // creates a default pen
-
-
-	pen.setWidth(10);
-	//pen.setBrush(Qt::red);
-	pen.setBrush(QBrush(QColor(qRgb(255,0,0))));
-//	pen.setStyle(Qt::DashDotLine);
-//	pen.setCapStyle(Qt::RoundCap);
-	pen.setJoinStyle(Qt::RoundJoin);
-	ui->customPlot->xAxis->setBasePen(pen);
-	ui->customPlot->xAxis->setTickPen(pen);
-	ui->customPlot->xAxis->setSubTickPen(pen);*/
 
 void MainWindow::calculateAndDrawFunction(QString &function) {
-	BinaryTree tree(function);
-
 	int min = ui->spinBox_setGraphMinimum->value();
 	int max = ui->spinBox_setGraphMaximum->value();
 	int len = ui->spinBox_setGraphLength->value();
@@ -214,7 +258,11 @@ void MainWindow::calculateAndDrawFunction(QString &function) {
 	// send it to another thread
 	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, functionGraphList->last(), function, xArray));
 #else
+	BinaryTree tree(function);
 
+	QVector<double> yArray = tree.calculateTree(xArray);
+
+	functionGraphList->last()->setData(xArray, yArray);
 #endif
 
 //	functionGraphList->last()->setData(xArray, yArray);
@@ -371,7 +419,64 @@ void MainWindow::stickAxisToZeroLines() {
 	ui->customPlot->yAxis->setOffset(ui->customPlot->axisRect()->left() - pxy);
 }
 
-void MainWindow::Test() {
+void MainWindow::Test(QMouseEvent *event) {
+	if (ui->customPlot->selectedGraphs().size() == 1) {
+		double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
+		double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
+//		QPointF pp = ui->customPlot->cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
+//		double plottable = ui->customPlot->selectedGraphs().first()->selectTest(point, true);
+		QCPGraphDataContainer::const_iterator it = ui->customPlot->selectedGraphs().first()->data()->constEnd();
+		QVariant details;
+		if (ui->customPlot->selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
+			QCPDataSelection dataPoints = details.value<QCPDataSelection>();
+			qDebug() << dataPoints;
+			if (dataPoints.dataPointCount() > 0)
+				it = ui->customPlot->selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
+		}
+
+		graphTracer->setGraph(ui->customPlot->selectedGraphs().first());
+		graphTracer->setGraphKey(it->key);
+		graphTracer->setInterpolating(true);
+		graphTracer->setStyle(QCPItemTracer::tsCircle);
+		graphTracer->setPen(QPen(Qt::red));
+		graphTracer->setBrush(Qt::red);
+		graphTracer->setSize(7);
+		graphTracer->setVisible(true);
+
+
+		textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignHCenter);
+		textLabel->position->setType(QCPItemPosition::ptPlotCoords);
+		textLabel->position->setCoords(it->key + (ui->customPlot->xAxis->range().upper - ui->customPlot->xAxis->range().lower) * 0.01,
+		                               it->value + (ui->customPlot->yAxis->range().upper - ui->customPlot->yAxis->range().lower) * 0.01);
+		QFont fufa = textLabel->font();
+		fufa.setPointSize(12);
+		fufa.setBold(true);
+		textLabel->setFont(fufa);
+		textLabel->setBrush(QBrush(QColor(Qt::white)));
+		textLabel->setAntialiased(true);
+		textLabel->setPositionAlignment(Qt::AlignLeft | Qt::AlignBottom);
+		textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
+		textLabel->setVisible(true);
+
+		ui->customPlot->layer("cursorLayer")->replot();
+//		qDebug() << it->key << it->value;
+
+
+//		ui->customPlot->cursor.cursorText->setText(QString("(%1, %2)").arg(x).arg(y));
+//		ui->customPlot->cursor.cursorText->position->setCoords(QPointF(x, y));
+//		QPointF pp = ui->customPlot->cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
+//		ui->customPlot->cursor.cursorText->position->setPixelPosition(pp);
+//		ui->customPlot->replot();
+//		double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
+//		QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(dataIndex).arg(dataValue);
+//		ui->statusBar->showMessage(message, 2500);
+
+	} else { // no graph / multiple graphs selected
+		textLabel->setVisible(false);
+		graphTracer->setVisible(false);
+		ui->customPlot->layer("cursorLayer")->replot();
+	}
+
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 //	networkManager->get(QNetworkRequest(QUrl("http://www.evileg.ru/it_example.json")));
 
@@ -404,21 +509,21 @@ void MainWindow::initGraph() {
 		ui->customPlot->cursorLayer->setMode(QCPLayer::lmBuffered);
 	}
 
+	textLabel = new QCPItemText(ui->customPlot);
+	textLabel->setLayer(ui->customPlot->cursorLayer);
+	graphTracer = new QCPItemTracer(ui->customPlot);
+	graphTracer->setLayer(ui->customPlot->cursorLayer);
+
 	//Cursor:
 	QPen qpen = QPen(Qt::DashDotLine);
 	ui->customPlot->cursor.hLine = new QCPItemLine(ui->customPlot);
 	ui->customPlot->cursor.hLine->setPen(qpen);
-	ui->customPlot->cursor.hLine->start->setCoords(0, 0);
-	ui->customPlot->cursor.hLine->end->setCoords(0, 0);
 
 	ui->customPlot->cursor.vLine = new QCPItemLine(ui->customPlot);
 	ui->customPlot->cursor.vLine->setPen(qpen);
-	ui->customPlot->cursor.vLine->start->setCoords(0, 0);
-	ui->customPlot->cursor.vLine->end->setCoords(0, 0);
 
 	ui->customPlot->cursor.cursorText = new QCPItemText(ui->customPlot);
 	ui->customPlot->cursor.cursorText->setFont(QFont(font().family(), 8));
-	ui->customPlot->cursor.cursorText->position->setPixelPosition(QPointF(-100.0, -100.0));
 
 	//Add to layer:
 	if (USING_LAYER) {
@@ -432,14 +537,14 @@ void MainWindow::initGraph() {
 	// todo: implement ui->customPlot->xAxis->setPadding(value);
 
 	// set axes ranges
-	ui->customPlot->xAxis2->setRange(-10, 10);
-	ui->customPlot->yAxis2->setRange(-10, 10);
+	ui->customPlot->xAxis->setRange(-10, 10);
+	ui->customPlot->yAxis->setRange(-10, 10);
 	// configure right and top axis to show ticks but no labels:
 	// (see QCPAxisRect::setupFullAxesBox for a quicker method to do this)
 
 
 	// legend initialization
-	ui->customPlot->legend->setVisible(true);
+	ui->customPlot->legend->setVisible(false);
 	QFont legendFont = font();
 	legendFont.setPointSize(10);
 	ui->customPlot->legend->setFont(legendFont);
@@ -515,8 +620,7 @@ void MainWindow::savePlotImage() {
 	} else if (ext == ".bmp") {
 		savedOk = ui->customPlot->saveBmp(savePathFilename, 0, 0, 3.0);
 	} else if (ext == ".pdf") {
-		savedOk = ui->customPlot->savePdf(savePathFilename, 0, 0, QCP::epAllowCosmetic, QString(""),
-		                                  QString("Title"));
+		savedOk = ui->customPlot->savePdf(savePathFilename, 0, 0, QCP::epAllowCosmetic, QString(""), QString("Title"));
 	}
 
 	if (savedOk) {
@@ -798,6 +902,33 @@ void MainWindow::plotGraphClicked(QCPAbstractPlottable *plottable, int dataIndex
 	QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(
 			dataIndex).arg(dataValue);
 	ui->statusBar->showMessage(message, 2500);
+
+//	if (ui->customPlot->selectedGraphs().size() == 1) {
+//		auto graph = ui->customPlot->selectedGraphs().first();
+//		QCPItemTracer *tracer = new QCPItemTracer(ui->customPlot);
+//		double key = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
+//		tracer->setGraph(graph);
+//		tracer->setGraphKey(key);
+//
+//		qDebug() << tracer->position->value();
+//
+//		ui->customPlot->replot();
+
+//		auto plottable = ui->customPlot->selectedGraphs().first();
+//		int dataIndex = ui->customPlot->selectedGraphs().;
+////		int dataIndex = ui->customPlot->mMouseSignalLayerableDetails.value<QCPDataSelection>().dataRange().begin();
+//		double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
+//		double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
+//		ui->customPlot->cursor.cursorText->setText(QString("(%1, %2)").arg(x).arg(y));
+//		ui->customPlot->cursor.cursorText->position->setCoords(QPointF(x, y));
+//		QPointF pp = ui->customPlot->cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
+//		ui->customPlot->cursor.cursorText->position->setPixelPosition(pp);
+//		ui->customPlot->replot();
+//		double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
+//		QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(
+//				dataIndex).arg(dataValue);
+//		ui->statusBar->showMessage(message, 2500);
+
 }
 
 void MainWindow::plotAxisLockDrag() {
@@ -1879,6 +2010,41 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		});
 	});
 
+	// * set cursor
+	connect(plotWindow->ui->checkBox_enableCursor, &QCheckBox::toggled, this, [=](bool checked) {
+		if (checked) {
+			connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMoveReplotCursor(QMouseEvent * )));
+			ui->customPlot->cursor.cursorText->setVisible(true);
+		} else {
+			disconnect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMoveReplotCursor(QMouseEvent * )));
+			ui->customPlot->cursor.hLine->start->setCoords(0, 0);
+			ui->customPlot->cursor.hLine->end->setCoords(0, 0);
+
+			ui->customPlot->cursor.vLine->start->setCoords(0, 0);
+			ui->customPlot->cursor.vLine->end->setCoords(0, 0);
+
+			ui->customPlot->cursor.cursorText->setVisible(false);
+			ui->customPlot->layer("cursorLayer")->replot();
+		}
+	});
+
+	// * set stick axis to zero line
+	connect(plotWindow->ui->checkBox_stickAxisToZeroLines, &QCheckBox::toggled, this, [=](bool checked) {
+		if (checked) {
+			connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(stickAxisToZeroLines()));
+			ui->customPlot->replot();
+		} else {
+			disconnect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(stickAxisToZeroLines()));
+			ui->customPlot->axisRect()->setAutoMargins(QCP::msAll);
+			ui->customPlot->xAxis->setOffset(0);
+			ui->customPlot->yAxis->setOffset(0);
+			ui->customPlot->replot();
+		}
+	});
+
+	emit(plotWindow->ui->checkBox_stickAxisToZeroLines->toggled(false));
+	emit(plotWindow->ui->checkBox_enableCursor->toggled(false));
+	plotWindow->ui->checkBox_enableCursor->setChecked(false);
 	plotWindow->ui->checkBox_RangeDrag->setChecked(true);
 	plotWindow->ui->checkBox_RangeZoom->setChecked(true);
 	plotWindow->ui->checkBox_MultiSelect->setChecked(true);
