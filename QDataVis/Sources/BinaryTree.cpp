@@ -83,12 +83,13 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
 	bool firstPass = false;
 	for (int i = 0; i < xArray.length(); ++i) {
 		yArray[i] = calculateTree(xArray[i]);
-		qDebug() << yArray[i];
-		if (firstPass && yArray[i - 1] == -yArray[i]) {
-			qDebug() << yArray[i - 1] << -yArray[i];
-			yArray[i] = _nan();
-		}
-		firstPass = true;
+
+//		if (firstPass && abs(yArray[i] - yArray[i - 1]) > 100) {
+//			qDebug() << yArray[i - 1] << -yArray[i];
+//			yArray[i - 1] = _nan();
+//			yArray[i] = _nan();
+//		}
+//		firstPass = true;
 	}
 	return yArray;
 }

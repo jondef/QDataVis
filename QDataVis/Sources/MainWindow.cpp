@@ -60,6 +60,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	});
 
 	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
+	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(replotGraphsOnMouseMove(QMouseEvent * )));
+	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(replotGraphsOnMouseMove()));
+	// todo: hide the tracing things when user clicks, not when he moves mouse
+	connect(ui->customPlot, &QCustomPlot::mousePress, this, &MainWindow::Test);
+//	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
 
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) { // enable dark mode
@@ -193,8 +198,8 @@ void MainWindow::onMouseMoveReplotCursor(QMouseEvent *event) {
 	double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
 	double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
 
-	//double dataIndex = functionGraphList->last()->findBegin(x);
-//	qDebug() << dataIndex << functionGraphList->last()->dataMainValue(dataIndex);
+	//double dataIndex = mFunctionGraph->lastKey()->findBegin(x);
+//	qDebug() << dataIndex << mFunctionGraph->lastKey()->dataMainValue(dataIndex);
 
 	ui->customPlot->manageCursor(x, y);
 	if (USING_LAYER)
@@ -223,18 +228,18 @@ void MainWindow::onMouseMoveReplotCursor(QMouseEvent *event) {
 
 
 void MainWindow::GraphParametersChanged() {
-	auto functions = QList<QString>();
-	// save the functions in the added order
-	for (int i = 0; i < functionGraphList->length(); ++i) {
-		functions.append(functionGraphList->at(i)->property("Function string").toString());
-	}
-	ui->customPlot->clearGraphs();
-	functionGraphList->clear();
-
-	for (int j = 0; j < functions.length(); ++j) {
-		calculateAndDrawFunction(const_cast<QString &>(functions.at(j)));
-	}
-	ui->customPlot->replot();
+//	auto functions = QList<QString>();
+//	// save the functions in the added order
+//	for (int i = 0; i < mFunctionGraph->length(); ++i) {
+//		functions.append(mFunctionGraph->at(i)->property("Function string").toString());
+//	}
+//	ui->customPlot->clearGraphs();
+//	mFunctionGraph->clear();
+//
+//	for (int j = 0; j < functions.length(); ++j) {
+//		calculateAndDrawFunction(const_cast<QString &>(functions.at(j)));
+//	}
+//	ui->customPlot->replot();
 }
 
 
@@ -251,34 +256,35 @@ void MainWindow::calculateAndDrawFunction(QString &function) {
 	 * Single-valued means that there should only be one data point per unique key coordinate.
 	 * In other words, the graph can't have loops. If you do want to plot non-single-valued curves,
 	 * rather use the QCPCurve plottable.*/
-	functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-
 
 #if ASYNC
 	// send it to another thread
-	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, functionGraphList->last(), function, xArray));
+	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, mFunctionGraph->lastKey(), function, xArray));
 #else
-	BinaryTree tree(function);
 
-	QVector<double> yArray = tree.calculateTree(xArray);
+	BinaryTree *tree = new BinaryTree(function);
 
-	functionGraphList->last()->setData(xArray, yArray);
+	mFunctionGraph->insert(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis), tree);
+
+	QVector<double> yArray = tree->calculateTree(xArray);
+
+	mFunctionGraph->lastKey()->setData(xArray, yArray);
 #endif
-
-//	functionGraphList->last()->setData(xArray, yArray);
-	functionGraphList->last()->setName(function);
-	functionGraphList->last()->setProperty("Function string", function);
+//	for (QHash<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i)
+//	mFunctionGraph->lastKey()->setData(xArray, yArray);
+	mFunctionGraph->lastKey()->setName(function);
+	mFunctionGraph->lastKey()->setProperty("Function string", function);
 	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
-	//functionGraphList->last()->rescaleAxes(false);
-	functionGraphList->last()->addToLegend();
+	//mFunctionGraph->lastKey()->rescaleAxes(false);
+	mFunctionGraph->lastKey()->addToLegend();
 
-	QColor color = getGraphColor(functionGraphList->length() - 1);
+	QColor color = getGraphColor(mFunctionGraph->size() - 1);
 
 	QPen graphPen;
 	graphPen.setColor(color);
 	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
-	functionGraphList->last()->setPen(graphPen); // apply color to graph
-	//functionGraphList->last()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
+	mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
+	//mFunctionGraph->lastKey()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
 }
 
 QColor MainWindow::getGraphColor(int colorIndex) {
@@ -366,20 +372,20 @@ void MainWindow::onResult(QNetworkReply *reply) {
 
 
 		// * high
-		functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-		functionGraphList->last()->setData(date, high);
-		graphPen.setColor(QColor(colors.at(2)));
-		functionGraphList->last()->setPen(graphPen); // apply color to graph
-		// * low
-		functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-		functionGraphList->last()->setData(date, low);
-		graphPen.setColor(QColor(colors.at(1)));
-		functionGraphList->last()->setPen(graphPen); // apply color to graph
-		// * avg
-		functionGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-		functionGraphList->last()->setData(date, avg);
-		graphPen.setColor(QColor(colors.at(0)));
-		functionGraphList->last()->setPen(graphPen); // apply color to graph
+//		mFunctionGraph->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+//		mFunctionGraph->lastKey()->setData(date, high);
+//		graphPen.setColor(QColor(colors.at(2)));
+//		mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
+//		// * low
+//		mFunctionGraph->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+//		mFunctionGraph->lastKey()->setData(date, low);
+//		graphPen.setColor(QColor(colors.at(1)));
+//		mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
+//		// * avg
+//		mFunctionGraph->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+//		mFunctionGraph->lastKey()->setData(date, avg);
+//		graphPen.setColor(QColor(colors.at(0)));
+//		mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
 
 		ui->customPlot->replot();
 
@@ -419,6 +425,20 @@ void MainWindow::stickAxisToZeroLines() {
 	ui->customPlot->yAxis->setOffset(ui->customPlot->axisRect()->left() - pxy);
 }
 
+void MainWindow::replotGraphsOnMouseMove(QMouseEvent *event) {
+	QVector<double> xArray = generateXArray(ui->customPlot->xAxis->range().lower, ui->customPlot->xAxis->range().upper, 1000);
+	// mouse is moving because this function is connected to MouseMove() signal
+	// and left button is held down => User is dragging the plot
+	// if event == nullptr, it is called by mouseWheel() signal
+	if (event == nullptr || event->buttons() == Qt::LeftButton) {
+		for (QMap<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i) {
+			QVector<double> yArray = i.value()->calculateTree(xArray);
+			i.key()->setData(xArray, yArray);
+		}
+	}
+}
+
+
 void MainWindow::Test(QMouseEvent *event) {
 	if (ui->customPlot->selectedGraphs().size() == 1) {
 		double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
@@ -429,9 +449,13 @@ void MainWindow::Test(QMouseEvent *event) {
 		QVariant details;
 		if (ui->customPlot->selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
 			QCPDataSelection dataPoints = details.value<QCPDataSelection>();
-			qDebug() << dataPoints;
-			if (dataPoints.dataPointCount() > 0)
-				it = ui->customPlot->selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
+
+			if (dataPoints.dataPointCount() < 1) {
+				// abort if event position is invalid
+				return;
+			}
+			it = ui->customPlot->selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
+
 		}
 
 		graphTracer->setGraph(ui->customPlot->selectedGraphs().first());
@@ -442,6 +466,7 @@ void MainWindow::Test(QMouseEvent *event) {
 		graphTracer->setBrush(Qt::red);
 		graphTracer->setSize(7);
 		graphTracer->setVisible(true);
+		graphTracer->setSelectable(false);
 
 
 		textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignHCenter);
@@ -452,6 +477,7 @@ void MainWindow::Test(QMouseEvent *event) {
 		fufa.setPointSize(12);
 		fufa.setBold(true);
 		textLabel->setFont(fufa);
+		textLabel->setSelectable(false);
 		textLabel->setBrush(QBrush(QColor(Qt::white)));
 		textLabel->setAntialiased(true);
 		textLabel->setPositionAlignment(Qt::AlignLeft | Qt::AlignBottom);
@@ -636,7 +662,7 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 	ui->customPlot->replot();
 
 	// * add item to widget and set the appropriate icon color
-	QColor color = getGraphColor(functionGraphList->length() - 1);
+	QColor color = getGraphColor(mFunctionGraph->size() - 1);
 
 	auto pixmap = QPixmap(16, 16);
 	pixmap.fill(color);
@@ -647,7 +673,7 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 	ui->QListWidget_functionList->addItem(item);
 }
 
-QVector<double> MainWindow::generateXArray(int lowerLim, int upperLim, unsigned int length) {
+QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, unsigned int length) {
 	// If you want something that will stick around and cannot go out of scope, you should allocate it with new
 	// remember to delete it with delete[] array;
 	QVector<double> finalArray(length);
@@ -830,8 +856,8 @@ void MainWindow::QPushButton_deleteFunction_clicked() {
 		// delete from widget
 		ui->QListWidget_functionList->takeItem(selectedIndex.row());
 		// use pointer stored in list to it delete from the graph
-		ui->customPlot->removeGraph((QCPGraph *) functionGraphList->at(selectedIndex.row()));
-		functionGraphList->removeAt(selectedIndex.row()); // remove from list
+		ui->customPlot->removeGraph((QCPGraph *) (mFunctionGraph->constBegin() + selectedIndex.row()).key());
+		mFunctionGraph->remove((mFunctionGraph->constBegin() + selectedIndex.row()).key()); // remove from list
 		ui->customPlot->replot();
 	} else {
 		statusBarMsg("Please select a function");

@@ -25,11 +25,13 @@ Q_OBJECT
 
 
 public:
-	static QVector<double> generateXArray(int lowerLim, int upperLim, unsigned int length); // enable signals and slots
+	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length); // enable signals and slots
 
 	Ui::MainWindow *ui;
 
 public slots:
+
+	void replotGraphsOnMouseMove(QMouseEvent *event = nullptr);
 
 	void stickAxisToZeroLines();
 
@@ -87,14 +89,15 @@ private:
 
 	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
 
-
 	void initGraph();
 
 	void statusBarMsg(const QString &msg, int time = 2000);
 
 	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
 
-	QList<QCPGraph *> *functionGraphList = new QList<QCPGraph *>; // stored pointers of the function graph
+//	QList<QCPGraph *> *mFunctionGraph = new QList<QCPGraph *>; // stored pointers of the function graph
+
+	QMap<QCPGraph *, BinaryTree *> *mFunctionGraph = new QMap<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
 
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
@@ -114,6 +117,7 @@ private:
 	void calculateAndDrawFunction(QString &function);
 
 	static QColor getGraphColor(int colorIndex);
+
 
 };
 
