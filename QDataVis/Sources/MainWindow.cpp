@@ -41,8 +41,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// comes from the xpm icon file
 	setWindowIcon(QIcon(QPixmap(window_icon_xpm)));
 
-	initGraph();
-
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [=]() {
 		ui->customPlot->xAxis->setRange(-10, 10);
 		ui->customPlot->yAxis->setRange(-10, 10);
@@ -59,11 +57,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		qDebug() << "The operation took" << timer.elapsed() << "milliseconds";
 	});
 
-	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
-	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(replotGraphsOnMouseMove(QMouseEvent * )));
-	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(replotGraphsOnMouseMove()));
+//	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(replotGraphsOnRangeChange(QMouseEvent * )));
+//	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(replotGraphsOnRangeChange()));
+	connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(replotGraphsOnRangeChange()));
 	// todo: hide the tracing things when user clicks, not when he moves mouse
-	connect(ui->customPlot, &QCustomPlot::mousePress, this, &MainWindow::Test);
+//	connect(ui->customPlot, &QCustomPlot::mousePress, ui->customPlot, &MainWindow::traceGraph);
 //	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
 
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, [=](bool checked) {
@@ -152,7 +150,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
-//	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, &MainWindow::Test);
+
 	connect(ui->actionProperies, &QAction::triggered, this, [=]() {
 		plotWindow->show();
 		plotWindow->raise(); // bring it to front
@@ -193,38 +191,20 @@ MainWindow::~MainWindow() {
 }
 
 
-void MainWindow::onMouseMoveReplotCursor(QMouseEvent *event) {
-	// Cursor coordinates:
-	double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
-	double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
-
-	//double dataIndex = mFunctionGraph->lastKey()->findBegin(x);
-//	qDebug() << dataIndex << mFunctionGraph->lastKey()->dataMainValue(dataIndex);
-
-	ui->customPlot->manageCursor(x, y);
-	if (USING_LAYER)
-		ui->customPlot->layer("cursorLayer")->replot();
-	else
-		ui->customPlot->replot();
-
-	// todo: add tracing option only on selected graph
-//	double mouseX = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
-//	//for the  graph values #####
-//	for (int i = 0; i < ui->customPlot->graphCount(); ++i) {
-//		int index = ui->customPlot->graph(i)->findBegin(mouseX);
-//		double x = ui->customPlot->graph(i)->dataMainKey(index);
-//		double y = ui->customPlot->graph(i)->dataMainValue(index);
+//QPointF MainWindow::getClosestPoint(QCPGraph *graph, QPoint point) {
+//	double distance = ui->customPlot->selectedGraphs().first()->selectTest(point, false);
+//	double x = point.x();
+//	double y = point.y();
 //
-//		if (mouseX >= 0) {
-//			qDebug() << index << "X:" << x << "Y:" << y;
-//		} else {
-//			qDebug() << index << "X:" << 0 << "Y:" << 0;
-//		}
-//	}
-	ui->customPlot->replot();
-
-
-}
+//	double closestPoint_x;
+//	double closestPoint_y;
+//
+//
+//	closestPoint_y = calculateTree(closestPoint_x);
+//
+//
+//	return QPointF(closestPoint_x, closestPoint_y);
+//}
 
 
 void MainWindow::GraphParametersChanged() {
@@ -248,8 +228,7 @@ void MainWindow::calculateAndDrawFunction(QString &function) {
 	int max = ui->spinBox_setGraphMaximum->value();
 	int len = ui->spinBox_setGraphLength->value();
 
-	QVector<double> xArray = generateXArray(min, max, len);
-//	QVector<double> yArray = tree.calculateTree(xArray, ui->progressBar);
+	QVector<double> xArray = generateXArray(ui->customPlot->xAxis->range().lower, ui->customPlot->xAxis->range().upper, len);
 
 	// ! GCPCurve has performance issues
 	/*Graphs are used to display single-valued data.
@@ -261,17 +240,13 @@ void MainWindow::calculateAndDrawFunction(QString &function) {
 	// send it to another thread
 	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, mFunctionGraph->lastKey(), function, xArray));
 #else
+	mFunctionGraph->insert(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis), new BinaryTree(function));
 
-	BinaryTree *tree = new BinaryTree(function);
-
-	mFunctionGraph->insert(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis), tree);
-
-	QVector<double> yArray = tree->calculateTree(xArray);
+	QVector<double> yArray = mFunctionGraph->last()->calculateTree(xArray);
 
 	mFunctionGraph->lastKey()->setData(xArray, yArray);
 #endif
-//	for (QHash<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i)
-//	mFunctionGraph->lastKey()->setData(xArray, yArray);
+
 	mFunctionGraph->lastKey()->setName(function);
 	mFunctionGraph->lastKey()->setProperty("Function string", function);
 	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
@@ -284,16 +259,12 @@ void MainWindow::calculateAndDrawFunction(QString &function) {
 	graphPen.setColor(color);
 	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
 	mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
-	//mFunctionGraph->lastKey()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
+	mFunctionGraph->lastKey()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
 }
 
 QColor MainWindow::getGraphColor(int colorIndex) {
-	// only take the last number of the index if bigger than 10
-	if (colorIndex > 9) {
-		QString str = QString::number(colorIndex);
-		colorIndex = str.mid(str.length() - 1).toInt();
-	}
-	return QColor(colors.at(colorIndex));
+	// only take the last digit of the index
+	return colors.at(colorIndex % 10);
 }
 
 
@@ -336,12 +307,10 @@ void MainWindow::onResult(QNetworkReply *reply) {
 		QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
 		QJsonArray array = document.array();
 
-
 		QVector<double> date;
 		QVector<double> avg;
 		QVector<double> low;
 		QVector<double> high;
-
 
 		// Taking from the document root object
 		QJsonObject root = document.object();
@@ -353,23 +322,9 @@ void MainWindow::onResult(QNetworkReply *reply) {
 		}
 		qDebug() << array.size();
 
-		QList<QColor> colors = {
-				QColor(qRgb(31, 119, 180)),
-				QColor(qRgb(255, 127, 14)),
-				QColor(qRgb(44, 160, 44)),
-				QColor(qRgb(214, 39, 40)),
-				QColor(qRgb(148, 103, 189)),
-				QColor(qRgb(140, 86, 75)),
-				QColor(qRgb(244, 119, 194)),
-				QColor(qRgb(127, 127, 127)),
-				QColor(qRgb(188, 189, 34)),
-				QColor(qRgb(23, 190, 207))
-		};
 		QPen graphPen;
 		graphPen.setColor(QColor(colors.at(0)));
 		graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
-
-
 
 		// * high
 //		mFunctionGraph->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
@@ -416,92 +371,18 @@ void MainWindow::onResult(QNetworkReply *reply) {
 	reply->deleteLater();
 }
 
-void MainWindow::stickAxisToZeroLines() {
-	ui->customPlot->axisRect()->setAutoMargins(QCP::msNone);
 
-	int pxx = ui->customPlot->yAxis->coordToPixel(0);
-	int pxy = ui->customPlot->xAxis->coordToPixel(0);
-	ui->customPlot->xAxis->setOffset(-ui->customPlot->axisRect()->height() - ui->customPlot->axisRect()->top() + pxx);
-	ui->customPlot->yAxis->setOffset(ui->customPlot->axisRect()->left() - pxy);
-}
-
-void MainWindow::replotGraphsOnMouseMove(QMouseEvent *event) {
+void MainWindow::replotGraphsOnRangeChange() {
 	QVector<double> xArray = generateXArray(ui->customPlot->xAxis->range().lower, ui->customPlot->xAxis->range().upper, 1000);
-	// mouse is moving because this function is connected to MouseMove() signal
-	// and left button is held down => User is dragging the plot
-	// if event == nullptr, it is called by mouseWheel() signal
-	if (event == nullptr || event->buttons() == Qt::LeftButton) {
-		for (QMap<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i) {
-			QVector<double> yArray = i.value()->calculateTree(xArray);
-			i.key()->setData(xArray, yArray);
-		}
+	QVector<double> yArray(xArray.length());
+
+	for (QMap<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i) {
+		yArray = i.value()->calculateTree(xArray);
+		i.key()->setData(xArray, yArray);
 	}
+	ui->customPlot->replot();
 }
 
-
-void MainWindow::Test(QMouseEvent *event) {
-	if (ui->customPlot->selectedGraphs().size() == 1) {
-		double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
-		double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
-//		QPointF pp = ui->customPlot->cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
-//		double plottable = ui->customPlot->selectedGraphs().first()->selectTest(point, true);
-		QCPGraphDataContainer::const_iterator it = ui->customPlot->selectedGraphs().first()->data()->constEnd();
-		QVariant details;
-		if (ui->customPlot->selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
-			QCPDataSelection dataPoints = details.value<QCPDataSelection>();
-
-			if (dataPoints.dataPointCount() < 1) {
-				// abort if event position is invalid
-				return;
-			}
-			it = ui->customPlot->selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
-
-		}
-
-		graphTracer->setGraph(ui->customPlot->selectedGraphs().first());
-		graphTracer->setGraphKey(it->key);
-		graphTracer->setInterpolating(true);
-		graphTracer->setStyle(QCPItemTracer::tsCircle);
-		graphTracer->setPen(QPen(Qt::red));
-		graphTracer->setBrush(Qt::red);
-		graphTracer->setSize(7);
-		graphTracer->setVisible(true);
-		graphTracer->setSelectable(false);
-
-
-		textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignHCenter);
-		textLabel->position->setType(QCPItemPosition::ptPlotCoords);
-		textLabel->position->setCoords(it->key + (ui->customPlot->xAxis->range().upper - ui->customPlot->xAxis->range().lower) * 0.01,
-		                               it->value + (ui->customPlot->yAxis->range().upper - ui->customPlot->yAxis->range().lower) * 0.01);
-		QFont fufa = textLabel->font();
-		fufa.setPointSize(12);
-		fufa.setBold(true);
-		textLabel->setFont(fufa);
-		textLabel->setSelectable(false);
-		textLabel->setBrush(QBrush(QColor(Qt::white)));
-		textLabel->setAntialiased(true);
-		textLabel->setPositionAlignment(Qt::AlignLeft | Qt::AlignBottom);
-		textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
-		textLabel->setVisible(true);
-
-		ui->customPlot->layer("cursorLayer")->replot();
-//		qDebug() << it->key << it->value;
-
-
-//		ui->customPlot->cursor.cursorText->setText(QString("(%1, %2)").arg(x).arg(y));
-//		ui->customPlot->cursor.cursorText->position->setCoords(QPointF(x, y));
-//		QPointF pp = ui->customPlot->cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
-//		ui->customPlot->cursor.cursorText->position->setPixelPosition(pp);
-//		ui->customPlot->replot();
-//		double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
-//		QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(dataIndex).arg(dataValue);
-//		ui->statusBar->showMessage(message, 2500);
-
-	} else { // no graph / multiple graphs selected
-		textLabel->setVisible(false);
-		graphTracer->setVisible(false);
-		ui->customPlot->layer("cursorLayer")->replot();
-	}
 
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 //	networkManager->get(QNetworkRequest(QUrl("http://www.evileg.ru/it_example.json")));
@@ -513,7 +394,6 @@ void MainWindow::Test(QMouseEvent *event) {
 //	connect(manager, SIGNAL(finished(QNetworkReply * )), this, SLOT(replyFini(QNetworkReply * )));
 //	connect(manager, &QNetworkAccessManager::finished, manager, &QNetworkAccessManager::deleteLater);
 //	manager->get(request);
-}
 
 void MainWindow::replyFini(QNetworkReply *reply) {
 	QString answer = QString::fromUtf8(reply->readAll());
@@ -521,102 +401,7 @@ void MainWindow::replyFini(QNetworkReply *reply) {
 	qDebug() << QSslSocket::supportsSsl();
 	reply->deleteLater();
 }
-
-
-void MainWindow::initGraph() {
-	// enable openGL
-	ui->customPlot->setOpenGl(true, 16); // enable openGL
-	statusBarMsg(ui->customPlot->openGl() ? "openGL enabled" : "openGL disabled", 5000);
-
-	if (USING_LAYER) {
-		ui->customPlot->addLayer("cursorLayer", nullptr, QCustomPlot::limAbove);
-		ui->customPlot->cursorLayer = ui->customPlot->layer("cursorLayer");
-		//cursorLayer = new QCPLayer(this, "cursorLayer");
-		ui->customPlot->cursorLayer->setMode(QCPLayer::lmBuffered);
-	}
-
-	textLabel = new QCPItemText(ui->customPlot);
-	textLabel->setLayer(ui->customPlot->cursorLayer);
-	graphTracer = new QCPItemTracer(ui->customPlot);
-	graphTracer->setLayer(ui->customPlot->cursorLayer);
-
-	//Cursor:
-	QPen qpen = QPen(Qt::DashDotLine);
-	ui->customPlot->cursor.hLine = new QCPItemLine(ui->customPlot);
-	ui->customPlot->cursor.hLine->setPen(qpen);
-
-	ui->customPlot->cursor.vLine = new QCPItemLine(ui->customPlot);
-	ui->customPlot->cursor.vLine->setPen(qpen);
-
-	ui->customPlot->cursor.cursorText = new QCPItemText(ui->customPlot);
-	ui->customPlot->cursor.cursorText->setFont(QFont(font().family(), 8));
-
-	//Add to layer:
-	if (USING_LAYER) {
-		ui->customPlot->cursor.hLine->setLayer("cursorLayer");  //"cursorLayer"
-		ui->customPlot->cursor.vLine->setLayer("cursorLayer");
-		ui->customPlot->cursor.cursorText->setLayer("cursorLayer");
-	}
-
-
-	// axes configuration
-	// todo: implement ui->customPlot->xAxis->setPadding(value);
-
-	// set axes ranges
-	ui->customPlot->xAxis->setRange(-10, 10);
-	ui->customPlot->yAxis->setRange(-10, 10);
-	// configure right and top axis to show ticks but no labels:
-	// (see QCPAxisRect::setupFullAxesBox for a quicker method to do this)
-
-
-	// legend initialization
-	ui->customPlot->legend->setVisible(false);
-	QFont legendFont = font();
-	legendFont.setPointSize(10);
-	ui->customPlot->legend->setFont(legendFont);
-	ui->customPlot->legend->setSelectedFont(legendFont);
-	ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-
-
-	// ! GRAPH RELATED CONNECTIONS
-	// * axes configuration
-	// connect slot that ties some axis selections together (especially opposite axes):
-	connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(plotOppositeAxesConnection()));
-	// connect slots that takes care that when an axis is selected, only that direction can be dragged and zoomed:
-	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(plotAxisLockDrag()));
-	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(plotAxisLockZoom()));
-	// make bottom and left axes transfer their ranges to top and right axes:
-	connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->customPlot->xAxis2, SLOT(setRange(QCPRange)));
-	connect(ui->customPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->customPlot->yAxis2, SLOT(setRange(QCPRange)));
-
-	// * click interaction
-	// axis label double click
-	connect(ui->customPlot, SIGNAL(axisDoubleClick(QCPAxis * , QCPAxis::SelectablePart, QMouseEvent * )), this,
-	        SLOT(plotAxisLabelDoubleClick(QCPAxis * , QCPAxis::SelectablePart)));
-	// legend double click
-	connect(ui->customPlot, SIGNAL(legendDoubleClick(QCPLegend * , QCPAbstractLegendItem * , QMouseEvent * )), this,
-	        SLOT(plotLegendGraphDoubleClick(QCPLegend * , QCPAbstractLegendItem * )));
-
-	// graph clicked statusbar message
-	connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable * , int, QMouseEvent * )), this,
-	        SLOT(plotGraphClicked(QCPAbstractPlottable * , int)));
-
-	// * context menu
-	// setup policy and connect slot for context menu popup:
-	ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
-
-
-//	QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-//	dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
-//	ui->customPlot->xAxis->setTicker(dateTicker);
-//	double now = QDateTime::currentDateTime().toTime_t();
-//	ui->customPlot->xAxis->setRange(now - now / 10, now);
-//	ui->customPlot->yAxis->setRange(0, 10000);
-
-	ui->customPlot->replot();
-}
-
+// todo: implement ui->customPlot->xAxis->setPadding(value);
 
 void MainWindow::statusBarMsg(const QString &msg, int time) {
 	ui->statusBar->showMessage(msg, time);
@@ -674,10 +459,8 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 }
 
 QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, unsigned int length) {
-	// If you want something that will stick around and cannot go out of scope, you should allocate it with new
-	// remember to delete it with delete[] array;
 	QVector<double> finalArray(length);
-	//auto *finalArray = new float[length];
+
 	double difference = upperLim - lowerLim;
 	double increment = difference / (length - 1);
 
@@ -861,196 +644,6 @@ void MainWindow::QPushButton_deleteFunction_clicked() {
 		ui->customPlot->replot();
 	} else {
 		statusBarMsg("Please select a function");
-	}
-}
-
-
-void MainWindow::plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part) {
-	// Set an axis label by double clicking on it
-	if (part ==
-	    QCPAxis::spAxisLabel) // only react when the actual axis label is clicked, not tick label or axis backbone
-	{
-		bool ok;
-		QString newLabel = QInputDialog::getText(this, "QCustomPlot example", "New axis label:", QLineEdit::Normal,
-		                                         axis->label(), &ok);
-		if (ok) {
-			axis->setLabel(newLabel);
-			ui->customPlot->replot();
-		}
-	}
-}
-
-void MainWindow::plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item) {
-	// Rename a graph by double clicking on its legend item
-	Q_UNUSED(legend)
-	if (item) // only react if item was clicked (user could have clicked on border padding of legend where there is no item, then item is 0)
-	{
-		QCPPlottableLegendItem *plItem = qobject_cast<QCPPlottableLegendItem *>(item);
-		bool ok;
-		QString newName = QInputDialog::getText(this, "QCustomPlot example", "New graph name:", QLineEdit::Normal,
-		                                        plItem->plottable()->name(), &ok);
-		if (ok) {
-			plItem->plottable()->setName(newName);
-			ui->customPlot->replot();
-		}
-	}
-}
-
-void MainWindow::plotMoveLegend() {
-	if (QAction *contextAction = qobject_cast<QAction *>(
-			sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
-	{
-		bool ok;
-		int dataInt = contextAction->data().toInt(&ok);
-		if (ok) {
-			ui->customPlot->axisRect()->insetLayout()->setInsetAlignment(0, (Qt::Alignment) dataInt);
-			ui->customPlot->replot();
-		}
-	}
-}
-
-void MainWindow::plotContextMenuRemoveAllGraphs() {
-	ui->customPlot->clearGraphs();
-	ui->customPlot->replot();
-}
-
-void MainWindow::plotContextMenuRemoveSelectedGraph() {
-	if (ui->customPlot->selectedGraphs().size() > 0) {
-		ui->customPlot->removeGraph(ui->customPlot->selectedGraphs().first());
-		ui->customPlot->replot();
-	}
-}
-
-void MainWindow::plotGraphClicked(QCPAbstractPlottable *plottable, int dataIndex) {
-	// since we know we only have QCPGraphs in the plot, we can immediately access interface1D()
-	// usually it's better to first check whether interface1D() returns non-zero, and only then use it.
-	double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
-	QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(
-			dataIndex).arg(dataValue);
-	ui->statusBar->showMessage(message, 2500);
-
-//	if (ui->customPlot->selectedGraphs().size() == 1) {
-//		auto graph = ui->customPlot->selectedGraphs().first();
-//		QCPItemTracer *tracer = new QCPItemTracer(ui->customPlot);
-//		double key = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
-//		tracer->setGraph(graph);
-//		tracer->setGraphKey(key);
-//
-//		qDebug() << tracer->position->value();
-//
-//		ui->customPlot->replot();
-
-//		auto plottable = ui->customPlot->selectedGraphs().first();
-//		int dataIndex = ui->customPlot->selectedGraphs().;
-////		int dataIndex = ui->customPlot->mMouseSignalLayerableDetails.value<QCPDataSelection>().dataRange().begin();
-//		double x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
-//		double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
-//		ui->customPlot->cursor.cursorText->setText(QString("(%1, %2)").arg(x).arg(y));
-//		ui->customPlot->cursor.cursorText->position->setCoords(QPointF(x, y));
-//		QPointF pp = ui->customPlot->cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
-//		ui->customPlot->cursor.cursorText->position->setPixelPosition(pp);
-//		ui->customPlot->replot();
-//		double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
-//		QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(
-//				dataIndex).arg(dataValue);
-//		ui->statusBar->showMessage(message, 2500);
-
-}
-
-void MainWindow::plotAxisLockDrag() {
-	// if an axis is selected, only allow the direction of that axis to be dragged
-	// if no axis is selected, both directions may be dragged
-
-	if (ui->customPlot->xAxis->selectedParts().testFlag(QCPAxis::spAxis))
-		ui->customPlot->axisRect()->setRangeDrag(ui->customPlot->xAxis->orientation());
-	else if (ui->customPlot->yAxis->selectedParts().testFlag(QCPAxis::spAxis))
-		ui->customPlot->axisRect()->setRangeDrag(ui->customPlot->yAxis->orientation());
-	else
-		ui->customPlot->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
-}
-
-
-void MainWindow::plotAxisLockZoom() {
-	// if an axis is selected, only allow the direction of that axis to be zoomed
-	// if no axis is selected, both directions may be zoomed
-
-	if (ui->customPlot->xAxis->selectedParts().testFlag(QCPAxis::spAxis))
-		ui->customPlot->axisRect()->setRangeZoom(ui->customPlot->xAxis->orientation());
-	else if (ui->customPlot->yAxis->selectedParts().testFlag(QCPAxis::spAxis))
-		ui->customPlot->axisRect()->setRangeZoom(ui->customPlot->yAxis->orientation());
-	else
-		ui->customPlot->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
-}
-
-
-void MainWindow::plotContextMenuRequest(QPoint pos) {
-	QMenu *menu = new QMenu(this);
-	menu->setAttribute(Qt::WA_DeleteOnClose);
-
-	if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-	{
-		menu->addAction("Move to top left", this, SLOT(plotMoveLegend()))->setData(
-				(int) (Qt::AlignTop | Qt::AlignLeft));
-		menu->addAction("Move to top center", this, SLOT(plotMoveLegend()))->setData(
-				(int) (Qt::AlignTop | Qt::AlignHCenter));
-		menu->addAction("Move to top right", this, SLOT(plotMoveLegend()))->setData(
-				(int) (Qt::AlignTop | Qt::AlignRight));
-		menu->addAction("Move to bottom right", this, SLOT(plotMoveLegend()))->setData(
-				(int) (Qt::AlignBottom | Qt::AlignRight));
-		menu->addAction("Move to bottom left", this, SLOT(plotMoveLegend()))->setData(
-				(int) (Qt::AlignBottom | Qt::AlignLeft));
-	} else  // general context menu on graphs requested
-	{
-		menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
-		if (ui->customPlot->selectedGraphs().size() > 0)
-			menu->addAction("Remove selected graph", this, SLOT(plotContextMenuRemoveSelectedGraph()));
-		if (ui->customPlot->graphCount() > 0)
-			menu->addAction("Remove all graphs", this, SLOT(plotContextMenuRemoveAllGraphs()));
-	}
-
-	menu->popup(ui->customPlot->mapToGlobal(pos));
-}
-
-
-void MainWindow::plotOppositeAxesConnection() {
-	/*
-	 normally, axis base line, axis tick labels and axis labels are selectable separately, but we want
-	 the user only to be able to select the axis as a whole, so we tie the selected states of the tick labels
-	 and the axis base line together. However, the axis label shall be selectable individually.
-
-	 The selection state of the left and right axes shall be synchronized as well as the state of the
-	 bottom and top axes.
-
-	 Further, we want to synchronize the selection of the graphs with the selection state of the respective
-	 legend item belonging to that graph. So the user can select a graph by either clicking on the graph itself
-	 or on its legend item.
-	*/
-
-	// make top and bottom axes be selected synchronously, and handle axis and tick labels as one selectable object:
-	if (ui->customPlot->xAxis->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    ui->customPlot->xAxis->selectedParts().testFlag(QCPAxis::spTickLabels) ||
-	    ui->customPlot->xAxis2->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    ui->customPlot->xAxis2->selectedParts().testFlag(QCPAxis::spTickLabels)) {
-		ui->customPlot->xAxis2->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
-		ui->customPlot->xAxis->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
-	}
-	// make left and right axes be selected synchronously, and handle axis and tick labels as one selectable object:
-	if (ui->customPlot->yAxis->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    ui->customPlot->yAxis->selectedParts().testFlag(QCPAxis::spTickLabels) ||
-	    ui->customPlot->yAxis2->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    ui->customPlot->yAxis2->selectedParts().testFlag(QCPAxis::spTickLabels)) {
-		ui->customPlot->yAxis2->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
-		ui->customPlot->yAxis->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
-	}
-
-	// synchronize selection of graphs with selection of corresponding legend items:
-	for (int i = 0; i < ui->customPlot->graphCount(); ++i) {
-		QCPGraph *graph = ui->customPlot->graph(i);
-		QCPPlottableLegendItem *item = ui->customPlot->legend->itemWithPlottable(graph);
-		if (item->selected() || graph->selected()) {
-			item->setSelected(true);
-			graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
-		}
 	}
 }
 
@@ -1824,7 +1417,6 @@ inline void MainWindow::setUpAxesPageConnections() {
 		});
 	});
 
-
 	plotWindow->ui->groupBox_xAxis_setGridVisible->setChecked(true);
 	plotWindow->ui->groupBox_yAxis_setGridVisible->setChecked(true);
 
@@ -1874,7 +1466,6 @@ inline void MainWindow::setUpTitlePageConnections() {
 		ui->customPlot->replot();
 	});
 
-
 	// * delete title
 	connect(plotWindow->ui->pushButton_removeTitle, &QPushButton::clicked, this, [=]() {
 		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
@@ -1900,15 +1491,6 @@ inline void MainWindow::setUpTitlePageConnections() {
 			plotWindow->titleColorDialog->setCurrentColor(titleElement->textColor());
 		}
 	});
-	//connect(plot, SIGNAL(beforeReplot()), this, SLOT(beforeReplot()));
-	//connect(ui->customPlot, &QCustomPlot::beforeReplot, this, [=]() {
-	//	int pxx = ui->customPlot->yAxis->coordToPixel(0);
-	//	int pxy = ui->customPlot->xAxis->coordToPixel(0);
-	//	ui->customPlot->xAxis->setOffset(-ui->customPlot->axisRect()->height() - ui->customPlot->axisRect()->top() + pxx);
-	//	ui->customPlot->yAxis->setOffset(ui->customPlot->axisRect()->left() - pxy);
-	//});
-
-
 
 	// * when user changed font in QFontDialog - any font option
 	connect(plotWindow->titleFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
@@ -1928,7 +1510,6 @@ inline void MainWindow::setUpTitlePageConnections() {
 			ui->customPlot->replot();
 		}
 	});
-
 
 	// * Title order changed
 	connect(plotWindow->ui->listWidget_titleList->model(), &QAbstractItemModel::rowsMoved, this, [=]() {
@@ -2039,10 +1620,10 @@ inline void MainWindow::setUpGeneralPageConnections() {
 	// * set cursor
 	connect(plotWindow->ui->checkBox_enableCursor, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
-			connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMoveReplotCursor(QMouseEvent * )));
+			connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), ui->customPlot, SLOT(onMouseMoveReplotCursor(QMouseEvent * )));
 			ui->customPlot->cursor.cursorText->setVisible(true);
 		} else {
-			disconnect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(onMouseMoveReplotCursor(QMouseEvent * )));
+			disconnect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), ui->customPlot, SLOT(onMouseMoveReplotCursor(QMouseEvent * )));
 			ui->customPlot->cursor.hLine->start->setCoords(0, 0);
 			ui->customPlot->cursor.hLine->end->setCoords(0, 0);
 
@@ -2057,10 +1638,10 @@ inline void MainWindow::setUpGeneralPageConnections() {
 	// * set stick axis to zero line
 	connect(plotWindow->ui->checkBox_stickAxisToZeroLines, &QCheckBox::toggled, this, [=](bool checked) {
 		if (checked) {
-			connect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(stickAxisToZeroLines()));
+			connect(ui->customPlot, SIGNAL(beforeReplot()), ui->customPlot, SLOT(stickAxisToZeroLines()));
 			ui->customPlot->replot();
 		} else {
-			disconnect(ui->customPlot, SIGNAL(beforeReplot()), this, SLOT(stickAxisToZeroLines()));
+			disconnect(ui->customPlot, SIGNAL(beforeReplot()), ui->customPlot, SLOT(stickAxisToZeroLines()));
 			ui->customPlot->axisRect()->setAutoMargins(QCP::msAll);
 			ui->customPlot->xAxis->setOffset(0);
 			ui->customPlot->yAxis->setOffset(0);

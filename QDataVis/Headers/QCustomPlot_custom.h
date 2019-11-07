@@ -11,8 +11,6 @@
 
 #include "qcustomplot.h"
 
-#define USING_LAYER true
-
 struct QCPCursor {
 	QCPItemLine *hLine;
 	QCPItemLine *vLine;
@@ -25,13 +23,46 @@ Q_OBJECT
 public:
 	explicit QCustomPlot_custom(QWidget *parent = nullptr);
 
-	~QCustomPlot_custom() = default;
+	~QCustomPlot_custom() override = default;
 
 public:
 	void manageCursor(double x, double y);
 
 	QCPLayer *cursorLayer;
 	QCPCursor cursor;
+
+	QCPItemText *textLabel = new QCPItemText(this);;
+	QCPItemTracer *graphTracer = new QCPItemTracer(this);;
+
+public slots:
+
+	void onMouseMoveReplotCursor(QMouseEvent *event);
+
+	void traceGraph(QMouseEvent *event);
+
+	void stickAxisToZeroLines();
+
+	void initGraph();
+
+public slots:
+
+	void plotOppositeAxesConnection();
+
+	void plotAxisLockDrag();
+
+	void plotAxisLockZoom();
+
+	void plotContextMenuRequest(QPoint pos);
+
+	void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
+
+	void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
+
+	void plotContextMenuRemoveAllGraphs();
+
+	void plotContextMenuRemoveSelectedGraph();
+
+	void plotMoveLegend();
 };
 
 

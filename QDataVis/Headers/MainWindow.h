@@ -25,15 +25,13 @@ Q_OBJECT
 
 
 public:
-	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length); // enable signals and slots
+	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
 
 	Ui::MainWindow *ui;
 
 public slots:
 
-	void replotGraphsOnMouseMove(QMouseEvent *event = nullptr);
-
-	void stickAxisToZeroLines();
+	void replotGraphsOnRangeChange();
 
 	void GraphParametersChanged();
 
@@ -43,36 +41,11 @@ public slots:
 
 	void QPushButton_deleteFunction_clicked();
 
-	void plotOppositeAxesConnection();
-
-	void plotAxisLockDrag();
-
-	void plotAxisLockZoom();
-
-	void plotGraphClicked(QCPAbstractPlottable *plottable, int dataIndex);
-
-	void plotContextMenuRequest(QPoint pos);
-
-	void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
-
-	void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
-
-	void plotContextMenuRemoveAllGraphs();
-
-	void plotContextMenuRemoveSelectedGraph();
-
-	void plotMoveLegend();
-
 	void savePlotImage();
-
-	void Test(QMouseEvent *event);
 
 	void onResult(QNetworkReply *reply);
 
 	void replyFini(QNetworkReply *reply);
-
-	void onMouseMoveReplotCursor(QMouseEvent *event);
-
 
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
@@ -89,22 +62,15 @@ private:
 
 	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
 
-	void initGraph();
-
 	void statusBarMsg(const QString &msg, int time = 2000);
 
 	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
-
-//	QList<QCPGraph *> *mFunctionGraph = new QList<QCPGraph *>; // stored pointers of the function graph
 
 	QMap<QCPGraph *, BinaryTree *> *mFunctionGraph = new QMap<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
 
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
 	std::vector<std::future<void>> m_Futures;
-
-	QCPItemText *textLabel;
-	QCPItemTracer *graphTracer;
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 
@@ -119,6 +85,7 @@ private:
 	static QColor getGraphColor(int colorIndex);
 
 
+	QPointF getClosestPoint(QCPGraph *graph, QPoint point);
 };
 
 

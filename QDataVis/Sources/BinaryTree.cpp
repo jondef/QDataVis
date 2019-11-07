@@ -83,7 +83,7 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
 	bool firstPass = false;
 	for (int i = 0; i < xArray.length(); ++i) {
 		yArray[i] = calculateTree(xArray[i]);
-
+		// tixme: the following code snippet has performance issues
 //		if (firstPass && abs(yArray[i] - yArray[i - 1]) > 100) {
 //			qDebug() << yArray[i - 1] << -yArray[i];
 //			yArray[i - 1] = _nan();
@@ -92,21 +92,6 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
 //		firstPass = true;
 	}
 	return yArray;
-}
-
-
-QPointF BinaryTree::getClosestPoint(QPoint point) {
-	double x = point.x();
-	double y = point.y();
-
-	double closestPoint_x;
-	double closestPoint_y;
-
-
-	closestPoint_y = calculateTree(closestPoint_x);
-
-
-	return QPointF(closestPoint_x, closestPoint_y);
 }
 
 
