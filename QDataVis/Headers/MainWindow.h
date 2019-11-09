@@ -25,13 +25,14 @@ Q_OBJECT
 
 
 public:
-	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
+	explicit MainWindow(QWidget *parent = nullptr);
 
-	Ui::MainWindow *ui;
+	~MainWindow();
+
 
 public slots:
 
-	void replotGraphsOnRangeChange();
+	void replotGraphsOnRangeChange(QCPRange range);
 
 	void GraphParametersChanged();
 
@@ -47,10 +48,9 @@ public slots:
 
 	void replyFini(QNetworkReply *reply);
 
-public:
-	explicit MainWindow(QWidget *parent = nullptr);
 
-	~MainWindow();
+public:
+	Ui::MainWindow *ui;
 
 	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow();
 
@@ -58,12 +58,8 @@ public:
 	QFontDialog *popUpFontDialog = new QFontDialog(plotWindow);
 	QPenDialog *popUpPenDialog = new QPenDialog(plotWindow);
 
+
 private:
-
-	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
-
-	void statusBarMsg(const QString &msg, int time = 2000);
-
 	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
 
 	QMap<QCPGraph *, BinaryTree *> *mFunctionGraph = new QMap<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
@@ -71,6 +67,16 @@ private:
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
 	std::vector<std::future<void>> m_Futures;
+
+
+public:
+	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
+
+
+private:
+	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
+
+	void statusBarMsg(const QString &msg, int time = 2000);
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 
@@ -83,7 +89,6 @@ private:
 	void calculateAndDrawFunction(QString &function);
 
 	static QColor getGraphColor(int colorIndex);
-
 
 	QPointF getClosestPoint(QCPGraph *graph, QPoint point);
 };

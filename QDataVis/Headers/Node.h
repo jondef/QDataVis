@@ -7,8 +7,44 @@
 
 #include <QtCore>
 
+// todo: add more functions, operators: http://www.partow.net/programming/exprtk/
+enum Operator {
+	Addition, Subtraction, Multiplication, Division, Modulo, Exponent, Factorial,
+	Arcsinh, Arccosh, Arctanh, Arcsin, Arccos, Arctan, Sinh, Cosh, Tanh, Sin, Cos, Tan, Log10, Log, Ln, Abs
+};
+
+static const QMap<QString, Operator> operatorsPriority = {
+		{"+", Addition},
+		{"-", Subtraction},
+		{"*", Multiplication},
+		{"/", Division},
+		{"%", Modulo},
+		{"^", Exponent},
+		{"!", Factorial}
+};
+
+// ! all "arc" trigo functions need to be before the normal ones
+static const QMap<QString, Operator> specialOperatorsPriority = {
+		{"arcsinh", Arcsinh},
+		{"arccosh", Arccosh},
+		{"arctanh", Arctanh},
+		{"arcsin",  Arcsin},
+		{"arccos",  Arccos},
+		{"arctan",  Arctan},
+		{"sinh",    Sinh},
+		{"cosh",    Cosh},
+		{"tanh",    Tanh},
+		{"sin",     Sin},
+		{"cos",     Cos},
+		{"tan",     Tan},
+		{"log10",   Log10},
+		{"log",     Log},
+		{"ln",      Ln},
+		{"abs",     Abs}
+};
 
 class Node {
+
 public:
 	Node *pParent = nullptr;
 	Node *pLeftChild = nullptr;
@@ -16,22 +52,23 @@ public:
 
 	QString strValue;
 	double doubleValue;
-	QString mathOperation = nullptr;
+	Operator mathOperation;
 	double logBase;
-
-	enum variable {
-		X
-	};
+	bool hasChildren = false;
+	bool isVariable = false;
 
 public:
 	explicit Node(QString &input, Node *aParent = nullptr);
 
-	bool createChildren(QString string);
+	double computeOperation(double xPlug);
+
 
 private:
 	static QList<int> getParenthesesArray(const QString &string);
 
 	static QList<int> findAllOccurences(QString string, const QString &ofWhat);
+
+	bool createChildren(QString string);
 
 	bool needsChildren();
 };

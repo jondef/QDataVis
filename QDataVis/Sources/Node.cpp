@@ -4,22 +4,13 @@
 
 #include "Node.h"
 
-const QList<QString> operators = {"+", "-", "*", "/", "%", "^", "!"};
-// ! all "arc" trigo functions need to be before the normal ones
-// csc = 1/sin(x) | sec = 1/cos(x) | cot = 1/tan(x)
-const QList<QString> specialOperators = {"arcsinh", "arccosh", "arctanh", "arcsin", "arccos", "arctan",
-                                         "sinh", "cosh", "tanh", "sin", "cos", "tan",
-                                         "log10", "ln", "log"};
-// todo: add more functions, operators: http://www.partow.net/programming/exprtk/
-// todo: add abs()
-
 
 Node::Node(QString &aInput, Node *aParent) {
 	pParent = aParent;
 	strValue = aInput;
 
-	// check if the node needs children
 	if (needsChildren()) {
+		hasChildren = true;
 		createChildren(aInput);
 	}
 }
@@ -54,14 +45,14 @@ bool Node::createChildren(QString string) {
 	QList<int> parenthesesArray = getParenthesesArray(string);
 
 	// * normal operators
-	for (const QString &Operator : operators) {
-		QList<int> allOperatorOccurences = findAllOccurences(string, Operator);
+	for (QMap<QString, Operator>::const_iterator Operator = operatorsPriority.begin(); Operator != operatorsPriority.end(); ++Operator) {
+		QList<int> operatorIndexes = findAllOccurences(string, Operator.key());
 
-		for (const int &operatorOccurence : allOperatorOccurences) {
+		for (const int &operatorIndex : operatorIndexes) {
 			// check if operator is in a parentheses or not.
-			if (parenthesesArray.at(operatorOccurence) == 0) {
-				QString leftSide = string.left(operatorOccurence);
-				QString rightSide = string.mid(operatorOccurence + 1);
+			if (parenthesesArray.at(operatorIndex) == 0) {
+				QString leftSide = string.left(operatorIndex);
+				QString rightSide = string.mid(operatorIndex + 1);
 
 				// if you have -2*x you gotta add a zero on the left side
 				if (leftSide.isEmpty()) {
@@ -73,7 +64,7 @@ bool Node::createChildren(QString string) {
 						continue;
 					}
 				}
-				mathOperation = Operator;
+				mathOperation = Operator.value();
 				qDebug() << leftSide << mathOperation << rightSide;
 				pLeftChild = new Node(leftSide, this);
 				if (!rightSide.isEmpty()) {
@@ -85,14 +76,15 @@ bool Node::createChildren(QString string) {
 	}
 
 	// * special operators | must be after normal operators!
-	for (const auto &operation : specialOperators) {
-		QList<int> allOperatorOccurences = findAllOccurences(string, operation);
+	for (QMap<QString, Operator>::const_iterator Operator = specialOperatorsPriority.begin();
+	     Operator != specialOperatorsPriority.end(); ++Operator) {
+		QList<int> operatorIndexes = findAllOccurences(string, Operator.key());
 
-		for (const int &operatorOccurence : allOperatorOccurences) {
-			if (parenthesesArray.at(operatorOccurence) == 0) {
-				QString parenthesesContent = string.left(string.length() - 1).mid(operatorOccurence + operation.length() + 1);
+		for (const int &operatorIndex : operatorIndexes) {
+			if (parenthesesArray.at(operatorIndex) == 0) {
+				QString parenthesesContent = string.left(string.length() - 1).mid(operatorIndex + Operator.key().length() + 1);
 
-				if (operation == "log") {
+				if (Operator.key() == "log") {
 					QString logBaseString = parenthesesContent.split(",").at(1);
 					if (logBaseString == "e") {
 						logBase = M_E;
@@ -105,7 +97,7 @@ bool Node::createChildren(QString string) {
 
 				}
 
-				mathOperation = operation;
+				mathOperation = Operator.value();
 				qDebug() << mathOperation << parenthesesContent;
 				pRightChild = new Node(parenthesesContent, this);
 				return true; // success
@@ -116,15 +108,16 @@ bool Node::createChildren(QString string) {
 }
 
 bool Node::needsChildren() {
-	// returns false if node does'nt need children
+	// returns false if node doesn't need children
 	bool valueOk;
 	doubleValue = strValue.toDouble(&valueOk);
 
-	// does'nt need children
+	// doesn't need children
 	if (valueOk) {
 		return false;
 	} else {
 		if (strValue == "x") {
+			isVariable = true;
 			return false;
 		} else if (strValue == "e") {
 			doubleValue = M_E;
@@ -136,6 +129,120 @@ bool Node::needsChildren() {
 		// needs children
 		return true;
 	}
+}
+
+double Node::computeOperation(double xPlug) {
+	// todo: instead of string x use struct
+	double doubleValueLeft = 0;
+	double doubleValueRight = 0;
+
+	// replace x with the number
+	if (pLeftChild) {
+		if (pLeftChild->isVariable) {
+			doubleValueLeft = xPlug;
+		} else {
+			doubleValueLeft = pLeftChild->doubleValue;
+		}
+	}
+
+	if (pRightChild) {
+		if (pRightChild->isVariable) {
+			doubleValueRight = xPlug;
+		} else {
+			doubleValueRight = pRightChild->doubleValue;
+		}
+	}
+
+	switch (mathOperation) {
+		case Addition :
+			return doubleValueLeft + doubleValueRight;
+		case Subtraction :
+			return doubleValueLeft - doubleValueRight;
+		case Multiplication :
+			return doubleValueLeft * doubleValueRight;
+		case Division :
+			return doubleValueLeft / doubleValueRight;
+		case Modulo :
+			if (int(doubleValueRight) != 0) {
+				return int(doubleValueLeft) % int(doubleValueRight);
+			}
+			return _nan();
+		case Exponent:
+			// only change if the base is negative
+			// ref: https://stackoverflow.com/a/8493081/10450514
+			if (doubleValueLeft < 0) {
+				// check whether the exponent is a fraction
+				if (pRightChild->mathOperation == Division) {
+					// It is not required to check whether doubleValue has been assigned
+					// a value, because is will be already computed by the time the
+					// program is here.
+					double numerator = pRightChild->pLeftChild->doubleValue;
+					double denominator = pRightChild->pRightChild->doubleValue;
+
+					// ! all the even denominator roots have imaginary negative
+					// ! while odd denominator roots have real negatives
+					// check if denominator is an int + check if denominator is odd
+					if (round(denominator) == denominator && int(denominator) % 2 != 0) {
+						// if the denominator is odd, the negative values are real
+						// if numerator is an int
+						if (round(numerator) == numerator) {
+							if (int(numerator) % 2 == 0) {
+								// if numerator is even simply flip the
+								// function above the y axis
+								return qPow(-doubleValueLeft, doubleValueRight);
+							} else {
+								// if the numerator is odd, we need to calculate the points
+								// by making them positive, because a negative base is not
+								// possible.
+								return -qPow(-doubleValueLeft, doubleValueRight);
+							}
+						}
+					}
+				}
+			}
+			return qPow(doubleValueLeft, doubleValueRight);
+		case Factorial:
+			// + 1 to match x!
+			return tgamma(doubleValueLeft + 1);
+		case Arcsinh:
+			return asinh(doubleValueRight);
+		case Arccosh:
+			return acosh(doubleValueRight);
+		case Arctanh:
+			return atanh(doubleValueRight);
+		case Arcsin:
+			return asin(doubleValueRight);
+		case Arccos:
+			return acos(doubleValueRight);
+		case Arctan:
+			return atan(doubleValueRight);
+		case Sinh:
+			return sinh(doubleValueRight);
+		case Cosh:
+			return cosh(doubleValueRight);
+		case Tanh:
+			return tanh(doubleValueRight);
+		case Sin:
+			return sin(doubleValueRight);
+		case Cos:
+			return cos(doubleValueRight);
+		case Tan:
+			return tan(doubleValueRight);
+		case Log10:
+			return log10(doubleValueRight);
+		case Log:
+			return log10(doubleValueRight) / log10(logBase);
+		case Ln:
+			return qLn(doubleValueRight);
+		case Abs:
+			return abs(doubleValueRight);
+		default:
+			// node has no children, but has a value
+			// functions that are just a number like 2
+			// fixme: what if you just enter x?
+			return doubleValue;
+	}
+	throw std::logic_error("No math operation defined");
 }
 
 

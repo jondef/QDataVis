@@ -27,8 +27,6 @@ public:
 	void setPRoot(QString &expression);
 
 private:
-	double computeOperation(Node *node, double xPlug);
-
 	void getNodeStats(Node *node);
 };
 

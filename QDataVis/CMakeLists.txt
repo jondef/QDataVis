@@ -19,6 +19,10 @@ file(GLOB UI_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.ui"
         )
 
+file(GLOB QRC_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.qrc"
+        )
+
 
 #SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 #SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
@@ -33,7 +37,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF) # enable verbose output
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
-set(CMAKE_AUTORCC ON) # ^
+set(CMAKE_AUTORCC ON) # Create Resource files
 
 
 # prepare dlls to be linked to exe
@@ -50,9 +54,9 @@ qt5_wrap_ui(ui_wrap ${UI_FILES})
 
 # compile exe
 if (DISABLE_CMD_WINDOW)
-    add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
+    add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
 else ()
-    add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap})
+    add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
 endif ()
 
 # link dlls to exe

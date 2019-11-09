@@ -3,22 +3,10 @@
 //
 
 #include "MainWindow.h"
-#include "exprtk.hpp"
-#include "Resources/icon.xpm" // import icon as static const array *
 
 #define ASYNC 0
 static std::mutex graphMutex;
 
-
-static void LoadMeshes(QCPGraph *graphPointer, QString function, QVector<double> xArray) {
-	BinaryTree tree(function);
-
-	QVector<double> *yArray = new QVector<double>();
-	*yArray = tree.calculateTree(xArray);
-
-	std::lock_guard<std::mutex> lock(graphMutex);
-	graphPointer->setData(xArray, *yArray);
-}
 
 const QList<QColor> colors = {
 		QColor(qRgb(31, 119, 180)),
@@ -37,9 +25,7 @@ const QList<QColor> colors = {
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
 
-	// save icon in exe // https://convertio.co/png-xpm/
-	// comes from the xpm icon file
-	setWindowIcon(QIcon(QPixmap(window_icon_xpm)));
+	setWindowIcon(QIcon(":/images/QDataVis"));
 
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [=]() {
 		ui->customPlot->xAxis->setRange(-10, 10);
@@ -59,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 //	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(replotGraphsOnRangeChange(QMouseEvent * )));
 //	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(replotGraphsOnRangeChange()));
-	connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(replotGraphsOnRangeChange()));
+	connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(replotGraphsOnRangeChange(QCPRange)));
 	// todo: hide the tracing things when user clicks, not when he moves mouse
 //	connect(ui->customPlot, &QCustomPlot::mousePress, ui->customPlot, &MainWindow::traceGraph);
 //	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
@@ -372,9 +358,9 @@ void MainWindow::onResult(QNetworkReply *reply) {
 }
 
 
-void MainWindow::replotGraphsOnRangeChange() {
-	QVector<double> xArray = generateXArray(ui->customPlot->xAxis->range().lower, ui->customPlot->xAxis->range().upper, 1000);
-	QVector<double> yArray(xArray.length());
+void MainWindow::replotGraphsOnRangeChange(QCPRange range) {
+	QVector<double> xArray = generateXArray(range.lower, range.upper, 1000);
+	static QVector<double> yArray(xArray.length());
 
 	for (QMap<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i) {
 		yArray = i.value()->calculateTree(xArray);
@@ -628,6 +614,16 @@ void MainWindow::QPushButton_PlotPoints_clicked() {
 		}
 	}
 	ui->customPlot->replot();
+}
+
+
+static void PlotFunctions(QCPGraph *graphPointer, QString function, QVector<double> xArray) {
+	BinaryTree tree(function);
+
+	QVector<double> yArray = tree.calculateTree(xArray);
+
+	std::lock_guard<std::mutex> lock(graphMutex);
+	graphPointer->setData(xArray, yArray, true);
 }
 
 

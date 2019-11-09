@@ -53,14 +53,8 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 }
 
 void QCustomPlot_custom::initGraph() {
-
-
-	// set axes ranges
 	xAxis->setRange(-10, 10);
 	yAxis->setRange(-10, 10);
-	// configure right and top axis to show ticks but no labels:
-	// (see QCPAxisRect::setupFullAxesBox for a quicker method to do this)
-
 
 	// legend initialization
 	legend->setVisible(false);
@@ -119,42 +113,42 @@ void QCustomPlot_custom::onMouseMoveReplotCursor(QMouseEvent *event) {
 void QCustomPlot_custom::stickAxisToZeroLines() {
 	this->axisRect()->setAutoMargins(QCP::msNone);
 
-	int pxx = this->yAxis->coordToPixel(0);
-	int pxy = this->xAxis->coordToPixel(0);
-	this->xAxis->setOffset(-this->axisRect()->height() - this->axisRect()->top() + pxx);
-	this->yAxis->setOffset(this->axisRect()->left() - pxy);
+	int pxx = yAxis->coordToPixel(0);
+	int pxy = xAxis->coordToPixel(0);
+	xAxis->setOffset(-this->axisRect()->height() - this->axisRect()->top() + pxx);
+	yAxis->setOffset(this->axisRect()->left() - pxy);
 }
 
 
 void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
-	if (this->selectedGraphs().size() == 1) {
+	if (selectedGraphs().size() == 1) {
 		QCPGraphDataContainer::const_iterator it = this->selectedGraphs().first()->data()->constEnd();
 		QVariant details;
 
-		if (this->selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
+		if (selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
 			QCPDataSelection dataPoints = details.value<QCPDataSelection>();
 
 			if (dataPoints.dataPointCount() < 1) {
 				// abort if event position is invalid
 				return;
 			}
-			if (this->selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value <
-			    this->selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+			if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value <
+			    selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
 				textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
-			} else if (this->selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value >
-			           this->selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+			} else if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value >
+			           selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
 				textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
 			}
-			it = this->selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
+			it = selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
 
 		}
 		graphTracer->setVisible(true);
-		graphTracer->setGraph(this->selectedGraphs().first());
+		graphTracer->setGraph(selectedGraphs().first());
 		graphTracer->setGraphKey(it->key);
 
 		textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
 		textLabel->setVisible(true);
-		textLabel->position->setCoords(it->key, it->value + (this->yAxis->range().upper - this->yAxis->range().lower) * 0.01);
+		textLabel->position->setCoords(it->key, it->value + yAxis->range().size() * 0.01);
 	} else { // no graph or more than one graphs selected
 		textLabel->setVisible(false);
 		graphTracer->setVisible(false);
@@ -179,8 +173,7 @@ void QCustomPlot_custom::manageCursor(double x, double y) {
 
 void QCustomPlot_custom::plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part) {
 	// Set an axis label by double clicking on it
-	if (part ==
-	    QCPAxis::spAxisLabel) // only react when the actual axis label is clicked, not tick label or axis backbone
+	if (part == QCPAxis::spAxisLabel) // only react when the actual axis label is clicked, not tick label or axis backbone
 	{
 		bool ok;
 		QString newLabel = QInputDialog::getText(this, "QCustomPlot example", "New axis label:", QLineEdit::Normal,
