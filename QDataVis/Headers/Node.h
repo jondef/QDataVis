@@ -10,10 +10,11 @@
 // todo: add more functions, operators: http://www.partow.net/programming/exprtk/
 enum Operator {
 	Addition, Subtraction, Multiplication, Division, Modulo, Exponent, Factorial,
-	Arcsinh, Arccosh, Arctanh, Arcsin, Arccos, Arctan, Sinh, Cosh, Tanh, Sin, Cos, Tan, Log10, Log, Ln, Abs
+	Arcsinh, Arccosh, Arctanh, Arcsin, Arccos, Arctan, Sinh, Cosh, Tanh, Sin, Cos, Tan, Log10, Log, Ln, Abs, Sqrt, Cbrt
 };
 
-static const QMap<QString, Operator> operatorsPriority = {
+
+const QVector<QPair<QString, Operator>> operatorsPriority = {
 		{"+", Addition},
 		{"-", Subtraction},
 		{"*", Multiplication},
@@ -22,9 +23,8 @@ static const QMap<QString, Operator> operatorsPriority = {
 		{"^", Exponent},
 		{"!", Factorial}
 };
-
 // ! all "arc" trigo functions need to be before the normal ones
-static const QMap<QString, Operator> specialOperatorsPriority = {
+const QVector<QPair<QString, Operator>> specialOperatorsPriority = {
 		{"arcsinh", Arcsinh},
 		{"arccosh", Arccosh},
 		{"arctanh", Arctanh},
@@ -40,8 +40,11 @@ static const QMap<QString, Operator> specialOperatorsPriority = {
 		{"log10",   Log10},
 		{"log",     Log},
 		{"ln",      Ln},
-		{"abs",     Abs}
+		{"abs",     Abs},
+		{"sqrt",    Sqrt},
+		{"cbrt",    Cbrt}
 };
+
 
 class Node {
 

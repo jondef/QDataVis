@@ -45,8 +45,8 @@ bool Node::createChildren(QString string) {
 	QList<int> parenthesesArray = getParenthesesArray(string);
 
 	// * normal operators
-	for (QMap<QString, Operator>::const_iterator Operator = operatorsPriority.begin(); Operator != operatorsPriority.end(); ++Operator) {
-		QList<int> operatorIndexes = findAllOccurences(string, Operator.key());
+	for (const QPair<QString, Operator> &Operator : operatorsPriority) {
+		QList<int> operatorIndexes = findAllOccurences(string, Operator.first);
 
 		for (const int &operatorIndex : operatorIndexes) {
 			// check if operator is in a parentheses or not.
@@ -64,8 +64,8 @@ bool Node::createChildren(QString string) {
 						continue;
 					}
 				}
-				mathOperation = Operator.value();
-				qDebug() << leftSide << mathOperation << rightSide;
+				mathOperation = Operator.second;
+				qDebug() << leftSide << Operator.first << rightSide;
 				pLeftChild = new Node(leftSide, this);
 				if (!rightSide.isEmpty()) {
 					pRightChild = new Node(rightSide, this);
@@ -76,15 +76,14 @@ bool Node::createChildren(QString string) {
 	}
 
 	// * special operators | must be after normal operators!
-	for (QMap<QString, Operator>::const_iterator Operator = specialOperatorsPriority.begin();
-	     Operator != specialOperatorsPriority.end(); ++Operator) {
-		QList<int> operatorIndexes = findAllOccurences(string, Operator.key());
+	for (const QPair<QString, Operator> &Operator : specialOperatorsPriority) {
+		QList<int> operatorIndexes = findAllOccurences(string, Operator.first);
 
 		for (const int &operatorIndex : operatorIndexes) {
 			if (parenthesesArray.at(operatorIndex) == 0) {
-				QString parenthesesContent = string.left(string.length() - 1).mid(operatorIndex + Operator.key().length() + 1);
+				QString parenthesesContent = string.left(string.length() - 1).mid(operatorIndex + Operator.first.length() + 1);
 
-				if (Operator.key() == "log") {
+				if (Operator.first == "log") {
 					QString logBaseString = parenthesesContent.split(",").at(1);
 					if (logBaseString == "e") {
 						logBase = M_E;
@@ -94,11 +93,10 @@ bool Node::createChildren(QString string) {
 						logBase = logBaseString.toDouble();
 					}
 					parenthesesContent = parenthesesContent.split(",").at(0);
-
 				}
 
-				mathOperation = Operator.value();
-				qDebug() << mathOperation << parenthesesContent;
+				mathOperation = Operator.second;
+				qDebug() << Operator.first << parenthesesContent;
 				pRightChild = new Node(parenthesesContent, this);
 				return true; // success
 			}
@@ -132,7 +130,6 @@ bool Node::needsChildren() {
 }
 
 double Node::computeOperation(double xPlug) {
-	// todo: instead of string x use struct
 	double doubleValueLeft = 0;
 	double doubleValueRight = 0;
 
@@ -236,13 +233,16 @@ double Node::computeOperation(double xPlug) {
 			return qLn(doubleValueRight);
 		case Abs:
 			return abs(doubleValueRight);
+		case Sqrt:
+			return sqrt(doubleValueRight);
+		case Cbrt:
+			return cbrt(doubleValueRight);
 		default:
 			// node has no children, but has a value
 			// functions that are just a number like 2
 			// fixme: what if you just enter x?
 			return doubleValue;
 	}
-	throw std::logic_error("No math operation defined");
 }
 
 

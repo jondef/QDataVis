@@ -22,11 +22,9 @@ void BinaryTree::setPRoot(QString &expression) {
  * @return y
  */
 double BinaryTree::calculateTree(double &xPlug) {
-	static Node *currentNode;
-	currentNode = pRoot;
-	static Node *previousNode = nullptr;
-
-	static bool returning = false;
+	Node *currentNode = pRoot;
+	Node *previousNode = nullptr;
+	bool returning = false;
 
 	while (true) {
 		if (currentNode->pLeftChild && !returning) {

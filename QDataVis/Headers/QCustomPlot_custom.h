@@ -31,8 +31,8 @@ public:
 	QCPLayer *cursorLayer;
 	QCPCursor cursor;
 
-	QCPItemText *textLabel = new QCPItemText(this);;
-	QCPItemTracer *graphTracer = new QCPItemTracer(this);;
+	QCPItemText *textLabel = new QCPItemText(this);
+	QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
 public slots:
 
