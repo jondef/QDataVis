@@ -3,6 +3,7 @@
 //
 
 #include "Node.h"
+#include "../Headers/Node.h"
 
 
 Node::Node(QString &aInput, Node *aParent) {

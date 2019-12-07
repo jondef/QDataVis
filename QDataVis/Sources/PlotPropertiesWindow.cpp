@@ -7,7 +7,7 @@
 //#include "MainWindow.h" // check https://stackoverflow.com/a/50205573/10450514 for more info
 
 
-PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), ui(new Ui::Form) {
+PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), ui(new Ui::uiPlotPropertiesWindow) {
 	ui->setupUi(this);
 
 	connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okButtonPressed())); // clicked ok

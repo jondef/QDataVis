@@ -54,9 +54,9 @@ public:
 	Node *pRightChild = nullptr;
 
 	QString strValue;
-	double doubleValue;
+	double doubleValue{};
 	Operator mathOperation;
-	double logBase;
+	double logBase{};
 	bool hasChildren = false;
 	bool isVariable = false;
 

@@ -8,13 +8,14 @@
 #include <QMainWindow>
 #include <QtNetwork>
 #include <QObject>
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 #include "QCustomPlot_custom.h"
 #include "Thread.h"
 #include "BinaryTree.h"
-#include "qpendialog.h"
+#include "QPenDialog.h"
 #include <future>
 #include "PlotPropertiesWindow.h"
+#include "PointWindow.h"
 
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
@@ -38,7 +39,7 @@ public slots:
 
 	void QLineEdit_addFunction_returnPressed();
 
-	void QPushButton_PlotPoints_clicked();
+	//void QPushButton_PlotPoints_clicked();
 
 	void QPushButton_deleteFunction_clicked();
 
@@ -50,17 +51,18 @@ public slots:
 
 
 public:
-	Ui::MainWindow *ui;
+	Ui::uiMainWindow *ui;
 
 	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow();
 
 	QColorDialog *popUpColorDialog = new QColorDialog(plotWindow);
 	QFontDialog *popUpFontDialog = new QFontDialog(plotWindow);
 	QPenDialog *popUpPenDialog = new QPenDialog(plotWindow);
+	PointWindow *pointGraphDialog = new PointWindow(this);
 
 
 private:
-	QList<QCPGraph *> *pointsGraphList = new QList<QCPGraph *>; // stored pointers of the points graphs
+	QHash<QListWidgetItem *, QCPGraph *> *pointsGraphHash = new QHash<QListWidgetItem *, QCPGraph *>;
 
 	QMap<QCPGraph *, BinaryTree *> *mFunctionGraph = new QMap<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
 

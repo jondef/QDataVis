@@ -8,14 +8,14 @@
 #include <QtGui>
 #include <QtCore>
 #include <QtWidgets>
-#include "ui_qpendialog.h"
+#include "ui_QPenDialog.h"
 
 
 class QPenDialog : public QDialog {
 Q_OBJECT
 
 public:
-	Ui::Dialog *ui;
+	Ui::uiQPenDialog *ui;
 
 	explicit QPenDialog(QWidget *parent = nullptr);
 

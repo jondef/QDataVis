@@ -6,7 +6,7 @@
 #include "QPenDialog.h"
 
 
-QPenDialog::QPenDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Dialog) {
+QPenDialog::QPenDialog(QWidget *parent) : QDialog(parent), ui(new Ui::uiQPenDialog) {
 	ui->setupUi(this);
 
 	penColorDialog->setOption(QColorDialog::NoButtons);

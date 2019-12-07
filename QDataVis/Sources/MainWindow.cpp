@@ -2,6 +2,7 @@
 // Created by John on 12/06/2019.
 //
 
+
 #include "MainWindow.h"
 
 #define ASYNC 0
@@ -22,26 +23,53 @@ const QList<QColor> colors = {
 };
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMainWindow) {
 	ui->setupUi(this);
 
 	setWindowIcon(QIcon(":/images/QDataVis"));
 
-	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [=]() {
+	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [this]() {
 		ui->customPlot->xAxis->setRange(-10, 10);
 		ui->customPlot->yAxis->setRange(-10, 10);
 		ui->customPlot->replot();
 	});
 
+	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, [this]() {
+		//pointsGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+		QListWidgetItem *pListWidgetItem = new QListWidgetItem;
+		pListWidgetItem->setText(QString("Graph #%1").arg(pointsGraphHash->size() + 1));
+		ui->listWidget_PointGraphList->addItem(pListWidgetItem);
 
-	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [=]() {
-
-		QElapsedTimer timer;
-		timer.start();
-
-		qDebug() << "The operation took" << timer.nsecsElapsed() << "nanoseconds";
-		qDebug() << "The operation took" << timer.elapsed() << "milliseconds";
+		pointsGraphHash->insert(pListWidgetItem, new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
 	});
+
+	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, [this]() {
+		if (ui->listWidget_PointGraphList->currentItem() != nullptr) {
+			ui->customPlot->removeGraph(pointsGraphHash->value(ui->listWidget_PointGraphList->currentItem()));
+			pointsGraphHash->remove(ui->listWidget_PointGraphList->currentItem());
+			delete pointsGraphHash->value(ui->listWidget_PointGraphList->currentItem());
+			delete ui->listWidget_PointGraphList->currentItem();
+			ui->customPlot->replot();
+		}
+	});
+
+	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
+		pointGraphDialog->setGraph(pointsGraphHash->value(item), item);
+		pointGraphDialog->show();
+	});
+
+	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
+		ui->customPlot->replot();
+	});
+
+//	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [this]() {
+//
+//		QElapsedTimer timer;
+//		timer.start();
+//
+//		qDebug() << "The operation took" << timer.nsecsElapsed() << "nanoseconds";
+//		qDebug() << "The operation took" << timer.elapsed() << "milliseconds";
+//	});
 
 //	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(replotGraphsOnRangeChange(QMouseEvent * )));
 //	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(replotGraphsOnRangeChange()));
@@ -50,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //	connect(ui->customPlot, &QCustomPlot::mousePress, ui->customPlot, &MainWindow::traceGraph);
 //	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
 
-	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) { // enable dark mode
 			// from: https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
 			// set style
@@ -126,7 +154,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		}
 	});
 
-	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
+//	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
 
@@ -137,7 +165,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
 
-	connect(ui->actionProperies, &QAction::triggered, this, [=]() {
+	connect(ui->actionProperies, &QAction::triggered, this, [this]() {
 		plotWindow->show();
 		plotWindow->raise(); // bring it to front
 		plotWindow->activateWindow(); // select it
@@ -157,7 +185,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setUpTitlePageConnections();
 
 
-	connect(plotWindow, &PlotPropertiesWindow::windowClosed, this, [=]() {
+	connect(plotWindow, &PlotPropertiesWindow::windowClosed, this, [this]() {
 		qDebug() << "saved";
 	});
 //	dumpObjectInfo();
@@ -175,22 +203,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
 	delete ui;
 }
-
-
-//QPointF MainWindow::getClosestPoint(QCPGraph *graph, QPoint point) {
-//	double distance = ui->customPlot->selectedGraphs().first()->selectTest(point, false);
-//	double x = point.x();
-//	double y = point.y();
-//
-//	double closestPoint_x;
-//	double closestPoint_y;
-//
-//
-//	closestPoint_y = calculateTree(closestPoint_x);
-//
-//
-//	return QPointF(closestPoint_x, closestPoint_y);
-//}
 
 
 void MainWindow::GraphParametersChanged() {
@@ -245,7 +257,7 @@ void MainWindow::calculateAndDrawFunction(QString &function) {
 	graphPen.setColor(color);
 	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
 	mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
-	mFunctionGraph->lastKey()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
+//	mFunctionGraph->lastKey()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
 }
 
 QColor MainWindow::getGraphColor(int colorIndex) {
@@ -442,6 +454,7 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 	item->setText(text);
 	item->setIcon(QIcon(pixmap));
 	ui->QListWidget_functionList->addItem(item);
+	delete item;
 }
 
 QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, unsigned int length) {
@@ -457,164 +470,34 @@ QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, uns
 	return finalArray;
 }
 
-void MainWindow::QPushButton_PlotPoints_clicked() {
-	// * Function is connected to the plot all points button
-	// * It clears the points graphs, then replots everything
-	// * in the above text edit
-	// todo: save plotting parameters, so it doesn't always use
-	// todo: the default ones, and not required to type them in again every time
-	for (auto i : *pointsGraphList) {
-		// delete previously plotted graphs
-		ui->customPlot->removeGraph(i);
-	}
-	// remove the pointers
-	pointsGraphList->clear();
-
-	pointsGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-
-	QString text = ui->QTextEdit_pointsList->toPlainText();
-	QStringList arrayLine = text.split("\n", QString::SkipEmptyParts);
-
-	for (int line = 0; line < arrayLine.length(); line++) { // * iterate over lines
-		QString currentLine = arrayLine.at(line);
-
-		if (currentLine.at(0) == "[") { // * configuration line
-			// ! create a new graph to configure it
-			pointsGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-			// * set defaults for graph
-			pointsGraphList->last()->setAdaptiveSampling(false);
-			pointsGraphList->last()->removeFromLegend();
-			pointsGraphList->last()->setLineStyle(QCPGraph::lsNone);
-			pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDot);
-			pointsGraphList->last()->setPen(QPen(QBrush(Qt::red), 3));
-
-			QList<QString> parameterArray = currentLine.remove("[").remove("]").split(",", QString::SkipEmptyParts);
-
-			for (const auto &parameter : parameterArray) {
-				QString param = parameter.split("=").at(0);
-				QString value = parameter.split("=").at(1);
-
-				qDebug() << "Setting graph param " << param << " to " << value;
-
-				if (param == "LineStyle") {
-					if (value == "None") {
-						pointsGraphList->last()->setLineStyle(QCPGraph::lsNone);
-					} else if (value == "Line") {
-						pointsGraphList->last()->setLineStyle(QCPGraph::lsLine);
-					} else if (value == "IsImpulse") {
-						pointsGraphList->last()->setLineStyle(QCPGraph::lsImpulse);
-					} else if (value == "StepLeft") {
-						pointsGraphList->last()->setLineStyle(QCPGraph::lsStepLeft);
-					} else if (value == "StepCenter") {
-						pointsGraphList->last()->setLineStyle(QCPGraph::lsStepCenter);
-					} else if (value == "StepRight") {
-						pointsGraphList->last()->setLineStyle(QCPGraph::lsStepRight);
-					}
-
-				} else if (param == "Pen") {
-					// ? example: Pen=red;3
-					QString color = value.split(";").at(0);
-					QString width = value.split(";").at(1);
-
-					if (color == "black") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::black), width.toInt()));
-					} else if (color == "white") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::white), width.toInt()));
-					} else if (color == "darkGray") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkGray), width.toInt()));
-					} else if (color == "gray") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::gray), width.toInt()));
-					} else if (color == "lightGray") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::lightGray), width.toInt()));
-					} else if (color == "red") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::red), width.toInt()));
-					} else if (color == "green") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::green), width.toInt()));
-					} else if (color == "blue") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::blue), width.toInt()));
-					} else if (color == "cyan") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::cyan), width.toInt()));
-					} else if (color == "magenta") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::magenta), width.toInt()));
-					} else if (color == "yellow") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::yellow), width.toInt()));
-					} else if (color == "darkRed") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkRed), width.toInt()));
-					} else if (color == "darkGreen") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkGreen), width.toInt()));
-					} else if (color == "darkBlue") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkBlue), width.toInt()));
-					} else if (color == "darkCyan") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkCyan), width.toInt()));
-					} else if (color == "darkMagenta") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkMagenta), width.toInt()));
-					} else if (color == "darkYellow") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::darkYellow), width.toInt()));
-					} else if (color == "transparent") {
-						pointsGraphList->last()->setPen(QPen(QBrush(Qt::transparent), width.toInt()));
-					}
-				} else if (param == "ScatterStyle") {
-					if (value == "None") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssNone);
-					} else if (value == "Dot") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDot);
-					} else if (value == "Cross") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCross);
-					} else if (value == "Circle") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCircle);
-					} else if (value == "CrossCircle") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCrossCircle);
-					} else if (value == "CrossSquare") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCrossSquare);
-					} else if (value == "Custom") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssCustom);
-					} else if (value == "Diamond") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDiamond);
-					} else if (value == "Disc") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssDisc);
-					} else if (value == "Peace") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPeace);
-					} else if (value == "Pixmap") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPixmap);
-					} else if (value == "Plus") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPlus);
-					} else if (value == "PlusCircle") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPlusCircle);
-					} else if (value == "PlusSquare") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssPlusSquare);
-					} else if (value == "Square") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssSquare);
-					} else if (value == "Star") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssStar);
-					} else if (value == "Triangle") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssTriangle);
-					} else if (value == "TriangleInverted") {
-						pointsGraphList->last()->setScatterStyle(QCPScatterStyle::ssTriangleInverted);
-					}
-
-				} else if (param == "RemoveFromLegend") {
-					if (value == "True") {
-						pointsGraphList->last()->removeFromLegend();
-					}
-
-				} else if (param == "AdaptiveSampling") {
-					if (value == "True") {
-						pointsGraphList->last()->setAdaptiveSampling(true);
-					} else if (value == "False") {
-						pointsGraphList->last()->setAdaptiveSampling(false);
-					}
-				}
-			} // iteration over parameter and value
-
-		} else { // * append point to last graph
-			QStringList coords = currentLine.split(",", QString::SkipEmptyParts);
-			if (coords.length() == 2) {
-				pointsGraphList->last()->addData(coords.at(0).toDouble(), coords.at(1).toDouble());
-			}
-		}
-	}
-	ui->customPlot->replot();
-}
+//void MainWindow::QPushButton_PlotPoints_clicked() {
+//	// * Function is connected to the plot all points button
+//	// * It clears the points graphs, then replots everything
+//	// * in the above text edit
+//	// todo: save plotting parameters, so it doesn't always use
+//	// todo: the default ones, and not required to type them in again every time
+//	for (auto i : *pointsGraphList) {
+//		// delete previously plotted graphs
+//		ui->customPlot->removeGraph(i);
+//	}
+//	// remove the pointers
+//	pointsGraphList->clear();
+//
+//	pointsGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+//
+//	QString text = ui->QTextEdit_pointsList->toPlainText();
+//	QStringList arrayLine = text.split("\n", QString::SkipEmptyParts);
+//
+//	for (int line = 0; line < arrayLine.length(); ++line) { // * iterate over lines
+//		const QString &currentLine = arrayLine.at(line);
+//
+//		QStringList coords = currentLine.split(",", QString::SkipEmptyParts);
+//		if (coords.length() == 2) {
+//			pointsGraphList->last()->addData(coords.at(0).toDouble(), coords.at(1).toDouble());
+//		}
+//	}
+//	ui->customPlot->replot();
+//}
 
 
 static void PlotFunctions(QCPGraph *graphPointer, QString function, QVector<double> xArray) {
@@ -646,286 +529,286 @@ void MainWindow::QPushButton_deleteFunction_clicked() {
 
 inline void MainWindow::setUpAxesPageConnections() {
 	// * set axis visible
-	connect(plotWindow->ui->groupBox_xAxis_setVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis_setVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis_setVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis_setVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_xAxis2_setVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis2_setVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis2_setVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis2_setVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->setVisible(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set label text
-	connect(plotWindow->ui->lineEdit_xAxis_setLabelText, &QLineEdit::textChanged, this, [=](const QString &text) {
+	connect(plotWindow->ui->lineEdit_xAxis_setLabelText, &QLineEdit::textChanged, this, [this](const QString &text) {
 		ui->customPlot->xAxis->setLabel(text);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->lineEdit_yAxis_setLabelText, &QLineEdit::textChanged, this, [=](const QString &text) {
+	connect(plotWindow->ui->lineEdit_yAxis_setLabelText, &QLineEdit::textChanged, this, [this](const QString &text) {
 		ui->customPlot->yAxis->setLabel(text);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->lineEdit_xAxis2_setLabelText, &QLineEdit::textChanged, this, [=](const QString &text) {
+	connect(plotWindow->ui->lineEdit_xAxis2_setLabelText, &QLineEdit::textChanged, this, [this](const QString &text) {
 		ui->customPlot->xAxis2->setLabel(text);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->lineEdit_yAxis2_setLabelText, &QLineEdit::textChanged, this, [=](const QString &text) {
+	connect(plotWindow->ui->lineEdit_yAxis2_setLabelText, &QLineEdit::textChanged, this, [this](const QString &text) {
 		ui->customPlot->yAxis2->setLabel(text);
 		ui->customPlot->replot();
 	});
 
 	// * set label color
-	connect(plotWindow->ui->pushButton_xAxis_setLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->xAxis->labelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->xAxis->setLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->yAxis->labelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->yAxis->setLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->xAxis2->labelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->xAxis2->setLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->yAxis2->labelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->yAxis2->setLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set label font
-	connect(plotWindow->ui->pushButton_xAxis_setLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->xAxis->labelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->xAxis->setLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->yAxis->labelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->yAxis->setLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->xAxis2->labelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->xAxis2->setLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->yAxis2->labelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->yAxis2->setLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set label padding
-	connect(plotWindow->ui->spinBox_xAxis_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis->setLabelPadding(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis->setLabelPadding(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_xAxis2_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis2_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis2->setLabelPadding(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis2_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis2_setLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis2->setLabelPadding(value);
 		ui->customPlot->replot();
 	});
 
 	// ! TICK LABEL //
 	// * set ticks visible
-	connect(plotWindow->ui->groupBox_xAxis_setTickLabelVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis_setTickLabelVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis_setTickLabelVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis_setTickLabelVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_xAxis2_setTickLabelVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis2_setTickLabelVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis2_setTickLabelVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis2_setTickLabelVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->setTickLabels(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set tick label color
-	connect(plotWindow->ui->pushButton_xAxis_setTickLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setTickLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->xAxis->tickLabelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->xAxis->setTickLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setTickLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setTickLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->yAxis->tickLabelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->yAxis->setTickLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setTickLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setTickLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->xAxis2->tickLabelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->xAxis2->setTickLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setTickLabelColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setTickLabelColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->yAxis2->tickLabelColor());
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->yAxis2->setTickLabelColor(popUpColorDialog->currentColor());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set tick label font
-	connect(plotWindow->ui->pushButton_xAxis_setTickLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setTickLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->xAxis->tickLabelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->xAxis->setTickLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setTickLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setTickLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->yAxis->tickLabelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->yAxis->setTickLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setTickLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setTickLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->xAxis2->tickLabelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->xAxis2->setTickLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setTickLabelFont, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setTickLabelFont, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpFontDialog, &QFontDialog::currentFontChanged, nullptr, nullptr);
 		popUpFontDialog->setCurrentFont(ui->customPlot->yAxis2->tickLabelFont());
 		popUpFontDialog->open();
-		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+		connect(popUpFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 			ui->customPlot->yAxis2->setTickLabelFont(popUpFontDialog->currentFont());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set tick label rotation
-	connect(plotWindow->ui->doubleSpinBox_xAxis_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [=](double value) {
+	connect(plotWindow->ui->doubleSpinBox_xAxis_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this](double value) {
 		ui->customPlot->xAxis->setTickLabelRotation(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->doubleSpinBox_yAxis_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [=](double value) {
+	connect(plotWindow->ui->doubleSpinBox_yAxis_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this](double value) {
 		ui->customPlot->yAxis->setTickLabelRotation(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->doubleSpinBox_xAxis2_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [=](double value) {
+	connect(plotWindow->ui->doubleSpinBox_xAxis2_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this](double value) {
 		ui->customPlot->xAxis2->setTickLabelRotation(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->doubleSpinBox_yAxis2_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [=](double value) {
+	connect(plotWindow->ui->doubleSpinBox_yAxis2_setTickLabelRotation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this](double value) {
 		ui->customPlot->yAxis2->setTickLabelRotation(value);
 		ui->customPlot->replot();
 	});
 
 	// * set tick label padding
-	connect(plotWindow->ui->spinBox_xAxis_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis->setTickLabelPadding(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis->setTickLabelPadding(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_xAxis2_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis2_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis2->setTickLabelPadding(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis2_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis2_setTickLabelPadding, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis2->setTickLabelPadding(value);
 		ui->customPlot->replot();
 	});
 
 	// * set tick label position
-	connect(plotWindow->ui->comboBox_xAxis_setTickLabelPosition, &QComboBox::currentTextChanged, this, [=]() {
+	connect(plotWindow->ui->comboBox_xAxis_setTickLabelPosition, &QComboBox::currentTextChanged, this, [this]() {
 		QCPAxis::LabelSide x = static_cast<QCPAxis::LabelSide>(plotWindow->ui->comboBox_xAxis_setTickLabelPosition->itemData(
 				plotWindow->ui->comboBox_xAxis_setTickLabelPosition->currentIndex(), Qt::UserRole).toInt());
 		ui->customPlot->xAxis->setTickLabelSide(x);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->comboBox_yAxis_setTickLabelPosition, &QComboBox::currentTextChanged, this, [=]() {
+	connect(plotWindow->ui->comboBox_yAxis_setTickLabelPosition, &QComboBox::currentTextChanged, this, [this]() {
 		QCPAxis::LabelSide x = static_cast<QCPAxis::LabelSide>(plotWindow->ui->comboBox_yAxis_setTickLabelPosition->itemData(
 				plotWindow->ui->comboBox_yAxis_setTickLabelPosition->currentIndex(), Qt::UserRole).toInt());
 		ui->customPlot->yAxis->setTickLabelSide(x);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->comboBox_xAxis2_setTickLabelPosition, &QComboBox::currentTextChanged, this, [=]() {
+	connect(plotWindow->ui->comboBox_xAxis2_setTickLabelPosition, &QComboBox::currentTextChanged, this, [this]() {
 		QCPAxis::LabelSide x = static_cast<QCPAxis::LabelSide>(plotWindow->ui->comboBox_xAxis2_setTickLabelPosition->itemData(
 				plotWindow->ui->comboBox_xAxis2_setTickLabelPosition->currentIndex(), Qt::UserRole).toInt());
 		ui->customPlot->xAxis2->setTickLabelSide(x);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->comboBox_yAxis2_setTickLabelPosition, &QComboBox::currentTextChanged, this, [=]() {
+	connect(plotWindow->ui->comboBox_yAxis2_setTickLabelPosition, &QComboBox::currentTextChanged, this, [this]() {
 		QCPAxis::LabelSide x = static_cast<QCPAxis::LabelSide>(plotWindow->ui->comboBox_yAxis2_setTickLabelPosition->itemData(
 				plotWindow->ui->comboBox_yAxis2_setTickLabelPosition->currentIndex(), Qt::UserRole).toInt());
 		ui->customPlot->yAxis2->setTickLabelSide(x);
@@ -935,414 +818,414 @@ inline void MainWindow::setUpAxesPageConnections() {
 
 	// ! TICK //
 	// * set tick visible
-	connect(plotWindow->ui->groupBox_xAxis_setTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis_setTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->setTicks(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis_setTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis_setTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->setTicks(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_xAxis2_setTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis2_setTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->setTicks(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis2_setTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis2_setTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->setTicks(checked);
 		ui->customPlot->replot();
 	});
 
 
 	// * set tick pen
-	connect(plotWindow->ui->pushButton_xAxis_setTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis->tickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis->setTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis->tickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis->setTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis2->tickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis2->setTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis2->tickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis2->setTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set tick length in
-	connect(plotWindow->ui->spinBox_xAxis_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis->setTickLengthIn(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis->setTickLengthIn(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_xAxis2_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis2_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis2->setTickLengthIn(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis2_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis2_setTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis2->setTickLengthIn(value);
 		ui->customPlot->replot();
 	});
 
 	// * set tick length out
-	connect(plotWindow->ui->spinBox_xAxis_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis->setTickLengthOut(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis->setTickLengthOut(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_xAxis2_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis2_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis2->setTickLengthOut(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis2_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis2_setTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis2->setTickLengthOut(value);
 		ui->customPlot->replot();
 	});
 
 	// * set sub-ticks visible
-	connect(plotWindow->ui->groupBox_xAxis_setSubTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis_setSubTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->setSubTicks(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis_setSubTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis_setSubTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->setSubTicks(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_xAxis2_setSubTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis2_setSubTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->setSubTicks(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis2_setSubTicksVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis2_setSubTicksVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->setSubTicks(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set sub-tick pen
-	connect(plotWindow->ui->pushButton_xAxis_setSubTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setSubTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis->subTickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis->setSubTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setSubTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setSubTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis->subTickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis->setSubTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setSubTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setSubTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis2->subTickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis2->setSubTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setSubTickPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setSubTickPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis2->subTickPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis2->setSubTickPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set sub-tick length in
-	connect(plotWindow->ui->spinBox_xAxis_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis->setSubTickLengthIn(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis->setSubTickLengthIn(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_xAxis2_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis2_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis2->setSubTickLengthIn(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis2_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis2_setSubTickLengthIn, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis2->setSubTickLengthIn(value);
 		ui->customPlot->replot();
 	});
 
 	// * set sub-tick length out
-	connect(plotWindow->ui->spinBox_xAxis_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis->setSubTickLengthOut(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis->setSubTickLengthOut(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_xAxis2_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_xAxis2_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->xAxis2->setSubTickLengthOut(value);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->spinBox_yAxis2_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value) {
+	connect(plotWindow->ui->spinBox_yAxis2_setSubTickLengthOut, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
 		ui->customPlot->yAxis2->setSubTickLengthOut(value);
 		ui->customPlot->replot();
 	});
 
 	// * set grid visible
-	connect(plotWindow->ui->groupBox_xAxis_setGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis_setGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->grid()->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis_setGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis_setGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->grid()->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_xAxis2_setGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis2_setGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->grid()->setVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis2_setGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis2_setGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->grid()->setVisible(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set grid pen
-	connect(plotWindow->ui->pushButton_xAxis_setGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis->grid()->pen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis->grid()->setPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis->grid()->pen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis->grid()->setPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis2->grid()->pen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis2->grid()->setPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis2->grid()->pen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis2->grid()->setPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set zero line pen
-	connect(plotWindow->ui->pushButton_xAxis_setZeroLinePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setZeroLinePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis->grid()->zeroLinePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis->grid()->setZeroLinePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setZeroLinePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setZeroLinePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis->grid()->zeroLinePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis->grid()->setZeroLinePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setZeroLinePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setZeroLinePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis2->grid()->zeroLinePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis2->grid()->setZeroLinePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setZeroLinePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setZeroLinePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis2->grid()->zeroLinePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis2->grid()->setZeroLinePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
 	// todo: check antialiasing boxes at init?
 	// * set grid antialiasing
-	connect(plotWindow->ui->checkBox_xAxis_setGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis_setGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->grid()->setAntialiased(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis_setGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis_setGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->grid()->setAntialiased(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_xAxis2_setGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis2_setGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->grid()->setAntialiased(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis2_setGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis2_setGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->grid()->setAntialiased(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set zero line antialisaing
-	connect(plotWindow->ui->checkBox_xAxis_setZeroLineAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis_setZeroLineAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->grid()->setAntialiasedZeroLine(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis_setZeroLineAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis_setZeroLineAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->grid()->setAntialiasedZeroLine(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_xAxis2_setZeroLineAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis2_setZeroLineAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->grid()->setAntialiasedZeroLine(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis2_setZeroLineAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis2_setZeroLineAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->grid()->setAntialiasedZeroLine(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set sub-grid visible
-	connect(plotWindow->ui->groupBox_xAxis_setSubGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis_setSubGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->grid()->setSubGridVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis_setSubGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis_setSubGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis->grid()->setSubGridVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_xAxis2_setSubGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_xAxis2_setSubGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->grid()->setSubGridVisible(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->groupBox_yAxis2_setSubGridVisible, &QGroupBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->groupBox_yAxis2_setSubGridVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->grid()->setSubGridVisible(checked);
 		ui->customPlot->replot();
 	});
 
 	// * set sub-grid pen
-	connect(plotWindow->ui->pushButton_xAxis_setSubGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setSubGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis->grid()->subGridPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis->grid()->setSubGridPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setSubGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setSubGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis->grid()->subGridPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis->grid()->setSubGridPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setSubGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setSubGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis2->grid()->subGridPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis2->grid()->setSubGridPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setSubGridPen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setSubGridPen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis2->grid()->subGridPen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis2->grid()->setSubGridPen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set sub-grid antialiasing
-	connect(plotWindow->ui->checkBox_xAxis_setSubGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis_setSubGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->grid()->setAntialiasedSubGrid(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis_setSubGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis_setSubGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis->grid()->setAntialiasedSubGrid(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_xAxis2_setSubGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis2_setSubGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->xAxis2->grid()->setAntialiasedSubGrid(checked);
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis2_setSubGridAntialiased, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis2_setSubGridAntialiased, &QCheckBox::toggled, this, [this](bool checked) {
 		ui->customPlot->yAxis2->grid()->setAntialiasedSubGrid(checked);
 		ui->customPlot->replot();
 	});
 
 	// * select axis ticker type (pi, date, etc...)
-	connect(plotWindow->ui->comboBox_xAxis_setTicker, &QComboBox::currentTextChanged, this, [=](const QString &value) {
+	connect(plotWindow->ui->comboBox_xAxis_setTicker, &QComboBox::currentTextChanged, this, [this](const QString &value) {
 		changeAxisTicker(ui->customPlot->xAxis, value);
 		plotWindow->ui->checkBox_xAxis_setLogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 	});
-	connect(plotWindow->ui->comboBox_xAxis2_setTicker, &QComboBox::currentTextChanged, this, [=](const QString &value) {
+	connect(plotWindow->ui->comboBox_xAxis2_setTicker, &QComboBox::currentTextChanged, this, [this](const QString &value) {
 		changeAxisTicker(ui->customPlot->xAxis2, value);
 		plotWindow->ui->checkBox_xAxis2_setLogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 	});
-	connect(plotWindow->ui->comboBox_yAxis_setTicker, &QComboBox::currentTextChanged, this, [=](const QString &value) {
+	connect(plotWindow->ui->comboBox_yAxis_setTicker, &QComboBox::currentTextChanged, this, [this](const QString &value) {
 		changeAxisTicker(ui->customPlot->yAxis, value);
 		plotWindow->ui->checkBox_yAxis_setLogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 	});
-	connect(plotWindow->ui->comboBox_yAxis2_setTicker, &QComboBox::currentTextChanged, this, [=](const QString &value) {
+	connect(plotWindow->ui->comboBox_yAxis2_setTicker, &QComboBox::currentTextChanged, this, [this](const QString &value) {
 		changeAxisTicker(ui->customPlot->yAxis2, value);
 		plotWindow->ui->checkBox_yAxis2_setLogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 	});
 
 	// * set logarithmic scale
-	connect(plotWindow->ui->checkBox_xAxis_setLogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis_setLogarithmicScale, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->xAxis->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -1350,7 +1233,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 		}
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_xAxis2_setLogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_xAxis2_setLogarithmicScale, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->xAxis2->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -1358,7 +1241,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 		}
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis_setLogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis_setLogarithmicScale, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->yAxis->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -1366,7 +1249,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 		}
 		ui->customPlot->replot();
 	});
-	connect(plotWindow->ui->checkBox_yAxis2_setLogarithmicScale, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_yAxis2_setLogarithmicScale, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->yAxis2->setScaleType(QCPAxis::stLogarithmic);
 		} else {
@@ -1376,38 +1259,38 @@ inline void MainWindow::setUpAxesPageConnections() {
 	});
 
 	// * set base pen
-	connect(plotWindow->ui->pushButton_xAxis_setBasePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis_setBasePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis->basePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis->setBasePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis_setBasePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis_setBasePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis->basePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis->setBasePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_xAxis2_setBasePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_xAxis2_setBasePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->xAxis2->basePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->xAxis2->setBasePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
 	});
-	connect(plotWindow->ui->pushButton_yAxis2_setBasePen, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_yAxis2_setBasePen, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpPenDialog, &QPenDialog::currentPenChanged, nullptr, nullptr);
 		popUpPenDialog->setCurrentPen(ui->customPlot->yAxis2->basePen());
 		popUpPenDialog->open();
-		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [=]() {
+		connect(popUpPenDialog, &QPenDialog::currentPenChanged, this, [this]() {
 			ui->customPlot->yAxis2->setBasePen(popUpPenDialog->currentPen());
 			ui->customPlot->replot();
 		});
@@ -1438,7 +1321,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 
 inline void MainWindow::setUpTitlePageConnections() {
 	// * add title button clicked
-	connect(plotWindow->ui->pushButton_addTitle, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_addTitle, &QPushButton::clicked, this, [this]() {
 		plotWindow->ui->listWidget_titleList->addItem("Title");
 
 		graphTextElements->insert(plotWindow->ui->listWidget_titleList->item(plotWindow->ui->listWidget_titleList->count() - 1),
@@ -1457,13 +1340,13 @@ inline void MainWindow::setUpTitlePageConnections() {
 	});
 
 	// * when user renamed listWidgetItem
-	connect(plotWindow->ui->listWidget_titleList, &QListWidget::itemChanged, this, [=](QListWidgetItem *changedItem) {
+	connect(plotWindow->ui->listWidget_titleList, &QListWidget::itemChanged, this, [this](QListWidgetItem *changedItem) {
 		graphTextElements->value(changedItem)->setText(changedItem->text());
 		ui->customPlot->replot();
 	});
 
 	// * delete title
-	connect(plotWindow->ui->pushButton_removeTitle, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_removeTitle, &QPushButton::clicked, this, [this]() {
 		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
 		if (selectedItem != nullptr) {
 			ui->customPlot->plotLayout()->remove(graphTextElements->value(selectedItem));
@@ -1477,7 +1360,7 @@ inline void MainWindow::setUpTitlePageConnections() {
 	});
 
 	// * update the widgets on the right when a title is clicked
-	connect(plotWindow->ui->listWidget_titleList, &QListWidget::itemClicked, this, [=]() {
+	connect(plotWindow->ui->listWidget_titleList, &QListWidget::itemClicked, this, [this]() {
 		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
 		if (selectedItem != nullptr) {
 			QCPTextElement *titleElement = graphTextElements->value(selectedItem);
@@ -1489,7 +1372,7 @@ inline void MainWindow::setUpTitlePageConnections() {
 	});
 
 	// * when user changed font in QFontDialog - any font option
-	connect(plotWindow->titleFontDialog, &QFontDialog::currentFontChanged, this, [=]() {
+	connect(plotWindow->titleFontDialog, &QFontDialog::currentFontChanged, this, [this]() {
 		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
 		if (selectedItem != nullptr) {
 			graphTextElements->value(selectedItem)->setFont(plotWindow->titleFontDialog->currentFont());
@@ -1498,7 +1381,7 @@ inline void MainWindow::setUpTitlePageConnections() {
 	});
 
 	// * when user changed the color in QColorDialog
-	connect(plotWindow->titleColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+	connect(plotWindow->titleColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 		QListWidgetItem *selectedItem = plotWindow->ui->listWidget_titleList->currentItem();
 		if (selectedItem != nullptr) {
 			graphTextElements->value(selectedItem)->setTextColor(plotWindow->titleColorDialog->currentColor());
@@ -1508,7 +1391,7 @@ inline void MainWindow::setUpTitlePageConnections() {
 	});
 
 	// * Title order changed
-	connect(plotWindow->ui->listWidget_titleList->model(), &QAbstractItemModel::rowsMoved, this, [=]() {
+	connect(plotWindow->ui->listWidget_titleList->model(), &QAbstractItemModel::rowsMoved, this, [this]() {
 		// remove all of the titles except the plot
 		for (int j = 0; j < graphTextElements->count() + 1; ++j) {
 			if (plotWindow->ui->listWidget_titleList->item(j)->text() == "Plot") {
@@ -1538,7 +1421,7 @@ inline void MainWindow::setUpTitlePageConnections() {
 
 
 inline void MainWindow::setUpGeneralPageConnections() {
-	connect(plotWindow->ui->checkBox_MultiSelect, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_MultiSelect, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iMultiSelect);
 		} else {
@@ -1546,7 +1429,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_RangeDrag, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_RangeDrag, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iRangeDrag);
 		} else {
@@ -1554,7 +1437,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_RangeZoom, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_RangeZoom, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iRangeZoom);
 		} else {
@@ -1562,7 +1445,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectPlottables, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectPlottables, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectPlottables);
 		} else {
@@ -1570,7 +1453,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectAxes, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectAxes, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectAxes);
 		} else {
@@ -1578,7 +1461,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectItems, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectItems, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectItems);
 		} else {
@@ -1586,7 +1469,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectLegend, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectLegend, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectLegend);
 		} else {
@@ -1594,7 +1477,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 		}
 	});
 
-	connect(plotWindow->ui->checkBox_SelectOther, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_SelectOther, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			ui->customPlot->setInteractions(ui->customPlot->interactions() | QCP::iSelectOther);
 		} else {
@@ -1603,18 +1486,18 @@ inline void MainWindow::setUpGeneralPageConnections() {
 	});
 
 	// * set background color
-	connect(plotWindow->ui->pushButton_setBackgroundColor, &QPushButton::clicked, this, [=]() {
+	connect(plotWindow->ui->pushButton_setBackgroundColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(ui->customPlot->background().toImage().pixelColor(0, 0)); // fixme: doesn't work
 		popUpColorDialog->open();
-		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [=]() {
+		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			ui->customPlot->setBackground(QBrush(popUpColorDialog->currentColor()));
 			ui->customPlot->replot();
 		});
 	});
 
 	// * set cursor
-	connect(plotWindow->ui->checkBox_enableCursor, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_enableCursor, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), ui->customPlot, SLOT(onMouseMoveReplotCursor(QMouseEvent * )));
 			ui->customPlot->cursor.cursorText->setVisible(true);
@@ -1632,7 +1515,7 @@ inline void MainWindow::setUpGeneralPageConnections() {
 	});
 
 	// * set stick axis to zero line
-	connect(plotWindow->ui->checkBox_stickAxisToZeroLines, &QCheckBox::toggled, this, [=](bool checked) {
+	connect(plotWindow->ui->checkBox_stickAxisToZeroLines, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			connect(ui->customPlot, SIGNAL(beforeReplot()), ui->customPlot, SLOT(stickAxisToZeroLines()));
 			ui->customPlot->replot();

@@ -121,6 +121,7 @@ void QCustomPlot_custom::stickAxisToZeroLines() {
 
 
 void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
+	// todo: sqrt(-x^2-4*x+46)-4 -> fix tracer on this function
 	if (selectedGraphs().size() == 1) {
 		QCPGraphDataContainer::const_iterator it = this->selectedGraphs().first()->data()->constEnd();
 		QVariant details;

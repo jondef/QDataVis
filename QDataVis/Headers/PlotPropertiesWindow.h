@@ -9,7 +9,7 @@
 #include <QtCore>
 #include <QColorDialog>
 #include <QFontDialog>
-#include "ui_plotpropertieswindow.h"
+#include "ui_PlotPropertiesWindow.h"
 #include "QCustomPlot_custom.h"
 
 
@@ -29,7 +29,7 @@ public:
 
 	~PlotPropertiesWindow();
 
-	Ui::Form *ui;
+	Ui::uiPlotPropertiesWindow *ui;
 
 	QFontDialog *titleFontDialog = new QFontDialog();
 	QColorDialog *titleColorDialog = new QColorDialog();
