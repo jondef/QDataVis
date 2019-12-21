@@ -21,13 +21,6 @@
         </property>
         <widget class="QWidget" name="centralwidget">
             <layout class="QGridLayout" name="gridLayout">
-                <item row="2" column="1" colspan="2">
-                    <widget class="Line" name="line">
-                        <property name="orientation">
-                            <enum>Qt::Horizontal</enum>
-                        </property>
-                    </widget>
-                </item>
                 <item row="1" column="2">
                     <widget class="QTabWidget" name="tabWidget">
                         <property name="sizePolicy">
@@ -44,25 +37,6 @@
                                 <string>Functions</string>
                             </attribute>
                             <layout class="QGridLayout" name="gridLayout_2">
-                                <item row="1" column="0">
-                                    <widget class="QListWidget" name="QListWidget_functionList"/>
-                                </item>
-                                <item row="3" column="0">
-                                    <widget class="QLineEdit" name="QLineEdit_addFunction">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="inputMask">
-                                            <string/>
-                                        </property>
-                                        <property name="placeholderText">
-                                            <string>Add function here</string>
-                                        </property>
-                                    </widget>
-                                </item>
                                 <item row="9" column="0">
                                     <layout class="QHBoxLayout" name="horizontalLayout_3">
                                         <item>
@@ -87,6 +61,22 @@
                                         </item>
                                     </layout>
                                 </item>
+                                <item row="3" column="0">
+                                    <widget class="QLineEdit" name="QLineEdit_addFunction">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="inputMask">
+                                            <string/>
+                                        </property>
+                                        <property name="placeholderText">
+                                            <string>Add function here</string>
+                                        </property>
+                                    </widget>
+                                </item>
                                 <item row="5" column="0">
                                     <layout class="QHBoxLayout" name="horizontalLayout">
                                         <item>
@@ -110,6 +100,9 @@
                                             </widget>
                                         </item>
                                     </layout>
+                                </item>
+                                <item row="1" column="0">
+                                    <widget class="QListWidget" name="QListWidget_functionList"/>
                                 </item>
                                 <item row="7" column="0">
                                     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -152,13 +145,6 @@
                                     <widget class="QPushButton" name="QPushButton_deleteFunction">
                                         <property name="text">
                                             <string>Delete function</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="11" column="0">
-                                    <widget class="QPushButton" name="pushButton_centerPlot">
-                                        <property name="text">
-                                            <string>Center</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -221,7 +207,21 @@
                         </widget>
                     </widget>
                 </item>
-                <item row="1" column="1">
+                <item row="3" column="1" colspan="2">
+                    <widget class="Line" name="line">
+                        <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                        </property>
+                    </widget>
+                </item>
+                <item row="2" column="2">
+                    <widget class="QPushButton" name="pushButton_centerPlot">
+                        <property name="text">
+                            <string>Center</string>
+                        </property>
+                    </widget>
+                </item>
+                <item row="1" column="1" rowspan="2">
                     <widget class="QCustomPlot_custom" name="customPlot" native="true">
                         <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">

@@ -75,10 +75,9 @@ void PointWindow::saveGraph() {
 
 	//Set graph scatterstyle
 	m_graph->setScatterStyle(static_cast<QCPScatterStyle::ScatterShape>(ui->comboBox_scatterStyle->currentData().toInt()));
-
 }
 
-void PointWindow::setGraph(QCPGraph *const pGraph, QListWidgetItem *listWidgetItem) {
+void PointWindow::setGraph(QListWidgetItem *listWidgetItem, QCPGraph *const pGraph) {
 	m_listWidgetItem = listWidgetItem;
 	m_graph = pGraph;
 
@@ -92,11 +91,10 @@ void PointWindow::setGraph(QCPGraph *const pGraph, QListWidgetItem *listWidgetIt
 	ui->lineEdit_graphName->setText(listWidgetItem->text());
 
 	//Set line style
-	ui->comboBox_lineStyle->setCurrentIndex(static_cast<int>(m_graph->lineStyle()));
+	ui->comboBox_lineStyle->setCurrentIndex(ui->comboBox_lineStyle->findData(static_cast<int>(m_graph->lineStyle())));
 
 	//set scatter style
-	ui->comboBox_scatterStyle->setCurrentIndex(static_cast<int>(m_graph->scatterStyle().shape()));
-
+	ui->comboBox_scatterStyle->setCurrentIndex(ui->comboBox_scatterStyle->findData(static_cast<int>(m_graph->scatterStyle().shape())));
 }
 
 

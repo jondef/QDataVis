@@ -8,18 +8,18 @@
 #include <QMainWindow>
 #include <QtNetwork>
 #include <QObject>
+#include <future>
+#include <memory>
 #include "ui_MainWindow.h"
 #include "QCustomPlot_custom.h"
 #include "Thread.h"
 #include "BinaryTree.h"
 #include "QPenDialog.h"
-#include <future>
 #include "PlotPropertiesWindow.h"
 #include "PointWindow.h"
 
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
-
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -29,7 +29,6 @@ public:
 	explicit MainWindow(QWidget *parent = nullptr);
 
 	~MainWindow();
-
 
 public slots:
 
@@ -50,26 +49,26 @@ public slots:
 	void replyFini(QNetworkReply *reply);
 
 
-public:
+private:
+	// todo: make ui a non pointer?
 	Ui::uiMainWindow *ui;
 
 	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow();
-
 	QColorDialog *popUpColorDialog = new QColorDialog(plotWindow);
 	QFontDialog *popUpFontDialog = new QFontDialog(plotWindow);
 	QPenDialog *popUpPenDialog = new QPenDialog(plotWindow);
 	PointWindow *pointGraphDialog = new PointWindow(this);
 
-
 private:
 	QHash<QListWidgetItem *, QCPGraph *> *pointsGraphHash = new QHash<QListWidgetItem *, QCPGraph *>;
+
+	QHash<QCPGraph *, QHash<QListWidgetItem *, BinaryTree *> *> *graphHash = new QHash<QCPGraph *, QHash<QListWidgetItem *, BinaryTree *> *>;
 
 	QMap<QCPGraph *, BinaryTree *> *mFunctionGraph = new QMap<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
 
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
 	std::vector<std::future<void>> m_Futures;
-
 
 public:
 	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);

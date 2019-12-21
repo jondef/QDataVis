@@ -3,10 +3,10 @@
 //
 
 #include "Node.h"
-#include "../Headers/Node.h"
 
 
 Node::Node(QString &aInput, Node *aParent) {
+	aInput.remove(" ");
 	pParent = aParent;
 	strValue = aInput;
 
@@ -238,6 +238,10 @@ double Node::computeOperation(double xPlug) {
 			return sqrt(doubleValueRight);
 		case Cbrt:
 			return cbrt(doubleValueRight);
+		case Floor:
+			return floor(doubleValueRight);
+		case Ceil:
+			return ceil(doubleValueRight);
 		default:
 			// node has no children, but has a value
 			// functions that are just a number like 2

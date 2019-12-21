@@ -17,12 +17,11 @@ endfunction()
 
 # ! Qt stuff
 SET(QT_USE_QTNETWORK true)
-#set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.5\\mingw73_64\\lib\\cmake")
-set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.5\\msvc2017_64\\lib\\cmake")
+set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.5\\mingw73_64\\lib\\cmake")
+#set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.5\\msvc2017_64\\lib\\cmake")
 FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport Test QuickTest REQUIRED)
 
 # QCustomPlot stuff
-include_directories(exprtk)
 include_directories(QCustomPlot)
 include_directories(QDataVis/Headers)
 

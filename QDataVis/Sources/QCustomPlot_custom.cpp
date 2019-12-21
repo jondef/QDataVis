@@ -46,6 +46,8 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	graphTracer->setSize(7);
 	graphTracer->setSelectable(false);
 	graphTracer->setVisible(false);
+	graphTracer->setInterpolating(true);
+	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
 
 
 	connect(this, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(traceGraph(QMouseEvent * )));
@@ -146,7 +148,10 @@ void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
 		graphTracer->setVisible(true);
 		graphTracer->setGraph(selectedGraphs().first());
 		graphTracer->setGraphKey(it->key);
-
+		graphTracer->position->setCoords(it->key, it->value);
+		qDebug() << graphTracer->position->key() << graphTracer->position->value();
+		graphTracer->updatePosition();
+		//qDebug() << it->key << it->value;
 		textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
 		textLabel->setVisible(true);
 		textLabel->position->setCoords(it->key, it->value + yAxis->range().size() * 0.01);
@@ -159,11 +164,11 @@ void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
 
 
 void QCustomPlot_custom::manageCursor(double x, double y) {
-	cursor.hLine->start->setCoords(-QCPRange::maxRange, y);
-	cursor.hLine->end->setCoords(QCPRange::maxRange, y);
+	cursor.hLine->start->setCoords(xAxis->range().lower, y);
+	cursor.hLine->end->setCoords(xAxis->range().upper, y);
 
-	cursor.vLine->start->setCoords(x, -QCPRange::maxRange);
-	cursor.vLine->end->setCoords(x, QCPRange::maxRange);
+	cursor.vLine->start->setCoords(x, yAxis->range().lower);
+	cursor.vLine->end->setCoords(x, yAxis->range().upper);
 
 	cursor.cursorText->setText(QString("(%1, %2)").arg(x).arg(y));
 	cursor.cursorText->position->setCoords(QPointF(x, y));

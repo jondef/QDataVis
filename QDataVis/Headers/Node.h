@@ -10,7 +10,7 @@
 // todo: add more functions, operators: http://www.partow.net/programming/exprtk/
 enum Operator {
 	Addition, Subtraction, Multiplication, Division, Modulo, Exponent, Factorial,
-	Arcsinh, Arccosh, Arctanh, Arcsin, Arccos, Arctan, Sinh, Cosh, Tanh, Sin, Cos, Tan, Log10, Log, Ln, Abs, Sqrt, Cbrt
+	Arcsinh, Arccosh, Arctanh, Arcsin, Arccos, Arctan, Sinh, Cosh, Tanh, Sin, Cos, Tan, Log10, Log, Ln, Abs, Sqrt, Cbrt, Ceil, Floor
 };
 
 
@@ -42,7 +42,9 @@ const QVector<QPair<QString, Operator>> specialOperatorsPriority = {
 		{"ln",      Ln},
 		{"abs",     Abs},
 		{"sqrt",    Sqrt},
-		{"cbrt",    Cbrt}
+		{"cbrt",    Cbrt},
+		{"floor",   Floor},
+		{"ceil",    Ceil},
 };
 
 

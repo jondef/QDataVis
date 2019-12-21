@@ -9,6 +9,27 @@
 static std::mutex graphMutex;
 
 
+// struct which has 3 lists and contains the items based on index in the list
+
+struct FunctionGraph {
+	QCPGraph graph;
+	BinaryTree binaryTree = BinaryTree();
+	QListWidgetItem listWidgetItem;
+};
+
+union graph {
+public:
+	QCPGraph *curve;
+	QListWidgetItem *listWidgetItem;
+	BinaryTree *tree;
+
+	graph(QCPAxis *xAxis, QCPAxis *yAxis) {
+		curve = new QCPGraph(xAxis, yAxis);
+	}
+};
+
+Q_DECLARE_METATYPE(std::shared_ptr<graph>)
+
 const QList<QColor> colors = {
 		QColor(qRgb(31, 119, 180)),
 		QColor(qRgb(255, 127, 14)),
@@ -32,6 +53,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		ui->customPlot->xAxis->setRange(-10, 10);
 		ui->customPlot->yAxis->setRange(-10, 10);
 		ui->customPlot->replot();
+		QVariant var;
+		graph *c = new graph(ui->customPlot->xAxis, ui->customPlot->yAxis);
+		graph i(ui->customPlot->xAxis, ui->customPlot->yAxis);
+		std::shared_ptr<graph> h = std::make_shared<graph>(ui->customPlot->xAxis, ui->customPlot->yAxis);
+//		var.setValue(h);
+//		graph s2 = var.value<graph>();
+
+		QVector<int> why = {1, 2, 3};
 	});
 
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, [this]() {
@@ -54,13 +83,30 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	});
 
 	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
-		pointGraphDialog->setGraph(pointsGraphHash->value(item), item);
+		pointGraphDialog->setGraph(item, pointsGraphHash->value(item));
+		pointGraphDialog->show();
+	});
+
+	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
+
+		//pointGraphDialog->setGraph(item, pointsGraphHash->value(item));
 		pointGraphDialog->show();
 	});
 
 	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
 		ui->customPlot->replot();
 	});
+
+	QListWidgetItem *thingy = new QListWidgetItem();
+
+	{
+		QCPGraph *graph = new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis);
+		graphHash->insert(graph, new QHash<QListWidgetItem *, BinaryTree *>());
+		graphHash->value(graph)->insert(thingy, new BinaryTree());
+
+	}
+
+
 
 //	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [this]() {
 //
@@ -440,7 +486,6 @@ void MainWindow::savePlotImage() {
 
 void MainWindow::QLineEdit_addFunction_returnPressed() {
 	QString text = ui->QLineEdit_addFunction->text();
-	text.remove(" ");
 	calculateAndDrawFunction(text);
 	ui->customPlot->replot();
 
@@ -454,7 +499,6 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 	item->setText(text);
 	item->setIcon(QIcon(pixmap));
 	ui->QListWidget_functionList->addItem(item);
-	delete item;
 }
 
 QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, unsigned int length) {
