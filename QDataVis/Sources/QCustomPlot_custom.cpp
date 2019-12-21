@@ -238,10 +238,11 @@ void QCustomPlot_custom::plotAxisLockDrag() {
 
 	if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis))
 		this->axisRect()->setRangeDrag(this->xAxis->orientation());
-	else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis))
+	else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
 		this->axisRect()->setRangeDrag(this->yAxis->orientation());
-	else
+	} else {
 		this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+	}
 }
 
 

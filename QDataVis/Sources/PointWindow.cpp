@@ -8,7 +8,7 @@
 PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointWindow) {
 	ui->setupUi(this);
 
-	setFixedSize(width(), height()); //for no maximaize
+	setFixedSize(width(), height());
 	setWindowModality(Qt::WindowModal);
 
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, [this]() {
@@ -20,6 +20,7 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, [this]() {
 		this->close();
 	});
+
 	//line style
 	ui->comboBox_lineStyle->addItem("None", QVariant(QCPGraph::lsNone));
 	ui->comboBox_lineStyle->addItem("Line", QVariant(QCPGraph::lsLine));
@@ -47,8 +48,6 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 	ui->comboBox_scatterStyle->addItem("Peace", QVariant(QCPScatterStyle::ssPeace));
 	ui->comboBox_scatterStyle->addItem("Pixmap", QVariant(QCPScatterStyle::ssPixmap));
 	ui->comboBox_scatterStyle->addItem("Custom", QVariant(QCPScatterStyle::ssCustom));
-
-
 }
 
 PointWindow::~PointWindow() {

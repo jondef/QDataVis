@@ -6,29 +6,11 @@
 #include "MainWindow.h"
 
 #define ASYNC 0
+#define POINT_DENSITY 1000
 static std::mutex graphMutex;
 
-
-// struct which has 3 lists and contains the items based on index in the list
-
-struct FunctionGraph {
-	QCPGraph graph;
-	BinaryTree binaryTree = BinaryTree();
-	QListWidgetItem listWidgetItem;
-};
-
-union graph {
-public:
-	QCPGraph *curve;
-	QListWidgetItem *listWidgetItem;
-	BinaryTree *tree;
-
-	graph(QCPAxis *xAxis, QCPAxis *yAxis) {
-		curve = new QCPGraph(xAxis, yAxis);
-	}
-};
-
-Q_DECLARE_METATYPE(std::shared_ptr<graph>)
+// use QSharedPointer...
+Q_DECLARE_METATYPE(std::shared_ptr<QCPGraph>)
 
 const QList<QColor> colors = {
 		QColor(qRgb(31, 119, 180)),
@@ -53,59 +35,42 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		ui->customPlot->xAxis->setRange(-10, 10);
 		ui->customPlot->yAxis->setRange(-10, 10);
 		ui->customPlot->replot();
-		QVariant var;
-		graph *c = new graph(ui->customPlot->xAxis, ui->customPlot->yAxis);
-		graph i(ui->customPlot->xAxis, ui->customPlot->yAxis);
-		std::shared_ptr<graph> h = std::make_shared<graph>(ui->customPlot->xAxis, ui->customPlot->yAxis);
-//		var.setValue(h);
-//		graph s2 = var.value<graph>();
-
-		QVector<int> why = {1, 2, 3};
 	});
 
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, [this]() {
-		//pointsGraphList->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-		QListWidgetItem *pListWidgetItem = new QListWidgetItem;
-		pListWidgetItem->setText(QString("Graph #%1").arg(pointsGraphHash->size() + 1));
-		ui->listWidget_PointGraphList->addItem(pListWidgetItem);
+		QListWidgetItem *pListWidgetItem = new QListWidgetItem();
+		pListWidgetItem->setText(QString("Graph #%1").arg(ui->listWidget_PointGraphList->count() + 1));
 
-		pointsGraphHash->insert(pListWidgetItem, new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
+		QCPGraph *graph = new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis);
+		QVariant var;
+		var.setValue(graph);
+		pListWidgetItem->setData(Qt::UserRole, var);
+		ui->listWidget_PointGraphList->addItem(pListWidgetItem);
 	});
 
 	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, [this]() {
-		if (ui->listWidget_PointGraphList->currentItem() != nullptr) {
-			ui->customPlot->removeGraph(pointsGraphHash->value(ui->listWidget_PointGraphList->currentItem()));
-			pointsGraphHash->remove(ui->listWidget_PointGraphList->currentItem());
-			delete pointsGraphHash->value(ui->listWidget_PointGraphList->currentItem());
+		QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
+		if (selectedItem != nullptr) {
+			ui->customPlot->removeGraph(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
+			delete selectedItem->data(Qt::UserRole).value<QCPGraph *>();
 			delete ui->listWidget_PointGraphList->currentItem();
 			ui->customPlot->replot();
 		}
 	});
 
 	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
-		pointGraphDialog->setGraph(item, pointsGraphHash->value(item));
+		pointGraphDialog->setGraph(item, item->data(Qt::UserRole).value<QCPGraph *>());
 		pointGraphDialog->show();
 	});
 
 	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
-
-		//pointGraphDialog->setGraph(item, pointsGraphHash->value(item));
+		pointGraphDialog->setGraph(item, item->data(Qt::UserRole).value<QCPGraph *>());
 		pointGraphDialog->show();
 	});
 
 	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
 		ui->customPlot->replot();
 	});
-
-	QListWidgetItem *thingy = new QListWidgetItem();
-
-	{
-		QCPGraph *graph = new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis);
-		graphHash->insert(graph, new QHash<QListWidgetItem *, BinaryTree *>());
-		graphHash->value(graph)->insert(thingy, new BinaryTree());
-
-	}
-
 
 
 //	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [this]() {
@@ -268,42 +233,7 @@ void MainWindow::GraphParametersChanged() {
 
 
 void MainWindow::calculateAndDrawFunction(QString &function) {
-	int min = ui->spinBox_setGraphMinimum->value();
-	int max = ui->spinBox_setGraphMaximum->value();
-	int len = ui->spinBox_setGraphLength->value();
 
-	QVector<double> xArray = generateXArray(ui->customPlot->xAxis->range().lower, ui->customPlot->xAxis->range().upper, len);
-
-	// ! GCPCurve has performance issues
-	/*Graphs are used to display single-valued data.
-	 * Single-valued means that there should only be one data point per unique key coordinate.
-	 * In other words, the graph can't have loops. If you do want to plot non-single-valued curves,
-	 * rather use the QCPCurve plottable.*/
-
-#if ASYNC
-	// send it to another thread
-	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, mFunctionGraph->lastKey(), function, xArray));
-#else
-	mFunctionGraph->insert(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis), new BinaryTree(function));
-
-	QVector<double> yArray = mFunctionGraph->last()->calculateTree(xArray);
-
-	mFunctionGraph->lastKey()->setData(xArray, yArray);
-#endif
-
-	mFunctionGraph->lastKey()->setName(function);
-	mFunctionGraph->lastKey()->setProperty("Function string", function);
-	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
-	//mFunctionGraph->lastKey()->rescaleAxes(false);
-	mFunctionGraph->lastKey()->addToLegend();
-
-	QColor color = getGraphColor(mFunctionGraph->size() - 1);
-
-	QPen graphPen;
-	graphPen.setColor(color);
-	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
-	mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
-//	mFunctionGraph->lastKey()->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
 }
 
 QColor MainWindow::getGraphColor(int colorIndex) {
@@ -417,10 +347,10 @@ void MainWindow::onResult(QNetworkReply *reply) {
 
 
 void MainWindow::replotGraphsOnRangeChange(QCPRange range) {
-	QVector<double> xArray = generateXArray(range.lower, range.upper, 1000);
+	QVector<double> xArray = generateXArray(range.lower, range.upper, POINT_DENSITY);
 	static QVector<double> yArray(xArray.length());
 
-	for (QMap<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i) {
+	for (QHash<QCPGraph *, BinaryTree *>::iterator i = mFunctionGraph->begin(); i != mFunctionGraph->end(); ++i) {
 		yArray = i.value()->calculateTree(xArray);
 		i.key()->setData(xArray, yArray);
 	}
@@ -486,32 +416,55 @@ void MainWindow::savePlotImage() {
 
 void MainWindow::QLineEdit_addFunction_returnPressed() {
 	QString text = ui->QLineEdit_addFunction->text();
-	calculateAndDrawFunction(text);
+
+	QVector<double> xArray = generateXArray(ui->customPlot->xAxis->range().lower, ui->customPlot->xAxis->range().upper, POINT_DENSITY);
+
+	// ! GCPCurve has performance issues
+	/*Graphs are used to display single-valued data.
+	 * Single-valued means that there should only be one data point per unique key coordinate.
+	 * In other words, the graph can't have loops. If you do want to plot non-single-valued curves,
+	 * rather use the QCPCurve plottable.*/
+
+#if ASYNC
+	// send it to another thread
+	m_Futures.push_back(std::async(std::launch::async, LoadMeshes, mFunctionGraph->lastKey(), function, xArray));
+#else
+	QCPGraph *graph = new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis);
+	BinaryTree *tree = new BinaryTree(text);
+	mFunctionGraph->insert(graph, tree);
+
+	QVector<double> yArray = tree->calculateTree(xArray);
+
+	graph->setData(xArray, yArray);
+#endif
+
+	graph->setName(text);
+	graph->setProperty("Function string", text);
+	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
+	//mFunctionGraph->lastKey()->rescaleAxes(false);
+	graph->addToLegend();
+
+	QColor color = getGraphColor(mFunctionGraph->size() - 1);
+
+	QPen graphPen;
+	graphPen.setColor(color);
+	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
+	graph->setPen(graphPen); // apply color to graph
+//	graph->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
+
 	ui->customPlot->replot();
 
 	// * add item to widget and set the appropriate icon color
-	QColor color = getGraphColor(mFunctionGraph->size() - 1);
-
 	auto pixmap = QPixmap(16, 16);
 	pixmap.fill(color);
 
 	auto *item = new QListWidgetItem();
 	item->setText(text);
 	item->setIcon(QIcon(pixmap));
+	QVariant variant;
+	variant.setValue(graph);
+	item->setData(Qt::UserRole, variant);
 	ui->QListWidget_functionList->addItem(item);
-}
-
-QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, unsigned int length) {
-	QVector<double> finalArray(length);
-
-	double difference = upperLim - lowerLim;
-	double increment = difference / (length - 1);
-
-	for (unsigned int i = 0; i < length; i++) {
-		finalArray[i] = lowerLim + increment * i;
-	}
-
-	return finalArray;
 }
 
 //void MainWindow::QPushButton_PlotPoints_clicked() {
@@ -544,6 +497,35 @@ QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, uns
 //}
 
 
+void MainWindow::QPushButton_deleteFunction_clicked() {
+	QListWidgetItem *selectedItem = ui->QListWidget_functionList->currentItem();
+
+	if (selectedItem == nullptr) {
+		statusBarMsg("Please select a function");
+		return;
+	}
+
+	ui->customPlot->removeGraph(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
+	delete selectedItem->data(Qt::UserRole).value<QCPGraph *>();
+	delete selectedItem;
+	ui->customPlot->replot();
+}
+
+
+QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, unsigned int length) {
+	QVector<double> finalArray(length);
+
+	double difference = upperLim - lowerLim;
+	double increment = difference / (length - 1);
+
+	for (unsigned int i = 0; i < length; i++) {
+		finalArray[i] = lowerLim + increment * i;
+	}
+
+	return finalArray;
+}
+
+
 static void PlotFunctions(QCPGraph *graphPointer, QString function, QVector<double> xArray) {
 	BinaryTree tree(function);
 
@@ -551,23 +533,6 @@ static void PlotFunctions(QCPGraph *graphPointer, QString function, QVector<doub
 
 	std::lock_guard<std::mutex> lock(graphMutex);
 	graphPointer->setData(xArray, yArray, true);
-}
-
-
-void MainWindow::QPushButton_deleteFunction_clicked() {
-	QModelIndex selectedIndex = ui->QListWidget_functionList->currentIndex();
-
-	// row is essentially the index of the selected item
-	if (selectedIndex.row() != -1) {
-		// delete from widget
-		ui->QListWidget_functionList->takeItem(selectedIndex.row());
-		// use pointer stored in list to it delete from the graph
-		ui->customPlot->removeGraph((QCPGraph *) (mFunctionGraph->constBegin() + selectedIndex.row()).key());
-		mFunctionGraph->remove((mFunctionGraph->constBegin() + selectedIndex.row()).key()); // remove from list
-		ui->customPlot->replot();
-	} else {
-		statusBarMsg("Please select a function");
-	}
 }
 
 

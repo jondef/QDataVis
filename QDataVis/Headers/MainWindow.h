@@ -60,11 +60,7 @@ private:
 	PointWindow *pointGraphDialog = new PointWindow(this);
 
 private:
-	QHash<QListWidgetItem *, QCPGraph *> *pointsGraphHash = new QHash<QListWidgetItem *, QCPGraph *>;
-
-	QHash<QCPGraph *, QHash<QListWidgetItem *, BinaryTree *> *> *graphHash = new QHash<QCPGraph *, QHash<QListWidgetItem *, BinaryTree *> *>;
-
-	QMap<QCPGraph *, BinaryTree *> *mFunctionGraph = new QMap<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
+	QHash<QCPGraph *, BinaryTree *> *mFunctionGraph = new QHash<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
 
 	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
