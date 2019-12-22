@@ -12,7 +12,7 @@ static std::mutex graphMutex;
 // use QSharedPointer...
 Q_DECLARE_METATYPE(std::shared_ptr<QCPGraph>)
 
-const QList<QColor> colors = {
+static const QList<QColor> colors = {
 		QColor(qRgb(31, 119, 180)),
 		QColor(qRgb(255, 127, 14)),
 		QColor(qRgb(44, 160, 44)),
@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, [this]() {
 		QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
-		if (selectedItem != nullptr) {
+		if (selectedItem) {
 			ui->customPlot->removeGraph(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
 			delete selectedItem->data(Qt::UserRole).value<QCPGraph *>();
 			delete ui->listWidget_PointGraphList->currentItem();
@@ -169,9 +169,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
 
-	connect(ui->spinBox_setGraphMinimum, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::GraphParametersChanged);
-	connect(ui->spinBox_setGraphMaximum, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::GraphParametersChanged);
-	connect(ui->spinBox_setGraphLength, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::GraphParametersChanged);
+	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::GraphParametersChanged);
 
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
@@ -232,44 +230,9 @@ void MainWindow::GraphParametersChanged() {
 }
 
 
-void MainWindow::calculateAndDrawFunction(QString &function) {
-
-}
-
 QColor MainWindow::getGraphColor(int colorIndex) {
 	// only take the last digit of the index
 	return colors.at(colorIndex % 10);
-}
-
-
-void MainWindow::changeAxisTicker(QCPAxis *axis, const QString &value) {
-	if (value == "QCPAxisTicker") {
-		QSharedPointer<QCPAxisTicker> fixedTicker(new QCPAxisTicker);
-		axis->setTicker(fixedTicker);
-	} else if (value == "QCPAxisTickerPi") {
-		QSharedPointer<QCPAxisTickerPi> fixedTicker(new QCPAxisTickerPi);
-		axis->setTicker(fixedTicker);
-	} else if (value == "QCPAxisTickerDateTime") {
-		QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-//		dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
-		axis->setTicker(dateTicker);
-//		double now = QDateTime::currentDateTime().toTime_t();
-//		axis->setRange(now - now / 10, now);
-//		axis->setRange(0, 10000);
-	} else if (value == "QCPAxisTickerFixed") {
-		QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
-		axis->setTicker(fixedTicker);
-	} else if (value == "QCPAxisTickerLog") {
-		QSharedPointer<QCPAxisTickerLog> fixedTicker(new QCPAxisTickerLog);
-		axis->setTicker(fixedTicker);
-	} else if (value == "QCPAxisTickerText") {
-		QSharedPointer<QCPAxisTickerText> fixedTicker(new QCPAxisTickerText);
-		axis->setTicker(fixedTicker);
-	} else if (value == "QCPAxisTickerTime") {
-		QSharedPointer<QCPAxisTickerTime> fixedTicker(new QCPAxisTickerTime);
-		axis->setTicker(fixedTicker);
-	}
-	ui->customPlot->replot();
 }
 
 
@@ -439,7 +402,6 @@ void MainWindow::QLineEdit_addFunction_returnPressed() {
 #endif
 
 	graph->setName(text);
-	graph->setProperty("Function string", text);
 	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
 	//mFunctionGraph->lastKey()->rescaleAxes(false);
 	graph->addToLegend();
@@ -505,8 +467,8 @@ void MainWindow::QPushButton_deleteFunction_clicked() {
 		return;
 	}
 
+	mFunctionGraph->remove(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
 	ui->customPlot->removeGraph(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
-	delete selectedItem->data(Qt::UserRole).value<QCPGraph *>();
 	delete selectedItem;
 	ui->customPlot->replot();
 }
@@ -1233,6 +1195,7 @@ inline void MainWindow::setUpAxesPageConnections() {
 		plotWindow->ui->checkBox_yAxis2_setLogarithmicScale->setChecked(value == "QCPAxisTickerLog");
 	});
 
+
 	// * set logarithmic scale
 	connect(plotWindow->ui->checkBox_xAxis_setLogarithmicScale, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
@@ -1325,6 +1288,37 @@ inline void MainWindow::setUpAxesPageConnections() {
 	plotWindow->ui->groupBox_yAxis_setSubTicksVisible->setChecked(true);
 	plotWindow->ui->groupBox_xAxis2_setSubTicksVisible->setChecked(true);
 	plotWindow->ui->groupBox_yAxis2_setSubTicksVisible->setChecked(true);
+}
+
+
+void MainWindow::changeAxisTicker(QCPAxis *axis, const QString &value) {
+	if (value == "QCPAxisTicker") {
+		QSharedPointer<QCPAxisTicker> fixedTicker(new QCPAxisTicker);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerPi") {
+		QSharedPointer<QCPAxisTickerPi> fixedTicker(new QCPAxisTickerPi);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerDateTime") {
+		QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+//		dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+		axis->setTicker(dateTicker);
+//		double now = QDateTime::currentDateTime().toTime_t();
+//		axis->setRange(now - now / 10, now);
+//		axis->setRange(0, 10000);
+	} else if (value == "QCPAxisTickerFixed") {
+		QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerLog") {
+		QSharedPointer<QCPAxisTickerLog> fixedTicker(new QCPAxisTickerLog);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerText") {
+		QSharedPointer<QCPAxisTickerText> fixedTicker(new QCPAxisTickerText);
+		axis->setTicker(fixedTicker);
+	} else if (value == "QCPAxisTickerTime") {
+		QSharedPointer<QCPAxisTickerTime> fixedTicker(new QCPAxisTickerTime);
+		axis->setTicker(fixedTicker);
+	}
+	ui->customPlot->replot();
 }
 
 

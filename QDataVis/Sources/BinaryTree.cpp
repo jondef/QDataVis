@@ -5,7 +5,8 @@
 #include "BinaryTree.h"
 
 
-BinaryTree::BinaryTree(QString &expression) {
+BinaryTree::BinaryTree(QString expression) {
+	expression.remove(" ");
 	pRoot = new Node(expression);
 }
 

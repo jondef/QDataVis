@@ -76,6 +76,8 @@ private:
 	bool createChildren(QString string);
 
 	bool needsChildren();
+
+	void sigmaExpand(QString &aInput);
 };
 
 

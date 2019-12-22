@@ -6,7 +6,7 @@
 
 
 Node::Node(QString &aInput, Node *aParent) {
-	aInput.remove(" ");
+	sigmaExpand(aInput);
 	pParent = aParent;
 	strValue = aInput;
 
@@ -106,6 +106,54 @@ bool Node::createChildren(QString string) {
 	return false; // failed
 }
 
+void Node::sigmaExpand(QString &aInput) {
+	// unfold/expand sigma sign. Example:
+	// sigma(n*cos(n*10*2*pi*x),n,1,5)
+	// to
+	// cos(20*pi*x)+2*cos(40*pi*x)+3*cos(60*pi*x)+4*cos(80*pi*x)+5*cos(100*pi*x)
+	if (!aInput.contains("sigma(")) {
+		return;
+	}
+
+	int sigmaIndex = aInput.indexOf("sigma("); // takes beginning of string -> add length of string
+	QString parenthesesContent = aInput.mid(sigmaIndex + 5);
+
+	{ // remove the stuff after the sigma ends
+		QList<int> parenthesesArray = getParenthesesArray(aInput.mid(sigmaIndex + 5));
+		int firstZero = parenthesesArray.indexOf(0);
+		if (firstZero != -1) { // if there is a zero in the parenthesesArray
+			parenthesesContent = parenthesesContent.left(firstZero);
+		}
+	}
+	// remove the () at the beginning and at the end
+	parenthesesContent = parenthesesContent.left(parenthesesContent.length() - 1).mid(1);
+
+	// separate each part of the sigma
+	QString function = parenthesesContent.section(',', 0, -4);
+	QString variable = parenthesesContent.section(',', -3, -3);
+	int start = parenthesesContent.section(',', -2, -2).toInt();
+	int finish = parenthesesContent.section(',', -1, -1).toInt();
+
+	// create the expanded form
+	QString expandedForm;
+	for (int i = start; i <= finish; ++i) {
+		QString temp = function;
+		expandedForm.append(temp.replace(QRegularExpression(QString("(?<!\\w)[%1]{1}(?!\\w)").arg(variable)), QString::number(i)));
+
+		if (i < finish) {
+			expandedForm.append("+");
+		}
+	}
+
+	// replace the sigma with the expanded form
+	aInput.replace(QString("sigma(" + parenthesesContent + ")"), QString("(" + expandedForm + ")"));
+
+	// re-expand sigma if recursive
+	if (expandedForm.contains("sigma(")) {
+		sigmaExpand(aInput);
+	}
+}
+
 bool Node::needsChildren() {
 	// returns false if node doesn't need children
 	bool valueOk;
@@ -129,6 +177,7 @@ bool Node::needsChildren() {
 		return true;
 	}
 }
+
 
 double Node::computeOperation(double xPlug) {
 	double doubleValueLeft = 0;
@@ -268,7 +317,6 @@ QList<int> Node::getParenthesesArray(const QString &string) {
 	}
 	return list;
 }
-
 
 QList<int> Node::findAllOccurences(QString string, const QString &ofWhat) {
 	QList<int> operatorIndex;

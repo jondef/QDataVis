@@ -14,7 +14,7 @@
 class BinaryTree {
 
 public:
-	explicit BinaryTree(QString &expression);
+	explicit BinaryTree(QString expession);
 
 	explicit BinaryTree();
 

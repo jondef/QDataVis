@@ -24,7 +24,6 @@
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
-
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 
@@ -69,6 +68,9 @@ private:
 public:
 	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
 
+	static QColor getGraphColor(int colorIndex);
+
+	static int globalPointDensity;
 
 private:
 	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
@@ -82,10 +84,6 @@ private:
 	inline void setUpGeneralPageConnections();
 
 	inline void setUpAxesPageConnections();
-
-	void calculateAndDrawFunction(QString &function);
-
-	static QColor getGraphColor(int colorIndex);
 
 	QPointF getClosestPoint(QCPGraph *graph, QPoint point);
 };
