@@ -21,8 +21,10 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	QPen qpen = QPen(Qt::DashDotLine);
 	this->cursor.hLine = new QCPItemLine(this);
 	this->cursor.hLine->setPen(qpen);
+	this->cursor.hLine->setSelectable(false);
 	this->cursor.vLine = new QCPItemLine(this);
 	this->cursor.vLine->setPen(qpen);
+	this->cursor.vLine->setSelectable(false);
 	this->cursor.cursorText = new QCPItemText(this);
 	this->cursor.cursorText->setFont(QFont(font().family(), 8));
 	//Add to layer
@@ -47,7 +49,7 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	graphTracer->setSelectable(false);
 	graphTracer->setVisible(false);
 	graphTracer->setInterpolating(true);
-	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
+//	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
 
 
 	connect(this, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(traceGraph(QMouseEvent * )));

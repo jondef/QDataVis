@@ -66,7 +66,7 @@ bool Node::createChildren(QString string) {
 					}
 				}
 				mathOperation = Operator.second;
-				qDebug() << leftSide << Operator.first << rightSide;
+//				qDebug() << leftSide << Operator.first << rightSide;
 				pLeftChild = new Node(leftSide, this);
 				if (!rightSide.isEmpty()) {
 					pRightChild = new Node(rightSide, this);
@@ -75,7 +75,6 @@ bool Node::createChildren(QString string) {
 			}
 		}
 	}
-
 	// * special operators | must be after normal operators!
 	for (const QPair<QString, Operator> &Operator : specialOperatorsPriority) {
 		QList<int> operatorIndexes = findAllOccurences(string, Operator.first);
@@ -115,10 +114,10 @@ void Node::sigmaExpand(QString &aInput) {
 		return;
 	}
 
-	int sigmaIndex = aInput.indexOf("sigma("); // takes beginning of string -> add length of string
+	int sigmaIndex = aInput.indexOf("sigma("); // takes beginning of string -> +5
 	QString parenthesesContent = aInput.mid(sigmaIndex + 5);
 
-	{ // remove the stuff after the sigma ends
+	{ // remove the stuff after the sigma if there is any
 		QList<int> parenthesesArray = getParenthesesArray(aInput.mid(sigmaIndex + 5));
 		int firstZero = parenthesesArray.indexOf(0);
 		if (firstZero != -1) { // if there is a zero in the parenthesesArray
@@ -149,7 +148,7 @@ void Node::sigmaExpand(QString &aInput) {
 	aInput.replace(QString("sigma(" + parenthesesContent + ")"), QString("(" + expandedForm + ")"));
 
 	// re-expand sigma if recursive
-	if (expandedForm.contains("sigma(")) {
+	if (aInput.contains("sigma(")) {
 		sigmaExpand(aInput);
 	}
 }
@@ -213,7 +212,7 @@ double Node::computeOperation(double xPlug) {
 			if (int(doubleValueRight) != 0) {
 				return int(doubleValueLeft) % int(doubleValueRight);
 			}
-			return _nan();
+			return nan("");
 		case Exponent:
 			// only change if the base is negative
 			// ref: https://stackoverflow.com/a/8493081/10450514

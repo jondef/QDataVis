@@ -47,14 +47,15 @@ elseif (${CMAKE_BUILD_TYPE} STREQUAL Release)
     set(PROJECT_LINK_LIBS qcustomplot2)
 endif ()
 
-link_directories(${CMAKE_BINARY_DIR}/QCustomPlot)
+# ! move the QCustomPlot .so file to QDataVis app directory
+link_directories(${CMAKE_BINARY_DIR}/QDataVis)
 
 # wrap the ui file to a c++ header
 qt5_wrap_ui(ui_wrap ${UI_FILES})
 
 # compile exe
 if (DISABLE_CMD_WINDOW)
-    add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
+    add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
 else ()
     add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
 endif ()
