@@ -1,31 +1,51 @@
-cmake_minimum_required(VERSION 3.14)
-set(CMAKE_CXX_STANDARD 17)
-
+cmake_minimum_required(VERSION 3.15)
 project(QDataVis)
-set(DISABLE_CMD_WINDOW OFF)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 message("CMAKE VERSION IS " ${CMAKE_VERSION})
 message("BUILD TYPE SET TO " ${CMAKE_BUILD_TYPE})
 
+if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif ()
+
 function(print_all_variables)
-    get_cmake_property(_variableNames VARIABLES)
-    list(SORT _variableNames)
-    foreach (_variableName ${_variableNames})
-        message(STATUS "${_variableName}=${${_variableName}}")
-    endforeach ()
+	get_cmake_property(_variableNames VARIABLES)
+	list(SORT _variableNames)
+	foreach (_variableName ${_variableNames})
+		message(STATUS "${_variableName}=${${_variableName}}")
+	endforeach ()
 endfunction()
 
-# ! Qt stuff
-SET(QT_USE_QTNETWORK true)
-#set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.5\\mingw73_64\\lib\\cmake")
-#set(CMAKE_PREFIX_PATH "C:\\Qt\\5.12.5\\msvc2017_64\\lib\\cmake")
+set(EXECUTABLE_OUTPUT_PATH "bin" CACHE STRING "Path to place executables relative to ${CMAKE_INSTALL_PREFIX}")
+set(LIBRARY_OUTPUT_PATH "bin" CACHE STRING "Path to place libraries relative to ${CMAKE_INSTALL_PREFIX}")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+################################
+# Qt
+################################
 FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport Test QuickTest REQUIRED)
 
-# QCustomPlot stuff
-include_directories(QCustomPlot)
-include_directories(QDataVis/Headers)
+set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
+set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
+set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
+set(CMAKE_AUTORCC ON) # Create Resource files
+SET(QT_USE_QTNETWORK true)
 
-# add subdirectories
+################################
+# QCustomPlot
+################################
+include_directories(QCustomPlot)
 add_subdirectory(QCustomPlot)
+
+################################
+# QDataVis
+################################
+include_directories(QDataVis/Headers)
 add_subdirectory(QDataVis)
-add_subdirectory(QDataVis_tests)
+#add_subdirectory(QDataVis_tests)

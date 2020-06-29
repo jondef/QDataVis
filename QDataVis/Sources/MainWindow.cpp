@@ -5,6 +5,8 @@
 
 #include "MainWindow.h"
 
+#include <utility>
+
 #define ASYNC 0
 #define POINT_DENSITY 1000
 static std::mutex graphMutex;
@@ -489,9 +491,10 @@ QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, uns
 
 
 static void PlotFunctions(QCPGraph *graphPointer, QString function, QVector<double> xArray) {
-	BinaryTree tree(function);
+	BinaryTree tree(std::move(function));
 
 	QVector<double> yArray = tree.calculateTree(xArray);
+
 
 	std::lock_guard<std::mutex> lock(graphMutex);
 	graphPointer->setData(xArray, yArray, true);
@@ -1328,7 +1331,7 @@ inline void MainWindow::setUpTitlePageConnections() {
 		plotWindow->ui->listWidget_titleList->addItem("Title");
 
 		graphTextElements->insert(plotWindow->ui->listWidget_titleList->item(plotWindow->ui->listWidget_titleList->count() - 1),
-		                          new QCPTextElement(ui->customPlot, "Title", plotWindow->titleFontDialog->currentFont()));
+								  new QCPTextElement(ui->customPlot, "Title", plotWindow->titleFontDialog->currentFont()));
 
 		// make each item editable by double clicking
 		QListWidgetItem *item = plotWindow->ui->listWidget_titleList->item(plotWindow->ui->listWidget_titleList->count() - 1);

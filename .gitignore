@@ -1,6 +1,8 @@
 # Default ignored files
 build/
+bin/
 .idea/
+.vscode/
 
 # Prerequisites
 *.d
