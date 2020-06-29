@@ -8,7 +8,7 @@
 
 #include <QtCore>
 #include <QtMath>
-#include "Node.h"
+#include "Node.hpp"
 
 
 class BinaryTree {

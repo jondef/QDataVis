@@ -11,12 +11,12 @@
 #include <future>
 #include <memory>
 #include "ui_MainWindow.h"
-#include "QCustomPlot_custom.h"
-#include "Thread.h"
-#include "BinaryTree.h"
-#include "QPenDialog.h"
-#include "PlotPropertiesWindow.h"
-#include "PointWindow.h"
+#include "QCustomPlot_custom.hpp"
+#include "Thread.hpp"
+#include "BinaryTree.hpp"
+#include "QPenDialog.hpp"
+#include "PlotPropertiesWindow.hpp"
+#include "PointWindow.hpp"
 
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL

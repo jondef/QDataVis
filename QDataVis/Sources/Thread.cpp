@@ -2,7 +2,7 @@
 // Created by John on 24.08.2019.
 //
 
-#include "Thread.h"
+#include "Thread.hpp"
 
 Thread::Thread(QObject *parent) : QThread(parent) {
 

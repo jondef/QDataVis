@@ -2,15 +2,15 @@
 // Created by John on 30.11.2019.
 //
 
-#ifndef QDATAVIS_POINTWINDOW_H
-#define QDATAVIS_POINTWINDOW_H
+#ifndef QDATAVIS_POINTWINDOW_HPP
+#define QDATAVIS_POINTWINDOW_HPP
 
 #include <QWidget>
 #include <QtCore>
 #include <QColorDialog>
 #include <QFontDialog>
 #include "ui_PointWindow.h"
-#include "QCustomPlot_custom.h"
+#include "QCustomPlot_custom.hpp"
 
 
 class PointWindow : public QDialog {
@@ -37,5 +37,5 @@ Q_SIGNALS:
 };
 
 
-#endif //QDATAVIS_POINTWINDOW_H
+#endif //QDATAVIS_POINTWINDOW_HPP
 

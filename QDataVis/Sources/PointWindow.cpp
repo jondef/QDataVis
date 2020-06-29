@@ -2,7 +2,7 @@
 // Created by John on 30.11.2019.
 //
 
-#include "PointWindow.h"
+#include "PointWindow.hpp"
 
 
 PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointWindow) {

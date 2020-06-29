@@ -2,7 +2,7 @@
 // Created by John on 12/06/2019.
 //
 
-#include "BinaryTree.h"
+#include "BinaryTree.hpp"
 
 
 BinaryTree::BinaryTree(QString expression) {

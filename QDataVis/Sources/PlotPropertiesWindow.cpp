@@ -3,7 +3,7 @@
 //
 
 
-#include "PlotPropertiesWindow.h"
+#include "PlotPropertiesWindow.hpp"
 //#include "MainWindow.h" // check https://stackoverflow.com/a/50205573/10450514 for more info
 
 

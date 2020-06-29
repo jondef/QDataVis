@@ -3,7 +3,7 @@
 //
 
 
-#include "QPenDialog.h"
+#include "QPenDialog.hpp"
 
 
 QPenDialog::QPenDialog(QWidget *parent) : QDialog(parent), ui(new Ui::uiQPenDialog) {

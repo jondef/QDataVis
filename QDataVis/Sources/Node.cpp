@@ -2,7 +2,7 @@
 // Created by John on 12/06/2019.
 //
 
-#include "Node.h"
+#include "Node.hpp"
 
 
 Node::Node(QString &aInput, Node *aParent) {

@@ -6,7 +6,7 @@
 // https://stackoverflow.com/questions/49477877/qcustomplot-replot-qcplayer
 //
 
-#include "QCustomPlot_custom.h"
+#include "QCustomPlot_custom.hpp"
 
 
 QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
@@ -83,10 +83,10 @@ void QCustomPlot_custom::initGraph() {
 	// * click interaction
 	// axis label double click
 	connect(this, SIGNAL(axisDoubleClick(QCPAxis * , QCPAxis::SelectablePart, QMouseEvent * )), this,
-	        SLOT(plotAxisLabelDoubleClick(QCPAxis * , QCPAxis::SelectablePart)));
+			SLOT(plotAxisLabelDoubleClick(QCPAxis * , QCPAxis::SelectablePart)));
 	// legend double click
 	connect(this, SIGNAL(legendDoubleClick(QCPLegend * , QCPAbstractLegendItem * , QMouseEvent * )), this,
-	        SLOT(plotLegendGraphDoubleClick(QCPLegend * , QCPAbstractLegendItem * )));
+			SLOT(plotLegendGraphDoubleClick(QCPLegend * , QCPAbstractLegendItem * )));
 
 	// * context menu
 	// setup policy and connect slot for context menu popup:
@@ -138,10 +138,10 @@ void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
 				return;
 			}
 			if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value <
-			    selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+				selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
 				textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
 			} else if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value >
-			           selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+					   selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
 				textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
 			}
 			it = selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
@@ -185,7 +185,7 @@ void QCustomPlot_custom::plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::Select
 	{
 		bool ok;
 		QString newLabel = QInputDialog::getText(this, "QCustomPlot example", "New axis label:", QLineEdit::Normal,
-		                                         axis->label(), &ok);
+												 axis->label(), &ok);
 		if (ok) {
 			axis->setLabel(newLabel);
 			this->replot();
@@ -201,7 +201,7 @@ void QCustomPlot_custom::plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstra
 		QCPPlottableLegendItem *plItem = qobject_cast<QCPPlottableLegendItem *>(item);
 		bool ok;
 		QString newName = QInputDialog::getText(this, "QCustomPlot example", "New graph name:", QLineEdit::Normal,
-		                                        plItem->plottable()->name(), &ok);
+												plItem->plottable()->name(), &ok);
 		if (ok) {
 			plItem->plottable()->setName(newName);
 			this->replot();
@@ -306,17 +306,17 @@ void QCustomPlot_custom::plotOppositeAxesConnection() {
 
 	// make top and bottom axes be selected synchronously, and handle axis and tick labels as one selectable object:
 	if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    this->xAxis->selectedParts().testFlag(QCPAxis::spTickLabels) ||
-	    this->xAxis2->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    this->xAxis2->selectedParts().testFlag(QCPAxis::spTickLabels)) {
+		this->xAxis->selectedParts().testFlag(QCPAxis::spTickLabels) ||
+		this->xAxis2->selectedParts().testFlag(QCPAxis::spAxis) ||
+		this->xAxis2->selectedParts().testFlag(QCPAxis::spTickLabels)) {
 		this->xAxis2->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
 		this->xAxis->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
 	}
 	// make left and right axes be selected synchronously, and handle axis and tick labels as one selectable object:
 	if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    this->yAxis->selectedParts().testFlag(QCPAxis::spTickLabels) ||
-	    this->yAxis2->selectedParts().testFlag(QCPAxis::spAxis) ||
-	    this->yAxis2->selectedParts().testFlag(QCPAxis::spTickLabels)) {
+		this->yAxis->selectedParts().testFlag(QCPAxis::spTickLabels) ||
+		this->yAxis2->selectedParts().testFlag(QCPAxis::spAxis) ||
+		this->yAxis2->selectedParts().testFlag(QCPAxis::spTickLabels)) {
 		this->yAxis2->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
 		this->yAxis->setSelectedParts(QCPAxis::spAxis | QCPAxis::spTickLabels);
 	}

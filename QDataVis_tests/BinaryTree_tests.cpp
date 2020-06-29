@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
-#include "BinaryTree.h"
+#include "BinaryTree.hpp"
 
 class BinaryTreeFixture : public ::testing::Test {
 
