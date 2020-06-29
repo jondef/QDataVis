@@ -15,11 +15,6 @@ int main(int argc, char *argv[]) {
 	QCoreApplication::setOrganizationDomain("qdatavis.com");
 	QCoreApplication::setApplicationName("QDataVis");
 
-	// set application style
-	qDebug() << QStyleFactory::keys();
-	qDebug() << "Plugins loaded from: " << QCoreApplication::libraryPaths();
-	QApplication::setStyle(QStyleFactory::create("Fusion"));
-
 	uint16_t result = 0;
 	do {
 		MainWindow window;
