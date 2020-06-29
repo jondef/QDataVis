@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource>
-        <file alias="images/QDataVis">icon-resizeimage.png</file>
+        <file alias="images/QDataVis">icon-resized.png</file>
     </qresource>
 </RCC>
