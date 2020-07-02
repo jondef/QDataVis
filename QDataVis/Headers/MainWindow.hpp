@@ -49,19 +49,15 @@ public slots:
 
 
 private:
-	// todo: make ui a non pointer?
+	friend class PlotPropertiesWindow;
+
 	Ui::uiMainWindow *ui;
 
-	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow();
-	QColorDialog *popUpColorDialog = new QColorDialog(plotWindow);
-	QFontDialog *popUpFontDialog = new QFontDialog(plotWindow);
-	QPenDialog *popUpPenDialog = new QPenDialog(plotWindow);
+	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow(this);
 	PointWindow *pointGraphDialog = new PointWindow(this);
 
 private:
 	QHash<QCPGraph *, BinaryTree *> *mFunctionGraph = new QHash<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
-
-	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
 	std::vector<std::future<void>> m_Futures;
 
@@ -78,12 +74,6 @@ private:
 	void statusBarMsg(const QString &msg, int time = 2000);
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
-
-	inline void setUpTitlePageConnections();
-
-	inline void setUpGeneralPageConnections();
-
-	inline void setUpAxesPageConnections();
 
 	QPointF getClosestPoint(QCPGraph *graph, QPoint point);
 };

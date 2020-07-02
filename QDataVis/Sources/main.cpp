@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 	QCoreApplication::setOrganizationDomain("qdatavis.com");
 	QCoreApplication::setApplicationName("QDataVis");
 
-	uint16_t result = 0;
+	uint16_t result;
 	do {
 		MainWindow window;
 		window.show();
