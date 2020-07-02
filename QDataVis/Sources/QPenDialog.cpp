@@ -47,6 +47,8 @@ QPenDialog::QPenDialog(QWidget *parent) : QDialog(parent), ui(new Ui::uiQPenDial
 
 QPenDialog::~QPenDialog() {
 	delete ui;
+	delete pen;
+	delete penColorDialog;
 }
 
 void QPenDialog::setCurrentPen(const QPen &apen) {

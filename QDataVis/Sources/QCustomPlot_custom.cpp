@@ -55,6 +55,12 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	initGraph();
 }
 
+QCustomPlot_custom::~QCustomPlot_custom() {
+	delete cursorLayer;
+	delete textLabel;
+	delete graphTracer;
+}
+
 void QCustomPlot_custom::updateColors() {
 	setBackground(QBrush(QApplication::palette().color(backgroundRole())));
 	QColor foregroundColor = QApplication::palette().color(foregroundRole());

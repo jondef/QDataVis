@@ -52,6 +52,8 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 
 PointWindow::~PointWindow() {
 	delete ui;
+	delete m_graph;
+	delete m_listWidgetItem;
 }
 
 void PointWindow::saveGraph() {

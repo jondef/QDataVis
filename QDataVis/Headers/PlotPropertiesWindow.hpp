@@ -20,7 +20,7 @@ public:
 
 	explicit PlotPropertiesWindow(QWidget *parent = nullptr);
 
-	~PlotPropertiesWindow();
+	~PlotPropertiesWindow() override;
 
 protected:
 

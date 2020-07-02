@@ -14,9 +14,11 @@
 class BinaryTree {
 
 public:
-	explicit BinaryTree(QString expession);
+	explicit BinaryTree(QString expression);
 
 	explicit BinaryTree();
+
+	~BinaryTree();
 
 	double calculateTree(double &xPlug);
 

@@ -25,7 +25,7 @@ Q_OBJECT
 public:
 	explicit QCustomPlot_custom(QWidget *parent = nullptr);
 
-	~QCustomPlot_custom() override = default;
+	~QCustomPlot_custom() override;
 
 public:
 	void manageCursor(double x, double y);

@@ -65,6 +65,8 @@ public:
 public:
 	explicit Node(QString &input, Node *aParent = nullptr);
 
+	~Node();
+
 	double computeOperation(double xPlug);
 
 

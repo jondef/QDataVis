@@ -19,14 +19,14 @@ Q_OBJECT
 public:
 	explicit PointWindow(QWidget *parent = nullptr);
 
-	~PointWindow();
+	~PointWindow() override;
 
 	Ui::uiPointWindow *ui;
 
 	QCPGraph *m_graph = nullptr;
 	QListWidgetItem *m_listWidgetItem = nullptr;
 
-	void setGraph(QListWidgetItem *listWidgetItem, QCPGraph *const pGraph);
+	void setGraph(QListWidgetItem *listWidgetItem, QCPGraph *pGraph);
 
 	void saveGraph();
 

@@ -12,6 +12,10 @@ BinaryTree::BinaryTree(QString expression) {
 
 BinaryTree::BinaryTree() = default;
 
+BinaryTree::~BinaryTree() noexcept {
+	delete pRoot;
+}
+
 
 void BinaryTree::setPRoot(QString &expression) {
 	pRoot = new Node(expression);
@@ -74,6 +78,6 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
 void BinaryTree::getNodeStats(Node *node) {
 	qDebug() << "pParent: " << node->pParent << "\tpLeft_child: " << node->pLeftChild << "\tpRight_child: " << node->pRightChild;
 	qDebug() << "operation: [" << node->pLeftChild->strValue << " (" << node->pLeftChild->doubleValue << ")] " << node->mathOperation << " ["
-	         << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
+			 << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
 }
 

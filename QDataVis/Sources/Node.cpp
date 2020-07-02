@@ -16,6 +16,11 @@ Node::Node(QString &aInput, Node *aParent) {
 	}
 }
 
+Node::~Node() {
+	delete pParent;
+	delete pLeftChild;
+	delete pRightChild;
+}
 
 bool Node::createChildren(QString string) {
 	// returns true if split successful, otherwise false

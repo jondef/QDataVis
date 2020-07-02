@@ -21,7 +21,7 @@ public:
 
 	explicit QPenDialog(const QPen &initial, QWidget *parent = nullptr);
 
-	~QPenDialog();
+	~QPenDialog() override;
 
 	void setCurrentPen(const QPen &apen);
 
