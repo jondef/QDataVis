@@ -47,6 +47,7 @@ public slots:
 
 	void replyFini(QNetworkReply *reply);
 
+	void updateColors(bool checked);
 
 private:
 	friend class PlotPropertiesWindow;
@@ -76,6 +77,7 @@ private:
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 
 	QPointF getClosestPoint(QCPGraph *graph, QPoint point);
+
 };
 
 

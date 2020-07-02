@@ -33,8 +33,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	setWindowIcon(QIcon(":/images/QDataVis"));
 
-	ui->customPlot->updateColors();
-
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [this]() {
 		ui->customPlot->xAxis->setRange(-10, 10);
 		ui->customPlot->yAxis->setRange(-10, 10);
@@ -77,15 +75,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	});
 
 
-//	connect(ui->QPushButton_FormattingHelp, &QPushButton::clicked, this, [this]() {
-//
-//		QElapsedTimer timer;
-//		timer.start();
-//
-//		qDebug() << "The operation took" << timer.nsecsElapsed() << "nanoseconds";
-//		qDebug() << "The operation took" << timer.elapsed() << "milliseconds";
-//	});
-
 //	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(replotGraphsOnRangeChange(QMouseEvent * )));
 //	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(replotGraphsOnRangeChange()));
 	connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(replotGraphsOnRangeChange(QCPRange)));
@@ -93,19 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 //	connect(ui->customPlot, &QCustomPlot::mousePress, ui->customPlot, &MainWindow::traceGraph);
 //	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
 
-	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, [this](bool checked) {
-		setAutoFillBackground(true);
-		if (checked) { // enabled dark mode // window = background, windowText = foreground
-			QPalette pal = QApplication::palette();
-			pal.setColor(QPalette::Window, QApplication::palette().color(foregroundRole()));
-			pal.setColor(QPalette::WindowText, QApplication::palette().color(backgroundRole()));
-			QApplication::setPalette(pal);
-		} else { // dark mode disabled
-			QApplication::setPalette(QApplication::style()->standardPalette());
-		}
-		qDebug() << "Dark mode enabled:" << checked;
-		ui->customPlot->updateColors();
-	});
+	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
 
 //	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
@@ -116,25 +93,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
 
-	connect(ui->actionProperies, &QAction::triggered, this, [this]() {
+	connect(ui->actionProperties, &QAction::triggered, this, [this]() {
 		plotWindow->show();
 		plotWindow->raise(); // bring it to front
 		plotWindow->activateWindow(); // select it
 		plotWindow->setWindowState(plotWindow->windowState() & ~Qt::WindowMinimized | Qt::WindowActive); // set to active
 	});
 
-	// todo: add ui->customPlot->xAxis->antialiased();
-	// todo: add theme https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
-	// todo: add theme https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
 
 
 	//ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
 	//ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
 
-
-	connect(plotWindow, &PlotPropertiesWindow::windowClosed, this, [this]() {
-		qDebug() << "saved";
-	});
 //	dumpObjectInfo();
 //	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
 //	qDebug() << __FILE__ <<  __LINE__ << Q_FUNC_INFO;
@@ -144,6 +114,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	// We get the data, namely JSON file from a site on a particular url
 	//networkManager->get(QNetworkRequest(QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
 //	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
+
+	// emit the signal of the checkbox to update the plot colors
+	emit(ui->checkBox_settingsDarkMode->toggled(false));
 }
 
 
@@ -151,6 +124,19 @@ MainWindow::~MainWindow() {
 	delete ui;
 }
 
+void MainWindow::updateColors(bool checked) {
+	setAutoFillBackground(true);
+	if (checked) { // enabled dark mode // window = background, windowText = foreground
+		QPalette pal = QApplication::palette();
+		pal.setColor(QPalette::Window, QApplication::palette().color(foregroundRole()));
+		pal.setColor(QPalette::WindowText, QApplication::palette().color(backgroundRole()));
+		QApplication::setPalette(pal);
+	} else { // dark mode disabled
+		QApplication::setPalette(QApplication::style()->standardPalette());
+	}
+	ui->customPlot->updateColors();
+	qDebug() << "Dark mode enabled:" << checked;
+}
 
 void MainWindow::GraphParametersChanged() {
 //	auto functions = QList<QString>();
