@@ -121,6 +121,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 MainWindow::~MainWindow() {
 	delete ui;
+	delete plotWindow;
+	delete pointGraphDialog;
+	delete mFunctionGraph;
 }
 
 /**

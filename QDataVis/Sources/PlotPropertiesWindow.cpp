@@ -46,6 +46,12 @@ PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), u
 
 PlotPropertiesWindow::~PlotPropertiesWindow() {
 	delete ui;
+	delete graphTextElements;
+	delete titleFontDialog;
+	delete titleColorDialog;
+	delete popUpColorDialog;
+	delete popUpFontDialog;
+	delete popUpPenDialog;
 }
 
 void PlotPropertiesWindow::showEvent(QShowEvent *event) {
