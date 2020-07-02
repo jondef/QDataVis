@@ -1074,7 +1074,7 @@ void PlotPropertiesWindow::setUpGeneralPageConnections() {
 	connect(ui->pushButton_setBackgroundColor, &QPushButton::clicked, this, [this]() {
 		disconnect(popUpColorDialog, &QColorDialog::currentColorChanged, nullptr, nullptr);
 		popUpColorDialog->setCurrentColor(
-				dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->background().toImage().pixelColor(0, 0)); // fixme: doesn't work
+				QApplication::palette().color(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->backgroundRole()));
 		popUpColorDialog->open();
 		connect(popUpColorDialog, &QColorDialog::currentColorChanged, this, [this]() {
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->setBackground(QBrush(popUpColorDialog->currentColor()));

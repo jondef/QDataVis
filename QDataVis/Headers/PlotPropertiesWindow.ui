@@ -30,7 +30,7 @@
                         <enum>QTabWidget::Rounded</enum>
                     </property>
                     <property name="currentIndex">
-                        <number>0</number>
+                        <number>1</number>
                     </property>
                     <widget class="QWidget" name="tab_2">
                         <attribute name="title">
@@ -315,6 +315,9 @@
                                                                                             <horstretch>0</horstretch>
                                                                                             <verstretch>0</verstretch>
                                                                                         </sizepolicy>
+                                                                                    </property>
+                                                                                    <property name="focusPolicy">
+                                                                                        <enum>Qt::WheelFocus</enum>
                                                                                     </property>
                                                                                     <property name="toolTip">
                                                                                         <string>Tick rotation</string>
@@ -628,6 +631,9 @@
                                                                             </item>
                                                                             <item>
                                                                                 <widget class="QSpinBox" name="spinBox_xAxis_setLabelPadding">
+                                                                                    <property name="focusPolicy">
+                                                                                        <enum>Qt::WheelFocus</enum>
+                                                                                    </property>
                                                                                     <property name="toolTip">
                                                                                         <string>Label padding</string>
                                                                                     </property>
