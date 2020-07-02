@@ -90,6 +90,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::GraphParametersChanged);
 
+
+	// * menubar connections
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
 
@@ -100,20 +102,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		plotWindow->setWindowState(plotWindow->windowState() & ~Qt::WindowMinimized | Qt::WindowActive); // set to active
 	});
 
+	connect(ui->actionHelp, &QAction::triggered, this, [this]() {
+		QMessageBox::information(this, "Help", "Not implemented");
+	});
+	connect(ui->actionAbout, &QAction::triggered, this, [this]() {
+		QMessageBox::information(this, "About", "this");
+	});
+
 
 
 	//ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
 	//ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
-
-//	dumpObjectInfo();
-//	qDebug() << Q_FUNC_INFO << "Item too large for memory, setting invisible";
-//	qDebug() << __FILE__ <<  __LINE__ << Q_FUNC_INFO;
-//	qDebug() << __FILE__ <<  __LINE__ << Q_FUNC_INFO;
-	// Connect networkManager response to the handler
-	//connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::onResult);
-	// We get the data, namely JSON file from a site on a particular url
-	//networkManager->get(QNetworkRequest(QUrl("https://poloniex.com/public?command=returnChartData&currencyPair=USDT_BTC&start=1405699200&end=9999999999&period=14400")));
-//	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
 
 	// emit the signal of the checkbox to update the plot colors
 	emit(ui->checkBox_settingsDarkMode->toggled(false));
@@ -160,79 +159,6 @@ QColor MainWindow::getGraphColor(int colorIndex) {
 }
 
 
-void MainWindow::onResult(QNetworkReply *reply) {
-	// If there are no errors
-	if (!reply->error()) {
-
-		// So create an object Json Document, by reading into it all the data from the response
-		QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
-		QJsonArray array = document.array();
-
-		QVector<double> date;
-		QVector<double> avg;
-		QVector<double> low;
-		QVector<double> high;
-
-		// Taking from the document root object
-		QJsonObject root = document.object();
-		for (auto &&transactions : array) {
-			date.append(transactions.toObject().take("date").toInt());
-			avg.append(transactions.toObject().take("weightedAverage").toDouble());
-			high.append(transactions.toObject().take("high").toDouble());
-			low.append(transactions.toObject().take("low").toDouble());
-		}
-		qDebug() << array.size();
-
-		QPen graphPen;
-		graphPen.setColor(QColor(colors.at(0)));
-		graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
-
-		// * high
-//		mFunctionGraph->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-//		mFunctionGraph->lastKey()->setData(date, high);
-//		graphPen.setColor(QColor(colors.at(2)));
-//		mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
-//		// * low
-//		mFunctionGraph->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-//		mFunctionGraph->lastKey()->setData(date, low);
-//		graphPen.setColor(QColor(colors.at(1)));
-//		mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
-//		// * avg
-//		mFunctionGraph->append(new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis));
-//		mFunctionGraph->lastKey()->setData(date, avg);
-//		graphPen.setColor(QColor(colors.at(0)));
-//		mFunctionGraph->lastKey()->setPen(graphPen); // apply color to graph
-
-		ui->customPlot->replot();
-
-		/* We find the object "departament", which is the very first in the root object.
-		 * Use the keys() method gets a list of all objects and the first index
-		 * Take away the name of the object on which we obtain its value
-		 * */
-//		ui->textEdit->append(root.keys().at(0) + ": " + root.value(root.keys().at(0)).toString());
-//
-//		// The second value prescribe line
-//		QJsonValue jv = root.value("employees");
-//		// If the value is an array, ...
-//		if (jv.isArray()) {
-//			// ... then pick from an array of properties
-//			QJsonArray ja = jv.toArray();
-//			// Going through all the elements of the array ...
-//			for (int i = 0; i < ja.count(); i++) {
-//				QJsonObject subtree = ja.at(i).toObject();
-//				// Taking the values of the properties and last name by adding them to textEdit
-//				ui->textEdit->append(subtree.value("firstName").toString() +
-//									 " " +
-//									 subtree.value("lastName").toString());
-//			}
-//		}
-//		// At the end we take away the property of the number of employees of the department and also to output textEdit
-//		ui->textEdit->append(QString::number(root.value("number").toInt()));
-	}
-	reply->deleteLater();
-}
-
-
 void MainWindow::replotGraphsOnRangeChange(QCPRange range) {
 	QVector<double> xArray = generateXArray(range.lower, range.upper, POINT_DENSITY);
 	static QVector<double> yArray(xArray.length());
@@ -244,30 +170,9 @@ void MainWindow::replotGraphsOnRangeChange(QCPRange range) {
 	ui->customPlot->replot();
 }
 
-
-//	networkManager->get(QNetworkRequest(QUrl("https://hacker-news.firebaseio.com/v0/newstories.json")));
-//	networkManager->get(QNetworkRequest(QUrl("http://www.evileg.ru/it_example.json")));
-
-
-
-//	QNetworkRequest request(QUrl("https://httpbin.org/get"));
-//	QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-//	connect(manager, SIGNAL(finished(QNetworkReply * )), this, SLOT(replyFini(QNetworkReply * )));
-//	connect(manager, &QNetworkAccessManager::finished, manager, &QNetworkAccessManager::deleteLater);
-//	manager->get(request);
-
-void MainWindow::replyFini(QNetworkReply *reply) {
-	QString answer = QString::fromUtf8(reply->readAll());
-	qDebug() << "answer------------>" << answer;
-	qDebug() << QSslSocket::supportsSsl();
-	reply->deleteLater();
-}
-// todo: implement ui->customPlot->xAxis->setPadding(value);
-
 void MainWindow::statusBarMsg(const QString &msg, int time) {
 	ui->statusBar->showMessage(msg, time);
 }
-
 
 void MainWindow::savePlotImage() {
 	// fixme: save as jpg doesn't correctly save in release mode
@@ -276,13 +181,11 @@ void MainWindow::savePlotImage() {
 	if (savePathFilename.isEmpty()) {
 		return;
 	}
-
 	QFile file(savePathFilename);
 
 	if (!file.open(QIODevice::WriteOnly)) {
 		QMessageBox::warning(nullptr, "Error", tr("\n Could not create image file on disk"));
 	}
-
 	QString ext = savePathFilename.mid(savePathFilename.length() - 4);
 	bool savedOk = false;
 	if (ext == ".png") {
@@ -294,12 +197,10 @@ void MainWindow::savePlotImage() {
 	} else if (ext == ".pdf") {
 		savedOk = ui->customPlot->savePdf(savePathFilename, 0, 0, QCP::epAllowCosmetic, QString(""), QString("Title"));
 	}
-
 	if (savedOk) {
 		statusBarMsg(QString("Successfully saved plot as a %1 file").arg(ext), 5000);
 	}
 }
-
 
 void MainWindow::QLineEdit_addFunction_returnPressed() {
 	QString text = ui->QLineEdit_addFunction->text();
@@ -390,7 +291,6 @@ void MainWindow::QPushButton_deleteFunction_clicked() {
 		statusBarMsg("Please select a function");
 		return;
 	}
-
 	mFunctionGraph->remove(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
 	ui->customPlot->removeGraph(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
 	delete selectedItem;
@@ -407,7 +307,6 @@ QVector<double> MainWindow::generateXArray(double lowerLim, double upperLim, uns
 	for (unsigned int i = 0; i < length; i++) {
 		finalArray[i] = lowerLim + increment * i;
 	}
-
 	return finalArray;
 }
 

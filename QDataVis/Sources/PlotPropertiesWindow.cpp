@@ -6,6 +6,8 @@
 #include "PlotPropertiesWindow.hpp"
 #include "QCustomPlot_custom.hpp"
 
+// todo: implement ui->customPlot->xAxis->setPadding(value);
+
 PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), ui(new Ui::uiPlotPropertiesWindow) {
 	ui->setupUi(this);
 

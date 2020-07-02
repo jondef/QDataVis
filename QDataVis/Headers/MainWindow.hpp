@@ -43,10 +43,6 @@ public slots:
 
 	void savePlotImage();
 
-	void onResult(QNetworkReply *reply);
-
-	void replyFini(QNetworkReply *reply);
-
 	void updateColors(bool checked);
 
 private:
@@ -70,7 +66,6 @@ public:
 	static int globalPointDensity;
 
 private:
-	QNetworkAccessManager *networkManager = new QNetworkAccessManager();
 
 	void statusBarMsg(const QString &msg, int time = 2000);
 

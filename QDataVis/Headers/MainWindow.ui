@@ -193,9 +193,9 @@
                 <property name="title">
                     <string>Help</string>
                 </property>
-                <addaction name="actionAbout"/>
+                <addaction name="actionHelp"/>
                 <addaction name="separator"/>
-                <addaction name="actionAbout_2"/>
+                <addaction name="actionAbout"/>
             </widget>
             <widget class="QMenu" name="menuGraph">
                 <property name="title">
@@ -218,12 +218,12 @@
                 <string>Copy</string>
             </property>
         </action>
-        <action name="actionAbout">
+        <action name="actionHelp">
             <property name="text">
                 <string>Show Help</string>
             </property>
         </action>
-        <action name="actionAbout_2">
+        <action name="actionAbout">
             <property name="text">
                 <string>About</string>
             </property>
