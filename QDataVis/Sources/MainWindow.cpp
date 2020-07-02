@@ -33,6 +33,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	setWindowIcon(QIcon(":/images/QDataVis"));
 
+	plotWindow->setUpAxesPageConnections();
+	plotWindow->setUpGeneralPageConnections();
+	plotWindow->setUpTitlePageConnections();
+
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [this]() {
 		ui->customPlot->xAxis->setRange(-10, 10);
 		ui->customPlot->yAxis->setRange(-10, 10);
@@ -54,8 +58,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
 		if (selectedItem) {
 			ui->customPlot->removeGraph(selectedItem->data(Qt::UserRole).value<QCPGraph *>());
-			delete selectedItem->data(Qt::UserRole).value<QCPGraph *>();
-			delete ui->listWidget_PointGraphList->currentItem();
+			delete selectedItem;
 			ui->customPlot->replot();
 		}
 	});
@@ -88,20 +91,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
 
-	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::GraphParametersChanged);
-
+	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::globalPointDensityChanged);
 
 	// * menubar connections
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
-
 	connect(ui->actionProperties, &QAction::triggered, this, [this]() {
 		plotWindow->show();
 		plotWindow->raise(); // bring it to front
 		plotWindow->activateWindow(); // select it
 		plotWindow->setWindowState(plotWindow->windowState() & ~Qt::WindowMinimized | Qt::WindowActive); // set to active
 	});
-
 	connect(ui->actionHelp, &QAction::triggered, this, [this]() {
 		QMessageBox::information(this, "Help", "Not implemented");
 	});
@@ -114,11 +114,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 								 "Git branch: " GIT_BRANCH);
 	});
 
-
-
-	//ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
-	//ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
-
 	// emit the signal of the checkbox to update the plot colors
 	emit(ui->checkBox_settingsDarkMode->toggled(false));
 }
@@ -128,6 +123,10 @@ MainWindow::~MainWindow() {
 	delete ui;
 }
 
+/**
+ * This function enables or disables dark mode
+ * @param checked: checkbox checked?
+ */
 void MainWindow::updateColors(bool checked) {
 	setAutoFillBackground(true);
 	if (checked) { // enabled dark mode // window = background, windowText = foreground
@@ -142,7 +141,11 @@ void MainWindow::updateColors(bool checked) {
 	qDebug() << "Dark mode enabled:" << checked;
 }
 
-void MainWindow::GraphParametersChanged() {
+/**
+ * This method iterates over plotted functions and checks if they are overriding
+ * global point density. If they're not, re-plot them with the new density
+ */
+void MainWindow::globalPointDensityChanged(int density) {
 //	auto functions = QList<QString>();
 //	// save the functions in the added order
 //	for (int i = 0; i < mFunctionGraph->length(); ++i) {

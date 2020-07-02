@@ -9,6 +9,8 @@
 #ifndef GUI_APP_QCUSTOMPLOT_CUSTOM_H
 #define GUI_APP_QCUSTOMPLOT_CUSTOM_H
 
+#define QCUSTOMPLOT_USE_OPENGL // use openGL
+
 #include "qcustomplot.h"
 
 struct QCPCursor {

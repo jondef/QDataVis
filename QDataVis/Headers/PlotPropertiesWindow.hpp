@@ -32,18 +32,17 @@ signals:
 
 public slots:
 
+	void setUpAxesPageConnections();
+
+	void setUpTitlePageConnections();
+
+	void setUpGeneralPageConnections();
 
 private slots:
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 
 	void okButtonPressed();
-
-	void setUpAxesPageConnections();
-
-	void setUpTitlePageConnections();
-
-	void setUpGeneralPageConnections();
 
 private:
 

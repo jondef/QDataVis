@@ -19,21 +19,19 @@
 #include "PointWindow.hpp"
 
 
-#define QCUSTOMPLOT_USE_OPENGL // use openGL
-
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 
-	~MainWindow();
+	~MainWindow() override;
 
 public slots:
 
 	void replotGraphsOnRangeChange(QCPRange range);
 
-	void GraphParametersChanged();
+	void globalPointDensityChanged(int density);
 
 	void QLineEdit_addFunction_returnPressed();
 

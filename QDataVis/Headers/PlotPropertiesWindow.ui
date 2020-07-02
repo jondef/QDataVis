@@ -30,7 +30,7 @@
                         <enum>QTabWidget::Rounded</enum>
                     </property>
                     <property name="currentIndex">
-                        <number>4</number>
+                        <number>0</number>
                     </property>
                     <widget class="QWidget" name="tab_2">
                         <attribute name="title">
@@ -100,7 +100,7 @@
                                             </brush>
                                         </property>
                                         <property name="flags">
-                                            <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsEnabled</set>
+                                            <set>ItemIsSelectable|ItemIsDragEnabled</set>
                                         </property>
                                     </item>
                                 </widget>
@@ -155,8 +155,8 @@
                                             <rect>
                                                 <x>0</x>
                                                 <y>0</y>
-                                                <width>684</width>
-                                                <height>931</height>
+                                                <width>804</width>
+                                                <height>1164</height>
                                             </rect>
                                         </property>
                                         <layout class="QGridLayout" name="gridLayout_2">

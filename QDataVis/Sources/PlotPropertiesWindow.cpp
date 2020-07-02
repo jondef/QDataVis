@@ -7,6 +7,8 @@
 #include "QCustomPlot_custom.hpp"
 
 // todo: implement ui->customPlot->xAxis->setPadding(value);
+//ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
+//ui->customPlot->yAxis->setNumberPrecision(0); // makes sure "1*10^4" is displayed only as "10^4"
 
 PlotPropertiesWindow::PlotPropertiesWindow(QWidget *parent) : QWidget(parent), ui(new Ui::uiPlotPropertiesWindow) {
 	ui->setupUi(this);
@@ -48,9 +50,6 @@ PlotPropertiesWindow::~PlotPropertiesWindow() {
 
 void PlotPropertiesWindow::showEvent(QShowEvent *event) {
 	QWidget::showEvent(event);
-	setUpAxesPageConnections();
-	setUpGeneralPageConnections();
-	setUpTitlePageConnections();
 }
 
 void PlotPropertiesWindow::okButtonPressed() {
@@ -89,7 +88,7 @@ void PlotPropertiesWindow::changeAxisTicker(QCPAxis *axis, const QString &value)
 }
 
 
-inline void PlotPropertiesWindow::setUpAxesPageConnections() {
+void PlotPropertiesWindow::setUpAxesPageConnections() {
 	// * set axis visible
 	connect(ui->groupBox_xAxis_setVisible, &QGroupBox::toggled, this, [this](bool checked) {
 		dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->xAxis->setVisible(checked);
@@ -882,7 +881,7 @@ inline void PlotPropertiesWindow::setUpAxesPageConnections() {
 }
 
 
-inline void PlotPropertiesWindow::setUpTitlePageConnections() {
+void PlotPropertiesWindow::setUpTitlePageConnections() {
 	// * add title button clicked
 	connect(ui->pushButton_addTitle, &QPushButton::clicked, this, [this]() {
 		ui->listWidget_titleList->addItem("Title");
@@ -926,10 +925,12 @@ inline void PlotPropertiesWindow::setUpTitlePageConnections() {
 	// * update the widgets on the right when a title is clicked
 	connect(ui->listWidget_titleList, &QListWidget::itemClicked, this, [this](QListWidgetItem *item) {
 		QCPTextElement *titleElement = graphTextElements->value(item);
-		// update QFontWidget
-		titleFontDialog->setCurrentFont(titleElement->font());
-		// update QColorWidget
-		titleColorDialog->setCurrentColor(titleElement->textColor());
+		if (titleElement) {
+			// update QFontWidget
+			titleFontDialog->setCurrentFont(titleElement->font());
+			// update QColorWidget
+			titleColorDialog->setCurrentColor(titleElement->textColor());
+		}
 	});
 
 	// * when user changed font in QFontDialog - any font option
@@ -982,7 +983,7 @@ inline void PlotPropertiesWindow::setUpTitlePageConnections() {
 }
 
 
-inline void PlotPropertiesWindow::setUpGeneralPageConnections() {
+void PlotPropertiesWindow::setUpGeneralPageConnections() {
 	connect(ui->checkBox_MultiSelect, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->setInteractions(
