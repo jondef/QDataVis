@@ -57,7 +57,6 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 
 void QCustomPlot_custom::updateColors() {
 	setBackground(QBrush(QApplication::palette().color(backgroundRole())));
-
 	QColor foregroundColor = QApplication::palette().color(foregroundRole());
 	QPen foregroundPen = QPen(foregroundColor);
 

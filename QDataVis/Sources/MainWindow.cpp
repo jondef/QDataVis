@@ -94,77 +94,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 //	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
 
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, [this](bool checked) {
-		if (checked) { // enable dark mode
-			// from: https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
-			// set style
-//			qApp->setStyle(QStyleFactory::create("Fusion"));
-			// increase font size for better reading
-			QFont defaultFont = QApplication::font();
-			defaultFont.setPointSize(defaultFont.pointSize());
-			qApp->setFont(defaultFont);
-			// modify palette to dark
-			QPalette darkPalette;
-			darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
-			darkPalette.setColor(QPalette::WindowText, Qt::white);
-			darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
-			darkPalette.setColor(QPalette::Base, QColor(42, 42, 42));
-			darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
-			darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-			darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-			darkPalette.setColor(QPalette::Text, Qt::white);
-			darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
-			darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
-			darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
-			darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
-			darkPalette.setColor(QPalette::ButtonText, Qt::white);
-			darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
-			darkPalette.setColor(QPalette::BrightText, Qt::red);
-			darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-			darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-			darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
-			darkPalette.setColor(QPalette::HighlightedText, Qt::white);
-			darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
-			qApp->setPalette(darkPalette);
-
-			// set plot colors
-			ui->customPlot->setBackground(QBrush(QColor(53, 53, 53)));
-			QPen pen = ui->customPlot->xAxis->tickPen();
-			QColor color = QColor(255, 255, 255);
-			pen.setColor(QColor(255, 255, 255));
-			QVector < QCPAxis * > axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
-			for (auto &i : axes) {
-				i->setTickPen(pen);
-//				i->grid()->setPen(pen);
-//				i->grid()->setSubGridPen(pen);
-				i->setSubTickPen(pen);
-				i->setBasePen(pen);
-				i->setLabelColor(color);
-				i->setTickLabelColor(color);
-			}
-			ui->customPlot->replot();
-		} else {
-			qApp->setPalette(QApplication::style()->standardPalette());
-			QFont defaultFont = QApplication::font();
-			defaultFont.setFamily(defaultFont.defaultFamily());
-			defaultFont.setPointSize(8); // 8 is the default font size
-			qApp->setFont(defaultFont);
-
-			ui->customPlot->setBackground(QBrush(QColor(255, 255, 255)));
-			QPen pen = ui->customPlot->xAxis->tickPen();
-			QColor color = QColor(0, 0, 0);
-			pen.setColor(QColor(0, 0, 0));
-			QVector < QCPAxis * > axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
-			for (auto &i : axes) {
-				i->setTickPen(pen);
-//				i->grid()->setPen(pen);
-//				i->grid()->setSubGridPen(pen);
-				i->setSubTickPen(pen);
-				i->setBasePen(pen);
-				i->setLabelColor(color);
-				i->setTickLabelColor(color);
-			}
-			ui->customPlot->replot();
+		setAutoFillBackground(true);
+		if (checked) { // enabled dark mode // window = background, windowText = foreground
+			QPalette pal = QApplication::palette();
+			pal.setColor(QPalette::Window, QApplication::palette().color(foregroundRole()));
+			pal.setColor(QPalette::WindowText, QApplication::palette().color(backgroundRole()));
+			QApplication::setPalette(pal);
+		} else { // dark mode disabled
+			QApplication::setPalette(QApplication::style()->standardPalette());
 		}
+		qDebug() << "Dark mode enabled:" << checked;
+		ui->customPlot->updateColors();
 	});
 
 //	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
