@@ -106,7 +106,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		QMessageBox::information(this, "Help", "Not implemented");
 	});
 	connect(ui->actionAbout, &QAction::triggered, this, [this]() {
-		QMessageBox::information(this, "About", "this");
+		QMessageBox::information(this, "About",
+								 "Version: " VERSION "\n"
+								 "Build date: " BUILDDATE "\n"
+								 "git commit date: " GIT_COMMIT_DATE "\n"
+								 "git commit hash: " GIT_COMMIT_HASH "\n"
+								 "Git branch: " GIT_BRANCH);
 	});
 
 
