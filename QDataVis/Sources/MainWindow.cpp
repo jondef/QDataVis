@@ -33,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	setWindowIcon(QIcon(":/images/QDataVis"));
 
+	ui->customPlot->updateColors();
+
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [this]() {
 		ui->customPlot->xAxis->setRange(-10, 10);
 		ui->customPlot->yAxis->setRange(-10, 10);
@@ -95,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		if (checked) { // enable dark mode
 			// from: https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle
 			// set style
-			qApp->setStyle(QStyleFactory::create("Fusion"));
+//			qApp->setStyle(QStyleFactory::create("Fusion"));
 			// increase font size for better reading
 			QFont defaultFont = QApplication::font();
 			defaultFont.setPointSize(defaultFont.pointSize());
@@ -129,7 +131,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 			QPen pen = ui->customPlot->xAxis->tickPen();
 			QColor color = QColor(255, 255, 255);
 			pen.setColor(QColor(255, 255, 255));
-			QVector<QCPAxis *> axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
+			QVector < QCPAxis * > axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
 			for (auto &i : axes) {
 				i->setTickPen(pen);
 //				i->grid()->setPen(pen);
@@ -139,7 +141,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 				i->setLabelColor(color);
 				i->setTickLabelColor(color);
 			}
-
 			ui->customPlot->replot();
 		} else {
 			qApp->setPalette(QApplication::style()->standardPalette());
@@ -152,7 +153,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 			QPen pen = ui->customPlot->xAxis->tickPen();
 			QColor color = QColor(0, 0, 0);
 			pen.setColor(QColor(0, 0, 0));
-			QVector<QCPAxis *> axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
+			QVector < QCPAxis * > axes = {ui->customPlot->xAxis, ui->customPlot->xAxis2, ui->customPlot->yAxis, ui->customPlot->yAxis2};
 			for (auto &i : axes) {
 				i->setTickPen(pen);
 //				i->grid()->setPen(pen);
@@ -162,7 +163,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 				i->setLabelColor(color);
 				i->setTickLabelColor(color);
 			}
-
 			ui->customPlot->replot();
 		}
 	});

@@ -51,9 +51,26 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	graphTracer->setInterpolating(true);
 //	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
 
-
 	connect(this, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(traceGraph(QMouseEvent * )));
 	initGraph();
+}
+
+void QCustomPlot_custom::updateColors() {
+	setBackground(QBrush(QApplication::palette().color(backgroundRole())));
+
+	QColor foregroundColor = QApplication::palette().color(foregroundRole());
+	QPen foregroundPen = QPen(foregroundColor);
+
+	for (QCPAxis *i : {xAxis, xAxis2, yAxis, yAxis2}) {
+		i->setTickPen(foregroundPen);
+		i->grid()->setPen(foregroundPen);
+		i->grid()->setSubGridPen(foregroundPen);
+		i->setSubTickPen(foregroundPen);
+		i->setBasePen(foregroundPen);
+		i->setLabelColor(foregroundColor);
+		i->setTickLabelColor(foregroundColor);
+	}
+	replot();
 }
 
 void QCustomPlot_custom::initGraph() {

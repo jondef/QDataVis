@@ -63,6 +63,8 @@ public slots:
 	void plotContextMenuRemoveSelectedGraph();
 
 	void plotMoveLegend();
+
+	void updateColors();
 };
 
 
