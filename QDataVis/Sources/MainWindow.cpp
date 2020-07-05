@@ -15,16 +15,16 @@ static std::mutex graphMutex;
 Q_DECLARE_METATYPE(std::shared_ptr<QCPGraph>)
 
 static const QList<QColor> colors = {
-		QColor(qRgb(31, 119, 180)),
-		QColor(qRgb(255, 127, 14)),
-		QColor(qRgb(44, 160, 44)),
-		QColor(qRgb(214, 39, 40)),
-		QColor(qRgb(148, 103, 189)),
-		QColor(qRgb(140, 86, 75)),
-		QColor(qRgb(244, 119, 194)),
-		QColor(qRgb(127, 127, 127)),
-		QColor(qRgb(188, 189, 34)),
-		QColor(qRgb(23, 190, 207))
+		QColor(31, 119, 180),
+		QColor(255, 127, 14),
+		QColor(44, 160, 44),
+		QColor(214, 39, 40),
+		QColor(148, 103, 189),
+		QColor(140, 86, 75),
+		QColor(244, 119, 194),
+		QColor(127, 127, 127),
+		QColor(188, 189, 34),
+		QColor(23, 190, 207)
 };
 
 
