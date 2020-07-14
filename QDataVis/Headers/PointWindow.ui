@@ -52,7 +52,7 @@
      <item row="2" column="0" colspan="2">
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Override domain point</string>
+        <string>Override point domain</string>
        </property>
        <property name="checkable">
         <bool>true</bool>

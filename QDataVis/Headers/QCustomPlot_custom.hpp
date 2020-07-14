@@ -12,6 +12,7 @@
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
 
 #include "qcustomplot.h"
+#include "Graph.hpp"
 
 struct QCPCursor {
 	QCPItemLine *hLine;
@@ -25,7 +26,7 @@ Q_OBJECT
 public:
 	explicit QCustomPlot_custom(QWidget *parent = nullptr);
 
-	~QCustomPlot_custom() override;
+	~QCustomPlot_custom();
 
 public:
 	void manageCursor(double x, double y);
@@ -45,6 +46,8 @@ public slots:
 	void stickAxisToZeroLines();
 
 	void initGraph();
+
+	void centerPlot();
 
 public slots:
 

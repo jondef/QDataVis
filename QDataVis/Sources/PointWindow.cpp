@@ -78,7 +78,7 @@ void PointWindow::saveGraph() {
 	m_graph->setScatterStyle(static_cast<QCPScatterStyle::ScatterShape>(ui->comboBox_scatterStyle->currentData().toInt()));
 }
 
-void PointWindow::setGraph(QListWidgetItem *listWidgetItem, QCPGraph *const pGraph) {
+void PointWindow::setGraph(QListWidgetItem *listWidgetItem, QCPGraph *pGraph) {
 	m_listWidgetItem = listWidgetItem;
 	m_graph = pGraph;
 

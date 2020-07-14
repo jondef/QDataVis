@@ -54,18 +54,20 @@ private:
 private:
 	QHash<QCPGraph *, BinaryTree *> *mFunctionGraph = new QHash<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
 
+	QVector<Graph> plottables;
+
 	std::vector<std::future<void>> m_Futures;
 
 public:
 	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
 
-	static QColor getGraphColor(int colorIndex);
+	inline static QColor getGraphColor(int colorIndex);
 
 	static int globalPointDensity;
 
 private:
 
-	void statusBarMsg(const QString &msg, int time = 2000);
+	inline void statusBarMsg(const QString &msg, int time = 2000);
 
 	void changeAxisTicker(QCPAxis *axis, const QString &value);
 

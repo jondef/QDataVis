@@ -56,10 +56,11 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 }
 
 QCustomPlot_custom::~QCustomPlot_custom() {
-	delete cursorLayer;
+//	delete cursorLayer;
 	delete textLabel;
 	delete graphTracer;
 }
+
 
 void QCustomPlot_custom::updateColors() {
 	setBackground(QBrush(QApplication::palette().color(backgroundRole())));
@@ -89,7 +90,6 @@ void QCustomPlot_custom::initGraph() {
 	legend->setFont(legendFont);
 	legend->setSelectedFont(legendFont);
 	legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-
 
 	// ! GRAPH RELATED CONNECTIONS
 	// * axes configuration
@@ -136,6 +136,12 @@ void QCustomPlot_custom::onMouseMoveReplotCursor(QMouseEvent *event) {
 }
 
 
+void QCustomPlot_custom::centerPlot() {
+	xAxis->setRange(-10, 10);
+	yAxis->setRange(-10, 10);
+	replot();
+}
+
 void QCustomPlot_custom::stickAxisToZeroLines() {
 	this->axisRect()->setAutoMargins(QCP::msNone);
 
@@ -167,7 +173,6 @@ void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
 				textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
 			}
 			it = selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
-
 		}
 		graphTracer->setVisible(true);
 		graphTracer->setGraph(selectedGraphs().first());
@@ -203,8 +208,7 @@ void QCustomPlot_custom::manageCursor(double x, double y) {
 
 void QCustomPlot_custom::plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part) {
 	// Set an axis label by double clicking on it
-	if (part == QCPAxis::spAxisLabel) // only react when the actual axis label is clicked, not tick label or axis backbone
-	{
+	if (part == QCPAxis::spAxisLabel) { // only react when the actual axis label is clicked, not tick label or axis backbone
 		bool ok;
 		QString newLabel = QInputDialog::getText(this, "QCustomPlot example", "New axis label:", QLineEdit::Normal,
 												 axis->label(), &ok);
@@ -218,8 +222,7 @@ void QCustomPlot_custom::plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::Select
 void QCustomPlot_custom::plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item) {
 	// Rename a graph by double clicking on its legend item
 	Q_UNUSED(legend)
-	if (item) // only react if item was clicked (user could have clicked on border padding of legend where there is no item, then item is 0)
-	{
+	if (item) { // only react if item was clicked (user could have clicked on border padding of legend where there is no item, then item is 0)
 		QCPPlottableLegendItem *plItem = qobject_cast<QCPPlottableLegendItem *>(item);
 		bool ok;
 		QString newName = QInputDialog::getText(this, "QCustomPlot example", "New graph name:", QLineEdit::Normal,
@@ -232,9 +235,8 @@ void QCustomPlot_custom::plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstra
 }
 
 void QCustomPlot_custom::plotMoveLegend() {
-	if (QAction *contextAction = qobject_cast<QAction *>(
-			sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
-	{
+	// make sure this slot is really called by a context menu action, so it carries the data we need
+	if (QAction *contextAction = qobject_cast<QAction *>(sender())) {
 		bool ok;
 		int dataInt = contextAction->data().toInt(&ok);
 		if (ok) {
@@ -250,7 +252,7 @@ void QCustomPlot_custom::plotContextMenuRemoveAllGraphs() {
 }
 
 void QCustomPlot_custom::plotContextMenuRemoveSelectedGraph() {
-	if (this->selectedGraphs().size() > 0) {
+	if (!this->selectedGraphs().empty()) {
 		this->removeGraph(this->selectedGraphs().first());
 		this->replot();
 	}
@@ -259,10 +261,9 @@ void QCustomPlot_custom::plotContextMenuRemoveSelectedGraph() {
 void QCustomPlot_custom::plotAxisLockDrag() {
 	// if an axis is selected, only allow the direction of that axis to be dragged
 	// if no axis is selected, both directions may be dragged
-
-	if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis))
+	if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
 		this->axisRect()->setRangeDrag(this->xAxis->orientation());
-	else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+	} else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
 		this->axisRect()->setRangeDrag(this->yAxis->orientation());
 	} else {
 		this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
@@ -273,13 +274,13 @@ void QCustomPlot_custom::plotAxisLockDrag() {
 void QCustomPlot_custom::plotAxisLockZoom() {
 	// if an axis is selected, only allow the direction of that axis to be zoomed
 	// if no axis is selected, both directions may be zoomed
-
-	if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis))
+	if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
 		this->axisRect()->setRangeZoom(this->xAxis->orientation());
-	else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis))
+	} else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
 		this->axisRect()->setRangeZoom(this->yAxis->orientation());
-	else
+	} else {
 		this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+	}
 }
 
 
@@ -287,8 +288,7 @@ void QCustomPlot_custom::plotContextMenuRequest(QPoint pos) {
 	QMenu *menu = new QMenu(this);
 	menu->setAttribute(Qt::WA_DeleteOnClose);
 
-	if (this->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-	{
+	if (this->legend->selectTest(pos, false) >= 0) { // context menu on legend requested
 		menu->addAction("Move to top left", this, SLOT(plotMoveLegend()))->setData(
 				(int) (Qt::AlignTop | Qt::AlignLeft));
 		menu->addAction("Move to top center", this, SLOT(plotMoveLegend()))->setData(
@@ -299,15 +299,15 @@ void QCustomPlot_custom::plotContextMenuRequest(QPoint pos) {
 				(int) (Qt::AlignBottom | Qt::AlignRight));
 		menu->addAction("Move to bottom left", this, SLOT(plotMoveLegend()))->setData(
 				(int) (Qt::AlignBottom | Qt::AlignLeft));
-	} else  // general context menu on graphs requested
-	{
+	} else { // general context menu on graphs requested
 		menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
-		if (this->selectedGraphs().size() > 0)
+		if (!this->selectedGraphs().empty()) {
 			menu->addAction("Remove selected graph", this, SLOT(plotContextMenuRemoveSelectedGraph()));
-		if (this->graphCount() > 0)
+		}
+		if (this->graphCount() > 0) {
 			menu->addAction("Remove all graphs", this, SLOT(plotContextMenuRemoveAllGraphs()));
+		}
 	}
-
 	menu->popup(this->mapToGlobal(pos));
 }
 

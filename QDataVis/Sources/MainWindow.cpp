@@ -37,20 +37,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	plotWindow->setUpGeneralPageConnections();
 	plotWindow->setUpTitlePageConnections();
 
-	connect(ui->pushButton_centerPlot, &QPushButton::clicked, this, [this]() {
-		ui->customPlot->xAxis->setRange(-10, 10);
-		ui->customPlot->yAxis->setRange(-10, 10);
-		ui->customPlot->replot();
-	});
+	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlot_custom::centerPlot);
 
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, [this]() {
 		QListWidgetItem *pListWidgetItem = new QListWidgetItem();
 		pListWidgetItem->setText(QString("Graph #%1").arg(ui->listWidget_PointGraphList->count() + 1));
 
+		Graph grap;
+		grap.listWidgetItem = pListWidgetItem;
+
 		QCPGraph *graph = new QCPGraph(ui->customPlot->xAxis, ui->customPlot->yAxis);
 		QVariant var;
 		var.setValue(graph);
 		pListWidgetItem->setData(Qt::UserRole, var);
+		grap.graph = graph;
 		ui->listWidget_PointGraphList->addItem(pListWidgetItem);
 	});
 
@@ -85,13 +85,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 //	connect(ui->customPlot, &QCustomPlot::mousePress, ui->customPlot, &MainWindow::traceGraph);
 //	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
 
-	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
-
-//	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
+	// * function tab
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
 
 	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::globalPointDensityChanged);
+
+	// * points tab
+//	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
+
+	// * settings tab
+	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
 
 	// * menubar connections
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
@@ -109,8 +113,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		QMessageBox::information(this, "About",
 								 "Version: " VERSION "\n"
 								 "Build date: " BUILDDATE "\n"
-								 "git commit date: " GIT_COMMIT_DATE "\n"
-								 "git commit hash: " GIT_COMMIT_HASH "\n"
+								 "Git commit date: " GIT_COMMIT_DATE "\n"
+								 "Git commit hash: " GIT_COMMIT_HASH "\n"
 								 "Git branch: " GIT_BRANCH);
 	});
 
@@ -164,7 +168,7 @@ void MainWindow::globalPointDensityChanged(int density) {
 }
 
 
-QColor MainWindow::getGraphColor(int colorIndex) {
+inline QColor MainWindow::getGraphColor(int colorIndex) {
 	// only take the last digit of the index
 	return colors.at(colorIndex % 10);
 }
@@ -181,7 +185,7 @@ void MainWindow::replotGraphsOnRangeChange(QCPRange range) {
 	ui->customPlot->replot();
 }
 
-void MainWindow::statusBarMsg(const QString &msg, int time) {
+inline void MainWindow::statusBarMsg(const QString &msg, int time) {
 	ui->statusBar->showMessage(msg, time);
 }
 
