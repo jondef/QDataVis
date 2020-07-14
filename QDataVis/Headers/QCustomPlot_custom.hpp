@@ -37,6 +37,8 @@ public:
 	QCPItemText *textLabel = new QCPItemText(this);
 	QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
+	QList<Graph> plottables;
+
 public slots:
 
 	void onMouseMoveReplotCursor(QMouseEvent *event);

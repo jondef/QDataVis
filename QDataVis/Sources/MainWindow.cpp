@@ -37,8 +37,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	plotWindow->setUpGeneralPageConnections();
 	plotWindow->setUpTitlePageConnections();
 
+	// * graph doubled clicked
+	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
+	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
+
+	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
+		ui->customPlot->replot();
+	});
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlot_custom::centerPlot);
 
+
+	connect(ui->customPlot->xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this, &MainWindow::replotGraphsOnRangeChange);
+	// todo: hide the tracing things when user clicks, not when he moves mouse
+//	connect(ui->customPlot, &QCustomPlot::mousePress, ui->customPlot, &MainWindow::traceGraph);
+//	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
+
+	// * points tab
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, [this]() {
 		QListWidgetItem *pListWidgetItem = new QListWidgetItem();
 		pListWidgetItem->setText(QString("Graph #%1").arg(ui->listWidget_PointGraphList->count() + 1));
@@ -53,7 +67,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		grap.graph = graph;
 		ui->listWidget_PointGraphList->addItem(pListWidgetItem);
 	});
-
 	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, [this]() {
 		QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
 		if (selectedItem) {
@@ -63,36 +76,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		}
 	});
 
-	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
-		pointGraphDialog->setGraph(item, item->data(Qt::UserRole).value<QCPGraph *>());
-		pointGraphDialog->show();
-	});
-
-	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
-		pointGraphDialog->setGraph(item, item->data(Qt::UserRole).value<QCPGraph *>());
-		pointGraphDialog->show();
-	});
-
-	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
-		ui->customPlot->replot();
-	});
-
-
-//	connect(ui->customPlot, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(replotGraphsOnRangeChange(QMouseEvent * )));
-//	connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(replotGraphsOnRangeChange()));
-	connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(replotGraphsOnRangeChange(QCPRange)));
-	// todo: hide the tracing things when user clicks, not when he moves mouse
-//	connect(ui->customPlot, &QCustomPlot::mousePress, ui->customPlot, &MainWindow::traceGraph);
-//	connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(Test(QMouseEvent * )));
-
 	// * function tab
-	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::QLineEdit_addFunction_returnPressed);
-
+	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::QPushButton_deleteFunction_clicked);
 	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::globalPointDensityChanged);
-
-	// * points tab
-//	connect(ui->QPushButton_PlotPoints, &QPushButton::clicked, this, &MainWindow::QPushButton_PlotPoints_clicked);
 
 	// * settings tab
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
@@ -122,6 +109,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	emit(ui->checkBox_settingsDarkMode->toggled(false));
 }
 
+
+void MainWindow::graphDoubleClicked(QListWidgetItem *item) {
+	pointGraphDialog->setGraph(item, item->data(Qt::UserRole).value<QCPGraph *>());
+	pointGraphDialog->show();
+}
 
 MainWindow::~MainWindow() {
 	delete ui;

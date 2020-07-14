@@ -43,6 +43,8 @@ public slots:
 
 	void updateColors(bool checked);
 
+	void graphDoubleClicked(QListWidgetItem *item);
+
 private:
 	friend class PlotPropertiesWindow;
 
