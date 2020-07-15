@@ -54,7 +54,7 @@ public:
 
 	QList<DataSet *> mDataSets;
 
-	QCPGraph *selectedGraph;
+	QCPGraph *selectedGraph = nullptr;
 
 	int mGlobalPointDensity = 1000;
 

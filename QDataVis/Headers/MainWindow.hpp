@@ -50,12 +50,6 @@ private:
 	PointWindow *pointGraphDialog = new PointWindow(this);
 
 private:
-	std::vector<std::future<void>> m_Futures;
-
-public:
-
-
-private:
 	inline void statusBarMsg(const QString &msg, int time = 2000);
 };
 

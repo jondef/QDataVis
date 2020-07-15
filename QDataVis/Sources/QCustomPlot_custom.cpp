@@ -212,7 +212,9 @@ void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWi
 }
 
 void QCustomPlot_custom::deleteGraph(DataSet *graph) {
-	selectedGraphs();
+	// we need to set selectedGraph to nullptr in case it's selected
+	// to avoid a dangling pointer
+	selectedGraph = nullptr;
 
 	removeGraph(graph->graph);
 	mDataSets.removeOne(graph);
