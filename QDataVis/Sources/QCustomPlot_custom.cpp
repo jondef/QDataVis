@@ -175,7 +175,7 @@ void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWi
 
 	pDataSet->binaryTree = new BinaryTree(functionString);
 
-	QVector<double> xArray = generateXArray(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
+	QVector<double> xArray = DataSet::generateXArray(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
 	QVector<double> yArray = pDataSet->binaryTree->calculateTree(xArray);
 
 	pDataSet->name = functionString;
@@ -227,7 +227,7 @@ void QCustomPlot_custom::globalPointDensityChanged(int density) {
 }
 
 void QCustomPlot_custom::replotGraphsOnRangeChange(QCPRange range) {
-	QVector<double> xArray = generateXArray(range.lower, range.upper, mGlobalPointDensity);
+	QVector<double> xArray = DataSet::generateXArray(range.lower, range.upper, mGlobalPointDensity);
 	static QVector<double> yArray(xArray.length());
 
 	for (DataSet *graph : mDataSets) {
@@ -236,18 +236,6 @@ void QCustomPlot_custom::replotGraphsOnRangeChange(QCPRange range) {
 		}
 	}
 	replot();
-}
-
-QVector<double> QCustomPlot_custom::generateXArray(double lowerLim, double upperLim, unsigned int length) {
-	QVector<double> finalArray(length);
-
-	double difference = upperLim - lowerLim;
-	double increment = difference / (length - 1);
-
-	for (unsigned int i = 0; i < length; i++) {
-		finalArray[i] = lowerLim + increment * i;
-	}
-	return finalArray;
 }
 
 

@@ -40,6 +40,23 @@ struct DataSet {
 		listWidgetItem->setText(this->name);
 	}
 
+	inline void recalculatePoints() const {
+		QVector<double> xArray = generateXArray(minimumDomain, maximumDomain, pointDensity);
+		graph->setData(xArray, binaryTree->calculateTree(xArray));
+	}
+
+	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length) {
+		QVector<double> finalArray(length);
+
+		double difference = upperLim - lowerLim;
+		double increment = difference / (length - 1);
+
+		for (unsigned int i = 0; i < length; i++) {
+			finalArray[i] = lowerLim + increment * i;
+		}
+		return finalArray;
+	}
+
 	QString name;
 	QListWidgetItem *listWidgetItem;
 	QCPGraph *graph;

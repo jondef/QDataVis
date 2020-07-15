@@ -99,8 +99,6 @@ public slots:
 
 	void showHideGraphTracer(QMouseEvent *event);
 
-	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
-
 	static QColor getGraphColor(int colorIndex);
 
 	void addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem);

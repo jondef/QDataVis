@@ -85,6 +85,10 @@ void PointWindow::saveGraph() const {
 	pDataSet->minimumDomain = ui->spinBox_setGraphMinimumDomain->value();
 	// set maximum domain
 	pDataSet->maximumDomain = ui->spinBox_setGraphMaximumDomain->value();
+	// recalculate the points of the graph
+	if (pDataSet->binaryTree != nullptr && pDataSet->overrideGlobalPointDensity) {
+		pDataSet->recalculatePoints();
+	}
 }
 
 void PointWindow::setGraph(QListWidgetItem *listWidgetItem) {

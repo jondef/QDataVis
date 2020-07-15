@@ -24,7 +24,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 
-	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() { ui->customPlot->replot(); });
+	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
+		ui->customPlot->replotGraphsOnRangeChange(ui->customPlot->xAxis->range());
+		ui->customPlot->replot();
+	});
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlot_custom::centerPlot);
 
 	// * points tab
