@@ -23,7 +23,7 @@ public:
 
 	Ui::uiPointWindow *ui;
 
-	QCPGraph *m_graph = nullptr;
+	DataSet *pDataSet = nullptr;
 	QListWidgetItem *m_listWidgetItem = nullptr;
 
 	void setGraph(QListWidgetItem *listWidgetItem);

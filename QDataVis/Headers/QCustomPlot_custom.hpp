@@ -10,8 +10,6 @@
 #define GUI_APP_QCUSTOMPLOT_CUSTOM_H
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
-#define POINT_DENSITY 10
-
 
 #include "qcustomplot.h"
 #include "DataSet.hpp"
@@ -43,7 +41,7 @@ Q_OBJECT
 public:
 	explicit QCustomPlot_custom(QWidget *parent = nullptr);
 
-	~QCustomPlot_custom();
+	~QCustomPlot_custom() override;
 
 public:
 	void manageCursor(double x, double y);
@@ -54,9 +52,11 @@ public:
 	QCPItemText *textLabel = new QCPItemText(this);
 	QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
-	QList<DataSet *> plottables;
+	QList<DataSet *> mDataSets;
 
 	QCPGraph *selectedGraph;
+
+	int mGlobalPointDensity = 1000;
 
 //	std::unique_ptr<QCPGraph *> selectedPlottable;
 //	std::unique_ptr<QCPGraph> v1 = std::make_unique<QCPGraph>();
@@ -109,6 +109,7 @@ public slots:
 
 	void deleteGraph(DataSet *graph);
 
+	void globalPointDensityChanged(int density);
 };
 
 

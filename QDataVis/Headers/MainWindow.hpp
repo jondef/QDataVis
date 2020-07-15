@@ -29,11 +29,7 @@ public:
 
 public slots:
 
-	void globalPointDensityChanged(int density);
-
 	void addFunctionGraph();
-
-	//void QPushButton_PlotPoints_clicked();
 
 	void removeGraph();
 
@@ -44,7 +40,6 @@ public slots:
 	void graphDoubleClicked(QListWidgetItem *item);
 
 	void addPointsGraph();
-
 
 private:
 	friend class PlotPropertiesWindow;
@@ -59,16 +54,9 @@ private:
 
 public:
 
-	static int globalPointDensity;
 
 private:
-
 	inline void statusBarMsg(const QString &msg, int time = 2000);
-
-	void changeAxisTicker(QCPAxis *axis, const QString &value);
-
-	QPointF getClosestPoint(QCPGraph *graph, QPoint point);
-
 };
 
 

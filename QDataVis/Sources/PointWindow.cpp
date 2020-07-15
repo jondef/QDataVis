@@ -52,7 +52,7 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 
 PointWindow::~PointWindow() {
 	delete ui;
-	delete m_graph;
+	delete pDataSet;
 	delete m_listWidgetItem;
 }
 
@@ -66,36 +66,48 @@ void PointWindow::saveGraph() {
 		xArray.append(pointCoord.at(0).toDouble());
 		yArray.append(pointCoord.at(1).toDouble());
 	}
-	m_graph->setData(xArray, yArray);
-
-	//Save graph name
+	pDataSet->graph->setData(xArray, yArray);
+	// Save graph name
 	m_listWidgetItem->setText(ui->lineEdit_graphName->text());
-
-	//Set graph linestyle
-	m_graph->setLineStyle(static_cast<QCPGraph::LineStyle>(ui->comboBox_lineStyle->currentData().toInt()));
-
-	//Set graph scatterstyle
-	m_graph->setScatterStyle(static_cast<QCPScatterStyle::ScatterShape>(ui->comboBox_scatterStyle->currentData().toInt()));
+	// Set graph line style
+	pDataSet->graph->setLineStyle(static_cast<QCPGraph::LineStyle>(ui->comboBox_lineStyle->currentData().toInt()));
+	// Set graph scatter style
+	pDataSet->graph->setScatterStyle(static_cast<QCPScatterStyle::ScatterShape>(ui->comboBox_scatterStyle->currentData().toInt()));
+	// set override point domain
+	pDataSet->overrideGlobalPointDensity = ui->groupBox_overridePointDomain->isChecked();
+	// set point density
+	pDataSet->pointDensity = ui->spinBox_setPointDensity->value();
+	// set minimum domain
+	pDataSet->minimumDomain = ui->spinBox_setGraphMinimumDomain->value();
+	// set maximum domain
+	pDataSet->maximumDomain = ui->spinBox_setGraphMaximumDomain->value();
 }
 
 void PointWindow::setGraph(QListWidgetItem *listWidgetItem) {
 	m_listWidgetItem = listWidgetItem;
-	m_graph = listWidgetItem->data(Qt::UserRole).value<DataSet *>()->graph;
+	pDataSet = listWidgetItem->data(Qt::UserRole).value<DataSet *>();
 
-	//set graphpoints in pointdata textedit
+	// set graphpoints in pointdata textedit
 	ui->textEdit_graphPoints->clear();
-	for (QCPDataContainer<QCPGraphData>::iterator i = m_graph->data()->begin(); i != m_graph->data()->end(); ++i) {
+	for (QCPDataContainer<QCPGraphData>::iterator i = pDataSet->graph->data()->begin(); i != pDataSet->graph->data()->end(); ++i) {
 		ui->textEdit_graphPoints->append(QString("%1, %2").arg(i->key).arg(i->value));
 	}
-
-	//set graph Name
+	// set graph Name
 	ui->lineEdit_graphName->setText(listWidgetItem->text());
-
-	//Set line style
-	ui->comboBox_lineStyle->setCurrentIndex(ui->comboBox_lineStyle->findData(static_cast<int>(m_graph->lineStyle())));
-
-	//set scatter style
-	ui->comboBox_scatterStyle->setCurrentIndex(ui->comboBox_scatterStyle->findData(static_cast<int>(m_graph->scatterStyle().shape())));
+	// Set line style
+	ui->comboBox_lineStyle->setCurrentIndex(ui->comboBox_lineStyle->findData(static_cast<int>(pDataSet->graph->lineStyle())));
+	// set scatter style
+	ui->comboBox_scatterStyle->setCurrentIndex(ui->comboBox_scatterStyle->findData(static_cast<int>(pDataSet->graph->scatterStyle().shape())));
+	// set override point domain
+	ui->groupBox_overridePointDomain->setChecked(pDataSet->overrideGlobalPointDensity);
+	// set point density
+	ui->spinBox_setPointDensity->setValue(pDataSet->pointDensity);
+	// set minimum domain
+	ui->spinBox_setGraphMinimumDomain->setValue(pDataSet->minimumDomain);
+	// set maximum domain
+	ui->spinBox_setGraphMaximumDomain->setValue(pDataSet->maximumDomain);
+	// disable the override point density if data set is made up of points and not a function
+	ui->groupBox_overridePointDomain->setDisabled(pDataSet->binaryTree == nullptr);
 }
 
 

@@ -22,8 +22,10 @@ struct DataSet {
 	QCPGraph *graph;
 	BinaryTree *binaryTree;
 
-	bool followGlobalPointDensity = true;
-	int pointDensity = 1000;
+	bool overrideGlobalPointDensity = false;
+	unsigned int pointDensity = 1000;
+	int minimumDomain = -10;
+	int maximumDomain = 10;
 };
 
 

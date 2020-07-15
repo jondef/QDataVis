@@ -171,30 +171,30 @@ void QCustomPlot_custom::centerPlot() {
  * This function is used when adding a new function graph
  */
 void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem) {
-	DataSet *graph = new DataSet();
+	DataSet *pDataSet = new DataSet();
 
-	graph->binaryTree = new BinaryTree(functionString);
+	pDataSet->binaryTree = new BinaryTree(functionString);
 
-	QVector<double> xArray = generateXArray(xAxis->range().lower, xAxis->range().upper, POINT_DENSITY);
-	QVector<double> yArray = graph->binaryTree->calculateTree(xArray);
+	QVector<double> xArray = generateXArray(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
+	QVector<double> yArray = pDataSet->binaryTree->calculateTree(xArray);
 
-	graph->name = functionString;
-	graph->graph = new QCPGraph(xAxis, yAxis);
-	graph->binaryTree = new BinaryTree(functionString);
-	graph->graph->setData(xArray, yArray);
-	graph->graph->setName(functionString);
-	graph->listWidgetItem = listWidgetItem;
-	graph->graph->addToLegend();
+	pDataSet->name = functionString;
+	pDataSet->graph = new QCPGraph(xAxis, yAxis);
+	pDataSet->binaryTree = new BinaryTree(functionString);
+	pDataSet->graph->setData(xArray, yArray);
+	pDataSet->graph->setName(functionString);
+	pDataSet->listWidgetItem = listWidgetItem;
+	pDataSet->graph->addToLegend();
 
 	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
 	//mFunctionGraph->lastKey()->rescaleAxes(false);
 
-	QColor graphColor = getGraphColor(plottables.size());
+	QColor graphColor = getGraphColor(mDataSets.size());
 
 	QPen graphPen;
 	graphPen.setColor(graphColor);
 	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
-	graph->graph->setPen(graphPen);
+	pDataSet->graph->setPen(graphPen);
 //	graph->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
 
 	// * Add item to list widget and set the appropriate icon color
@@ -202,18 +202,20 @@ void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWi
 	pixmap.fill(graphColor);
 
 	QVariant variant;
-	variant.setValue(graph);
-	graph->listWidgetItem->setText(functionString);
-	graph->listWidgetItem->setIcon(QIcon(pixmap));
-	graph->listWidgetItem->setData(Qt::UserRole, variant);
+	variant.setValue(pDataSet);
+	pDataSet->listWidgetItem->setText(functionString);
+	pDataSet->listWidgetItem->setIcon(QIcon(pixmap));
+	pDataSet->listWidgetItem->setData(Qt::UserRole, variant);
 
-	plottables.append(graph);
+	mDataSets.append(pDataSet);
 	replot();
 }
 
 void QCustomPlot_custom::deleteGraph(DataSet *graph) {
+	selectedGraphs();
+
 	removeGraph(graph->graph);
-	plottables.removeOne(graph);
+	mDataSets.removeOne(graph);
 	replot();
 }
 
@@ -221,28 +223,32 @@ void QCustomPlot_custom::deleteGraph(DataSet *graph) {
  * This function is used when adding a new points graph
  */
 void QCustomPlot_custom::addPointsGraph(const QString &graphName, QListWidgetItem *listWidgetItem) {
-	DataSet *graph = new DataSet();
+	DataSet *pDataSet = new DataSet();
 
-	graph->name = graphName;
-	graph->listWidgetItem = listWidgetItem;
-	graph->graph = new QCPGraph(xAxis, yAxis);
+	pDataSet->name = graphName;
+	pDataSet->listWidgetItem = listWidgetItem;
+	pDataSet->graph = new QCPGraph(xAxis, yAxis);
 
 	QVariant variant;
-	variant.setValue(graph);
+	variant.setValue(pDataSet);
 	listWidgetItem->setData(Qt::UserRole, variant);
 	listWidgetItem->setText(graphName);
 
-	plottables.append(graph);
+	mDataSets.append(pDataSet);
 	replot();
 }
 
+void QCustomPlot_custom::globalPointDensityChanged(int density) {
+	mGlobalPointDensity = density;
+	replotGraphsOnRangeChange(xAxis->range());
+}
 
 void QCustomPlot_custom::replotGraphsOnRangeChange(QCPRange range) {
-	QVector<double> xArray = generateXArray(range.lower, range.upper, POINT_DENSITY);
+	QVector<double> xArray = generateXArray(range.lower, range.upper, mGlobalPointDensity);
 	static QVector<double> yArray(xArray.length());
 
-	for (DataSet *graph : plottables) {
-		if (graph->binaryTree) {
+	for (DataSet *graph : mDataSets) {
+		if (graph->binaryTree && !graph->overrideGlobalPointDensity) {
 			graph->graph->setData(xArray, graph->binaryTree->calculateTree(xArray));
 		}
 	}

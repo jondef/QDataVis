@@ -24,9 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 
-	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
-		ui->customPlot->replot();
-	});
+	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() { ui->customPlot->replot(); });
 	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlot_custom::centerPlot);
 
 	// * points tab
@@ -36,12 +34,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	// * function tab
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeGraph);
-	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::globalPointDensityChanged);
+	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), ui->customPlot,
+			&QCustomPlot_custom::globalPointDensityChanged);
 
 	// * settings tab
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
 
-	// * menubar connections
+	// region menubar connections
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
 	connect(ui->actionProperties, &QAction::triggered, this, [this]() {
@@ -61,21 +60,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 								 "Git commit hash: " GIT_COMMIT_HASH "\n"
 								 "Git branch: " GIT_BRANCH);
 	});
+	// endregion
 
 	// emit the signal of the checkbox to update the plot colors
 	emit(ui->checkBox_settingsDarkMode->toggled(false));
 }
 
 
-void MainWindow::graphDoubleClicked(QListWidgetItem *listWidgetItem) {
-	pointGraphDialog->setGraph(listWidgetItem);
-	pointGraphDialog->show();
-}
-
 MainWindow::~MainWindow() {
 	delete ui;
 	delete plotWindow;
 	delete pointGraphDialog;
+}
+
+
+void MainWindow::graphDoubleClicked(QListWidgetItem *listWidgetItem) {
+	pointGraphDialog->setGraph(listWidgetItem);
+	pointGraphDialog->show();
 }
 
 /**
@@ -94,25 +95,6 @@ void MainWindow::updateColors(bool checked) {
 	}
 	ui->customPlot->updateColors();
 	qDebug() << "Dark mode enabled:" << checked;
-}
-
-/**
- * This method iterates over plotted functions and checks if they are overriding
- * global point density. If they're not, re-plot them with the new density
- */
-void MainWindow::globalPointDensityChanged(int density) {
-//	auto functions = QList<QString>();
-//	// save the functions in the added order
-//	for (int i = 0; i < mFunctionGraph->length(); ++i) {
-//		functions.append(mFunctionGraph->at(i)->property("Function string").toString());
-//	}
-//	ui->customPlot->clearGraphs();
-//	mFunctionGraph->clear();
-//
-//	for (int j = 0; j < functions.length(); ++j) {
-//		calculateAndDrawFunction(const_cast<QString &>(functions.at(j)));
-//	}
-//	ui->customPlot->replot();
 }
 
 inline void MainWindow::statusBarMsg(const QString &msg, int time) {
