@@ -50,9 +50,7 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 	ui->comboBox_scatterStyle->addItem("Custom", QVariant(QCPScatterStyle::ssCustom));
 
 	connect(ui->pushButton_setColor, &QPushButton::clicked, this, [this]() {
-		QColorDialog *popUpColorDialog = new QColorDialog(this);
-		popUpColorDialog->open();
-		qDebug() << "fuck";
+		pDataSet->changeColor(QColorDialog::getColor(pDataSet->color));
 	});
 }
 
@@ -67,10 +65,10 @@ void PointWindow::saveGraph() const {
 	QStringList pointString = ui->textEdit_graphPoints->toPlainText().split('\n', Qt::SkipEmptyParts);
 	QVector<double> xArray(pointString.size());
 	QVector<double> yArray(pointString.size());
-	for (QString &line : pointString) {
-		QStringList pointCoord = line.split(',');
-		xArray.append(pointCoord.at(0).toDouble());
-		yArray.append(pointCoord.at(1).toDouble());
+	for (int lineNumber = 0; lineNumber < pointString.size(); ++lineNumber) {
+		QStringList pointCoord = pointString.at(lineNumber).split(',');
+		xArray.replace(lineNumber, pointCoord.at(0).toDouble());
+		yArray.replace(lineNumber, pointCoord.at(1).toDouble());
 	}
 	pDataSet->graph->setData(xArray, yArray);
 	// Save graph name

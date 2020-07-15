@@ -186,26 +186,8 @@ void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWi
 	pDataSet->listWidgetItem = listWidgetItem;
 	pDataSet->graph->addToLegend();
 
-	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
-	//mFunctionGraph->lastKey()->rescaleAxes(false);
-
-	QColor graphColor = getGraphColor(mDataSets.size());
-
-	QPen graphPen;
-	graphPen.setColor(graphColor);
-	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
-	pDataSet->graph->setPen(graphPen);
-//	graph->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
-
-	// * Add item to list widget and set the appropriate icon color
-	QPixmap pixmap = QPixmap(16, 16);
-	pixmap.fill(graphColor);
-
-	QVariant variant;
-	variant.setValue(pDataSet);
-	pDataSet->listWidgetItem->setText(functionString);
-	pDataSet->listWidgetItem->setIcon(QIcon(pixmap));
-	pDataSet->listWidgetItem->setData(Qt::UserRole, variant);
+	pDataSet->changeColor(getGraphColor(mDataSets.size()));
+	pDataSet->configureListWidgetItem();
 
 	mDataSets.append(pDataSet);
 	replot();
@@ -230,11 +212,10 @@ void QCustomPlot_custom::addPointsGraph(const QString &graphName, QListWidgetIte
 	pDataSet->name = graphName;
 	pDataSet->listWidgetItem = listWidgetItem;
 	pDataSet->graph = new QCPGraph(xAxis, yAxis);
+	pDataSet->graph->setName(graphName);
 
-	QVariant variant;
-	variant.setValue(pDataSet);
-	listWidgetItem->setData(Qt::UserRole, variant);
-	listWidgetItem->setText(graphName);
+	pDataSet->changeColor(getGraphColor(mDataSets.size()));
+	pDataSet->configureListWidgetItem();
 
 	mDataSets.append(pDataSet);
 	replot();

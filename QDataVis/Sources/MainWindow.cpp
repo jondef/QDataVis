@@ -150,5 +150,9 @@ void MainWindow::removeGraph() {
 	if (selectedItem) {
 		ui->customPlot->deleteGraph(selectedItem->data(Qt::UserRole).value<DataSet *>());
 		delete selectedItem;
+	} else if (ui->listWidget_PointGraphList->currentItem()) {
+		QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
+		ui->customPlot->deleteGraph(selectedItem->data(Qt::UserRole).value<DataSet *>());
+		delete selectedItem;
 	}
 }
