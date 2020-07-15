@@ -43,7 +43,7 @@ public slots:
 
 	void onMouseMoveReplotCursor(QMouseEvent *event);
 
-	void traceGraph(QMouseEvent *event);
+	void traceGraph(QCPAbstractPlottable *, int, QMouseEvent *event);
 
 	void stickAxisToZeroLines();
 

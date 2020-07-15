@@ -51,7 +51,9 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	graphTracer->setInterpolating(true);
 //	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
 
-	connect(this, SIGNAL(mouseMove(QMouseEvent * )), this, SLOT(traceGraph(QMouseEvent * )));
+//	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
+	connect(this, &QCustomPlot_custom::plottableClick, this, &QCustomPlot_custom::traceGraph);
+//	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::traceGraph);
 	initGraph();
 }
 
@@ -94,26 +96,24 @@ void QCustomPlot_custom::initGraph() {
 	// ! GRAPH RELATED CONNECTIONS
 	// * axes configuration
 	// connect slot that ties some axis selections together (especially opposite axes):
-	connect(this, SIGNAL(selectionChangedByUser()), this, SLOT(plotOppositeAxesConnection()));
+	connect(this, &QCustomPlot_custom::selectionChangedByUser, this, &QCustomPlot_custom::plotOppositeAxesConnection);
 	// connect slots that takes care that when an axis is selected, only that direction can be dragged and zoomed:
-	connect(this, SIGNAL(mousePress(QMouseEvent * )), this, SLOT(plotAxisLockDrag()));
-	connect(this, SIGNAL(mouseWheel(QWheelEvent * )), this, SLOT(plotAxisLockZoom()));
+	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::plotAxisLockDrag);
+	connect(this, &QCustomPlot_custom::mouseWheel, this, &QCustomPlot_custom::plotAxisLockZoom);
 	// make bottom and left axes transfer their ranges to top and right axes:
-	connect(this->xAxis, SIGNAL(rangeChanged(QCPRange)), this->xAxis2, SLOT(setRange(QCPRange)));
-	connect(this->yAxis, SIGNAL(rangeChanged(QCPRange)), this->yAxis2, SLOT(setRange(QCPRange)));
+	connect(this->xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this->xAxis2, QOverload<const QCPRange &>::of(&QCPAxis::setRange));
+	connect(this->yAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this->yAxis2, QOverload<const QCPRange &>::of(&QCPAxis::setRange));
 
 	// * click interaction
 	// axis label double click
-	connect(this, SIGNAL(axisDoubleClick(QCPAxis * , QCPAxis::SelectablePart, QMouseEvent * )), this,
-			SLOT(plotAxisLabelDoubleClick(QCPAxis * , QCPAxis::SelectablePart)));
+	connect(this, &QCustomPlot_custom::axisDoubleClick, this, &QCustomPlot_custom::plotAxisLabelDoubleClick);
 	// legend double click
-	connect(this, SIGNAL(legendDoubleClick(QCPLegend * , QCPAbstractLegendItem * , QMouseEvent * )), this,
-			SLOT(plotLegendGraphDoubleClick(QCPLegend * , QCPAbstractLegendItem * )));
+	connect(this, &QCustomPlot_custom::legendDoubleClick, this, &QCustomPlot_custom::plotLegendGraphDoubleClick);
 
 	// * context menu
 	// setup policy and connect slot for context menu popup:
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(plotContextMenuRequest(QPoint)));
+	connect(this, &QCustomPlot_custom::customContextMenuRequested, this, &QCustomPlot_custom::plotContextMenuRequest);
 
 
 //	QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
@@ -152,8 +152,9 @@ void QCustomPlot_custom::stickAxisToZeroLines() {
 }
 
 
-void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
+void QCustomPlot_custom::traceGraph(QCPAbstractPlottable *, int, QMouseEvent *event) {
 	// todo: sqrt(-x^2-4*x+46)-4 -> fix tracer on this function
+	qDebug() << selectedGraphs().size();
 	if (selectedGraphs().size() == 1) {
 		QCPGraphDataContainer::const_iterator it = this->selectedGraphs().first()->data()->constEnd();
 		QVariant details;
@@ -178,7 +179,7 @@ void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
 		graphTracer->setGraph(selectedGraphs().first());
 		graphTracer->setGraphKey(it->key);
 		graphTracer->position->setCoords(it->key, it->value);
-		qDebug() << graphTracer->position->key() << graphTracer->position->value();
+//		qDebug() << graphTracer->position->key() << graphTracer->position->value();
 		graphTracer->updatePosition();
 		//qDebug() << it->key << it->value;
 		textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
