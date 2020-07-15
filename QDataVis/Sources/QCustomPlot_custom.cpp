@@ -54,6 +54,9 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
 	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::showHideGraphTracer);
 
+
+	connect(xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this, &QCustomPlot_custom::replotGraphsOnRangeChange);
+
 	initGraph();
 }
 
@@ -68,17 +71,16 @@ QCustomPlot_custom::~QCustomPlot_custom() {
  * @param event
  */
 void QCustomPlot_custom::showHideGraphTracer(QMouseEvent *event) {
-	// if a plottable is clicked
+	// if there is a plottable at the event position
 	if (plottableAt(event->pos(), true)) {
-		// if only one graph is selected
-		if (selectedGraphs().size() == 1) {
-			traceGraph(event);
-			return;
-		}
+		selectedGraph = dynamic_cast<QCPGraph *>(plottableAt(event->pos(), true));
+		traceGraph(event);
+		return;
 	}
 	// if there is no plottable on click position
 	textLabel->setVisible(false);
 	graphTracer->setVisible(false);
+	selectedGraph = nullptr;
 }
 
 void QCustomPlot_custom::updateColors() {
@@ -159,6 +161,115 @@ void QCustomPlot_custom::centerPlot() {
 	replot();
 }
 
+/**
+ * ! GCPCurve has performance issues
+ * Graphs are used to display single-valued data.
+ * Single-valued means that there should only be one data point per unique key coordinate.
+ * In other words, the graph can't have loops. If you do want to plot non-single-valued curves,
+ * rather use the QCPCurve plottable.
+ *
+ * This function is used when adding a new function graph
+ */
+void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem) {
+	Graph *graph = new Graph();
+
+	graph->binaryTree = new BinaryTree(functionString);
+
+	QVector<double> xArray = generateXArray(xAxis->range().lower, xAxis->range().upper, POINT_DENSITY);
+	QVector<double> yArray = graph->binaryTree->calculateTree(xArray);
+
+	graph->name = functionString;
+	graph->graph = new QCPGraph(xAxis, yAxis);
+	graph->binaryTree = new BinaryTree(functionString);
+	graph->graph->setData(xArray, yArray);
+	graph->graph->setName(functionString);
+	graph->listWidgetItem = listWidgetItem;
+	graph->graph->addToLegend();
+
+	// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
+	//mFunctionGraph->lastKey()->rescaleAxes(false);
+
+	QColor graphColor = getGraphColor(plottables.size());
+
+	QPen graphPen;
+	graphPen.setColor(graphColor);
+	graphPen.setWidthF(2); // between 1 and 2 acceptable (float/int)
+	graph->graph->setPen(graphPen);
+//	graph->setBrush(QBrush(QColor(0, 0, 255, 20))); // set background
+
+	// * Add item to list widget and set the appropriate icon color
+	QPixmap pixmap = QPixmap(16, 16);
+	pixmap.fill(graphColor);
+
+	QVariant variant;
+	variant.setValue(graph);
+	graph->listWidgetItem->setText(functionString);
+	graph->listWidgetItem->setIcon(QIcon(pixmap));
+	graph->listWidgetItem->setData(Qt::UserRole, variant);
+
+	plottables.append(graph);
+	replot();
+}
+
+void QCustomPlot_custom::removeFunctionGraph(Graph *pGraph) {
+	removeGraph(pGraph->graph);
+	plottables.removeOne(pGraph);
+	replot();
+}
+
+/**
+ * This function is used when adding a new points graph
+ */
+void QCustomPlot_custom::addPointsGraph(const QString &graphName, QListWidgetItem *listWidgetItem) {
+	Graph *graph = new Graph();
+
+	graph->name = graphName;
+	graph->listWidgetItem = listWidgetItem;
+	graph->graph = new QCPGraph(xAxis, yAxis);
+
+	QVariant variant;
+	variant.setValue(graph);
+	listWidgetItem->setData(Qt::UserRole, variant);
+	listWidgetItem->setText(graphName);
+
+	plottables.append(graph);
+	replot();
+}
+
+void QCustomPlot_custom::removePointsGraph(Graph *graph) {
+	removeGraph(graph->graph);
+	plottables.removeOne(graph);
+	replot();
+}
+
+void QCustomPlot_custom::replotGraphsOnRangeChange(QCPRange range) {
+	QVector<double> xArray = generateXArray(range.lower, range.upper, POINT_DENSITY);
+	static QVector<double> yArray(xArray.length());
+
+	for (Graph *graph : plottables) {
+		graph->graph->setData(xArray, graph->binaryTree->calculateTree(xArray));
+	}
+	replot();
+}
+
+QVector<double> QCustomPlot_custom::generateXArray(double lowerLim, double upperLim, unsigned int length) {
+	QVector<double> finalArray(length);
+
+	double difference = upperLim - lowerLim;
+	double increment = difference / (length - 1);
+
+	for (unsigned int i = 0; i < length; i++) {
+		finalArray[i] = lowerLim + increment * i;
+	}
+	return finalArray;
+}
+
+
+inline QColor QCustomPlot_custom::getGraphColor(int colorIndex) {
+	// only take the last digit of the index
+	return colors.at(colorIndex % 10);
+}
+
 void QCustomPlot_custom::stickAxisToZeroLines() {
 	this->axisRect()->setAutoMargins(QCP::msNone);
 
@@ -174,28 +285,28 @@ void QCustomPlot_custom::stickAxisToZeroLines() {
  * at the nearest position to the mouse on the graph.
  */
 void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
-	if (selectedGraphs().size() != 1) { return; }
+	if (!selectedGraph) { return; }
 
-	QCPGraphDataContainer::const_iterator it = this->selectedGraphs().first()->data()->constEnd();
+	QCPGraphDataContainer::const_iterator it = selectedGraph->data()->constEnd();
 	QVariant details;
 
-	if (selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
+	if (selectedGraph->selectTest(event->pos(), false, &details)) {
 		QCPDataSelection dataPoints = details.value<QCPDataSelection>();
 
 		// abort if event position is invalid
 		if (dataPoints.dataPointCount() < 1) { return; }
 
-		if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value <
-			selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+		if (selectedGraph->data()->at(dataPoints.dataRange().begin())->value <
+			selectedGraph->data()->at(dataPoints.dataRange().end())->value) {
 			textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
-		} else if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value >
-				   selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+		} else if (selectedGraph->data()->at(dataPoints.dataRange().begin())->value >
+				   selectedGraph->data()->at(dataPoints.dataRange().end())->value) {
 			textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
 		}
-		it = selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
+		it = selectedGraph->data()->at(dataPoints.dataRange().begin());
 	}
 	graphTracer->setVisible(true);
-	graphTracer->setGraph(selectedGraphs().first());
+	graphTracer->setGraph(selectedGraph);
 	graphTracer->setGraphKey(it->key);
 	graphTracer->position->setCoords(it->key, it->value);
 //	qDebug() << graphTracer->position->key() << graphTracer->position->value();

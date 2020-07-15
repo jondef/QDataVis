@@ -29,21 +29,23 @@ public:
 
 public slots:
 
-	void replotGraphsOnRangeChange(QCPRange range);
-
 	void globalPointDensityChanged(int density);
 
-	void QLineEdit_addFunction_returnPressed();
+	void addFunctionGraph();
 
 	//void QPushButton_PlotPoints_clicked();
 
-	void QPushButton_deleteFunction_clicked();
+	void removeFunctionGraph();
 
 	void savePlotImage();
 
 	void updateColors(bool checked);
 
 	void graphDoubleClicked(QListWidgetItem *item);
+
+	void addPointsGraph();
+
+	void removePointsGraph();
 
 private:
 	friend class PlotPropertiesWindow;
@@ -61,8 +63,6 @@ private:
 	std::vector<std::future<void>> m_Futures;
 
 public:
-	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
-
 	inline static QColor getGraphColor(int colorIndex);
 
 	static int globalPointDensity;

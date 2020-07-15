@@ -10,14 +10,31 @@
 #define GUI_APP_QCUSTOMPLOT_CUSTOM_H
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
+#define POINT_DENSITY 10
+
 
 #include "qcustomplot.h"
 #include "Graph.hpp"
+
+Q_DECLARE_METATYPE(Graph *)
 
 struct QCPCursor {
 	QCPItemLine *hLine;
 	QCPItemLine *vLine;
 	QCPItemText *cursorText;
+};
+
+static const QList<QColor> colors = {
+		QColor(31, 119, 180),
+		QColor(255, 127, 14),
+		QColor(44, 160, 44),
+		QColor(214, 39, 40),
+		QColor(148, 103, 189),
+		QColor(140, 86, 75),
+		QColor(244, 119, 194),
+		QColor(127, 127, 127),
+		QColor(188, 189, 34),
+		QColor(23, 190, 207)
 };
 
 class QCustomPlot_custom : public QCustomPlot {
@@ -37,7 +54,12 @@ public:
 	QCPItemText *textLabel = new QCPItemText(this);
 	QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
-	QList<Graph> plottables;
+	QList<Graph *> plottables;
+
+	QCPGraph *selectedGraph;
+
+//	std::unique_ptr<QCPGraph *> selectedPlottable;
+//	std::unique_ptr<QCPGraph> v1 = std::make_unique<QCPGraph>();
 
 public slots:
 
@@ -50,6 +72,8 @@ public slots:
 	void initGraph();
 
 	void centerPlot();
+
+	void replotGraphsOnRangeChange(QCPRange range);
 
 public slots:
 
@@ -74,6 +98,18 @@ public slots:
 	void updateColors();
 
 	void showHideGraphTracer(QMouseEvent *event);
+
+	static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length);
+
+	static QColor getGraphColor(int colorIndex);
+
+	void addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+
+	void addPointsGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+
+	void removePointsGraph(Graph *graph);
+
+	void removeFunctionGraph(Graph *pGraph);
 };
 
 

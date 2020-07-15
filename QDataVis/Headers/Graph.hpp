@@ -17,12 +17,19 @@ struct Graph {
 		BinaryTree *binaryTree = aBinaryTree;
 	}
 
+	~Graph() {
+		delete listWidgetItem;
+		delete graph;
+		delete binaryTree;
+	}
+
 	QString name;
 	QListWidgetItem *listWidgetItem;
 	QCPGraph *graph;
 	BinaryTree *binaryTree;
 
 	bool followGlobalPointDensity = true;
+	int pointDensity = 1000;
 };
 
 
