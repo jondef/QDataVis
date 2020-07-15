@@ -31,7 +31,9 @@ public slots:
 
 	void addFunctionGraph();
 
-	void removeGraph();
+	void removeFunctionGraph();
+
+	void removePointGraph();
 
 	void savePlotImage();
 
@@ -40,6 +42,10 @@ public slots:
 	void graphDoubleClicked(QListWidgetItem *item);
 
 	void addPointsGraph();
+
+	void exportData();
+
+	void importData();
 
 private:
 	friend class PlotPropertiesWindow;
@@ -51,6 +57,7 @@ private:
 
 private:
 	inline void statusBarMsg(const QString &msg, int time = 2000);
+
 };
 
 

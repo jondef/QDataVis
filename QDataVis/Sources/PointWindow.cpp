@@ -75,6 +75,8 @@ void PointWindow::saveGraph() const {
 	m_listWidgetItem->setText(ui->lineEdit_graphName->text());
 	// Set graph line style
 	pDataSet->graph->setLineStyle(static_cast<QCPGraph::LineStyle>(ui->comboBox_lineStyle->currentData().toInt()));
+	// set line width
+	pDataSet->graphWidth = ui->doubleSpinBox_lineWidth->value();
 	// Set graph scatter style
 	pDataSet->graph->setScatterStyle(static_cast<QCPScatterStyle::ScatterShape>(ui->comboBox_scatterStyle->currentData().toInt()));
 	// set override point domain
@@ -89,6 +91,8 @@ void PointWindow::saveGraph() const {
 	if (pDataSet->binaryTree != nullptr && pDataSet->overrideGlobalPointDensity) {
 		pDataSet->recalculatePoints();
 	}
+	// need to update the pen width
+	pDataSet->changeColor(pDataSet->color);
 }
 
 void PointWindow::setGraph(QListWidgetItem *listWidgetItem) {
@@ -104,6 +108,8 @@ void PointWindow::setGraph(QListWidgetItem *listWidgetItem) {
 	ui->lineEdit_graphName->setText(listWidgetItem->text());
 	// Set line style
 	ui->comboBox_lineStyle->setCurrentIndex(ui->comboBox_lineStyle->findData(static_cast<int>(pDataSet->graph->lineStyle())));
+	// set line width
+	ui->doubleSpinBox_lineWidth->setValue(pDataSet->graphWidth);
 	// set scatter style
 	ui->comboBox_scatterStyle->setCurrentIndex(ui->comboBox_scatterStyle->findData(static_cast<int>(pDataSet->graph->scatterStyle().shape())));
 	// set override point domain

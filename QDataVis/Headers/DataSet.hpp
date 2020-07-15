@@ -62,7 +62,7 @@ struct DataSet {
 	QCPGraph *graph;
 	BinaryTree *binaryTree;
 	QColor color;
-	double graphWidth = 3;
+	double graphWidth = 2.5;
 
 	bool overrideGlobalPointDensity = false;
 	unsigned int pointDensity = 1000;

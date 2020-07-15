@@ -32,11 +32,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	// * points tab
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
-	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removeGraph);
+	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removePointGraph);
 
 	// * function tab
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
-	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeGraph);
+	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeFunctionGraph);
 	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), ui->customPlot,
 			&QCustomPlot_custom::globalPointDensityChanged);
 
@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
 
 	// region menubar connections
+	connect(ui->actionExport_data, &QAction::triggered, this, &MainWindow::exportData);
+	connect(ui->actionImport_data, &QAction::triggered, this, &MainWindow::importData);
 	connect(ui->actionQuit, &QAction::triggered, QApplication::instance(), &QApplication::quit);
 	connect(ui->actionSave_as, &QAction::triggered, this, &MainWindow::savePlotImage);
 	connect(ui->actionProperties, &QAction::triggered, this, [this]() {
@@ -104,6 +106,17 @@ inline void MainWindow::statusBarMsg(const QString &msg, int time) {
 	ui->statusBar->showMessage(msg, time);
 }
 
+
+void MainWindow::exportData() {
+
+}
+
+
+void MainWindow::importData() {
+
+}
+
+
 void MainWindow::savePlotImage() {
 	// fixme: save as jpg doesn't correctly save in release mode
 	QString savePathFilename = QFileDialog::getSaveFileName(this, tr("Save plot"), "", tr("*.jpg;;*.png;;*.bmp;;*.pdf"));
@@ -148,13 +161,17 @@ void MainWindow::addPointsGraph() {
 	ui->listWidget_PointGraphList->addItem(listWidgetItem);
 }
 
-void MainWindow::removeGraph() {
+void MainWindow::removeFunctionGraph() {
 	QListWidgetItem *selectedItem = ui->QListWidget_functionList->currentItem();
 	if (selectedItem) {
 		ui->customPlot->deleteGraph(selectedItem->data(Qt::UserRole).value<DataSet *>());
 		delete selectedItem;
-	} else if (ui->listWidget_PointGraphList->currentItem()) {
-		QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
+	}
+}
+
+void MainWindow::removePointGraph() {
+	QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
+	if (selectedItem) {
 		ui->customPlot->deleteGraph(selectedItem->data(Qt::UserRole).value<DataSet *>());
 		delete selectedItem;
 	}

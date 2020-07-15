@@ -51,10 +51,8 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	graphTracer->setInterpolating(true);
 //	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
 
-	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
+//	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
 	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::showHideGraphTracer);
-
-
 	connect(xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this, &QCustomPlot_custom::replotGraphsOnRangeChange);
 
 	initGraph();
@@ -72,7 +70,7 @@ QCustomPlot_custom::~QCustomPlot_custom() {
  */
 void QCustomPlot_custom::showHideGraphTracer(QMouseEvent *event) {
 	// if there is a plottable at the event position
-	if (plottableAt(event->pos(), true)) {
+	if (event != nullptr && plottableAt(event->pos(), true)) {
 		selectedGraph = dynamic_cast<QCPGraph *>(plottableAt(event->pos(), true));
 		traceGraph(event);
 		return;
@@ -84,9 +82,10 @@ void QCustomPlot_custom::showHideGraphTracer(QMouseEvent *event) {
 }
 
 void QCustomPlot_custom::updateColors() {
-	setBackground(QBrush(QApplication::palette().color(backgroundRole())));
+	QColor backgroundColor = QApplication::palette().color(backgroundRole());
 	QColor foregroundColor = QApplication::palette().color(foregroundRole());
 	QPen foregroundPen = QPen(foregroundColor);
+	setBackground(QBrush(backgroundColor));
 
 	for (QCPAxis *i : {xAxis, xAxis2, yAxis, yAxis2}) {
 		i->setTickPen(foregroundPen);
@@ -97,6 +96,15 @@ void QCustomPlot_custom::updateColors() {
 		i->setLabelColor(foregroundColor);
 		i->setTickLabelColor(foregroundColor);
 	}
+	// update the graph tracer
+	textLabel->setColor(foregroundColor); // text color
+	textLabel->setBrush(QBrush(backgroundColor)); // background color
+	// update cursor color
+	cursor.cursorText->setColor(foregroundColor);
+	cursor.cursorText->setBrush(QBrush(backgroundColor));
+	cursor.hLine->setPen(QColor(foregroundColor));
+	cursor.vLine->setPen(QColor(foregroundColor));
+
 	replot();
 }
 
@@ -196,7 +204,7 @@ void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWi
 void QCustomPlot_custom::deleteGraph(DataSet *graph) {
 	// we need to set selectedGraph to nullptr in case it's selected
 	// to avoid a dangling pointer
-	selectedGraph = nullptr;
+	showHideGraphTracer();
 
 	removeGraph(graph->graph);
 	mDataSets.removeOne(graph);

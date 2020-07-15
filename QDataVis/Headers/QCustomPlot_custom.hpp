@@ -97,7 +97,7 @@ public slots:
 
 	void updateColors();
 
-	void showHideGraphTracer(QMouseEvent *event);
+	void showHideGraphTracer(QMouseEvent *event = nullptr);
 
 	static QColor getGraphColor(int colorIndex);
 
