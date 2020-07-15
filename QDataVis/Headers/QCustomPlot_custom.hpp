@@ -43,7 +43,7 @@ public slots:
 
 	void onMouseMoveReplotCursor(QMouseEvent *event);
 
-	void traceGraph(QCPAbstractPlottable *, int, QMouseEvent *event);
+	void traceGraph(QMouseEvent *event);
 
 	void stickAxisToZeroLines();
 
@@ -72,6 +72,8 @@ public slots:
 	void plotMoveLegend();
 
 	void updateColors();
+
+	void showHideGraphTracer(QMouseEvent *event);
 };
 
 

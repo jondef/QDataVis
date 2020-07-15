@@ -51,9 +51,9 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	graphTracer->setInterpolating(true);
 //	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
 
-//	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
-	connect(this, &QCustomPlot_custom::plottableClick, this, &QCustomPlot_custom::traceGraph);
-//	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::traceGraph);
+	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
+	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::showHideGraphTracer);
+
 	initGraph();
 }
 
@@ -63,6 +63,23 @@ QCustomPlot_custom::~QCustomPlot_custom() {
 	delete graphTracer;
 }
 
+/**
+ *
+ * @param event
+ */
+void QCustomPlot_custom::showHideGraphTracer(QMouseEvent *event) {
+	// if a plottable is clicked
+	if (plottableAt(event->pos(), true)) {
+		// if only one graph is selected
+		if (selectedGraphs().size() == 1) {
+			traceGraph(event);
+			return;
+		}
+	}
+	// if there is no plottable on click position
+	textLabel->setVisible(false);
+	graphTracer->setVisible(false);
+}
 
 void QCustomPlot_custom::updateColors() {
 	setBackground(QBrush(QApplication::palette().color(backgroundRole())));
@@ -151,44 +168,43 @@ void QCustomPlot_custom::stickAxisToZeroLines() {
 	yAxis->setOffset(this->axisRect()->left() - pxy);
 }
 
+/**
+ * todo: sqrt(-x^2-4*x+46)-4 -> fix tracer on this function
+ * This function draws the text label and the graph tracer
+ * at the nearest position to the mouse on the graph.
+ */
+void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
+	if (selectedGraphs().size() != 1) { return; }
 
-void QCustomPlot_custom::traceGraph(QCPAbstractPlottable *, int, QMouseEvent *event) {
-	// todo: sqrt(-x^2-4*x+46)-4 -> fix tracer on this function
-	qDebug() << selectedGraphs().size();
-	if (selectedGraphs().size() == 1) {
-		QCPGraphDataContainer::const_iterator it = this->selectedGraphs().first()->data()->constEnd();
-		QVariant details;
+	QCPGraphDataContainer::const_iterator it = this->selectedGraphs().first()->data()->constEnd();
+	QVariant details;
 
-		if (selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
-			QCPDataSelection dataPoints = details.value<QCPDataSelection>();
+	if (selectedGraphs().first()->selectTest(event->pos(), false, &details)) {
+		QCPDataSelection dataPoints = details.value<QCPDataSelection>();
 
-			if (dataPoints.dataPointCount() < 1) {
-				// abort if event position is invalid
-				return;
-			}
-			if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value <
-				selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
-				textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
-			} else if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value >
-					   selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
-				textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
-			}
-			it = selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
+		// abort if event position is invalid
+		if (dataPoints.dataPointCount() < 1) { return; }
+
+		if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value <
+			selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+			textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
+		} else if (selectedGraphs().first()->data()->at(dataPoints.dataRange().begin())->value >
+				   selectedGraphs().first()->data()->at(dataPoints.dataRange().end())->value) {
+			textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
 		}
-		graphTracer->setVisible(true);
-		graphTracer->setGraph(selectedGraphs().first());
-		graphTracer->setGraphKey(it->key);
-		graphTracer->position->setCoords(it->key, it->value);
-//		qDebug() << graphTracer->position->key() << graphTracer->position->value();
-		graphTracer->updatePosition();
-		//qDebug() << it->key << it->value;
-		textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
-		textLabel->setVisible(true);
-		textLabel->position->setCoords(it->key, it->value + yAxis->range().size() * 0.01);
-	} else { // no graph or more than one graphs selected
-		textLabel->setVisible(false);
-		graphTracer->setVisible(false);
+		it = selectedGraphs().first()->data()->at(dataPoints.dataRange().begin());
 	}
+	graphTracer->setVisible(true);
+	graphTracer->setGraph(selectedGraphs().first());
+	graphTracer->setGraphKey(it->key);
+	graphTracer->position->setCoords(it->key, it->value);
+//	qDebug() << graphTracer->position->key() << graphTracer->position->value();
+	graphTracer->updatePosition();
+	//qDebug() << it->key << it->value;
+	textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
+	textLabel->setVisible(true);
+	textLabel->position->setCoords(it->key, it->value + yAxis->range().size() * 0.01);
+
 	this->layer("cursorLayer")->replot();
 }
 
@@ -290,23 +306,23 @@ void QCustomPlot_custom::plotContextMenuRequest(QPoint pos) {
 	menu->setAttribute(Qt::WA_DeleteOnClose);
 
 	if (this->legend->selectTest(pos, false) >= 0) { // context menu on legend requested
-		menu->addAction("Move to top left", this, SLOT(plotMoveLegend()))->setData(
+		menu->addAction("Move to top left", this, &QCustomPlot_custom::plotMoveLegend)->setData(
 				(int) (Qt::AlignTop | Qt::AlignLeft));
-		menu->addAction("Move to top center", this, SLOT(plotMoveLegend()))->setData(
+		menu->addAction("Move to top center", this, &QCustomPlot_custom::plotMoveLegend)->setData(
 				(int) (Qt::AlignTop | Qt::AlignHCenter));
-		menu->addAction("Move to top right", this, SLOT(plotMoveLegend()))->setData(
+		menu->addAction("Move to top right", this, &QCustomPlot_custom::plotMoveLegend)->setData(
 				(int) (Qt::AlignTop | Qt::AlignRight));
-		menu->addAction("Move to bottom right", this, SLOT(plotMoveLegend()))->setData(
+		menu->addAction("Move to bottom right", this, &QCustomPlot_custom::plotMoveLegend)->setData(
 				(int) (Qt::AlignBottom | Qt::AlignRight));
-		menu->addAction("Move to bottom left", this, SLOT(plotMoveLegend()))->setData(
+		menu->addAction("Move to bottom left", this, &QCustomPlot_custom::plotMoveLegend)->setData(
 				(int) (Qt::AlignBottom | Qt::AlignLeft));
 	} else { // general context menu on graphs requested
 		menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
 		if (!this->selectedGraphs().empty()) {
-			menu->addAction("Remove selected graph", this, SLOT(plotContextMenuRemoveSelectedGraph()));
+			menu->addAction("Remove selected graph", this, &QCustomPlot_custom::plotContextMenuRemoveSelectedGraph);
 		}
 		if (this->graphCount() > 0) {
-			menu->addAction("Remove all graphs", this, SLOT(plotContextMenuRemoveAllGraphs()));
+			menu->addAction("Remove all graphs", this, &QCustomPlot_custom::plotContextMenuRemoveAllGraphs);
 		}
 	}
 	menu->popup(this->mapToGlobal(pos));
