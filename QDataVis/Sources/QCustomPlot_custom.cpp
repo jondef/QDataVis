@@ -171,7 +171,7 @@ void QCustomPlot_custom::centerPlot() {
  * This function is used when adding a new function graph
  */
 void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem) {
-	Graph *graph = new Graph();
+	DataSet *graph = new DataSet();
 
 	graph->binaryTree = new BinaryTree(functionString);
 
@@ -211,9 +211,9 @@ void QCustomPlot_custom::addFunctionGraph(const QString &functionString, QListWi
 	replot();
 }
 
-void QCustomPlot_custom::removeFunctionGraph(Graph *pGraph) {
-	removeGraph(pGraph->graph);
-	plottables.removeOne(pGraph);
+void QCustomPlot_custom::deleteGraph(DataSet *graph) {
+	removeGraph(graph->graph);
+	plottables.removeOne(graph);
 	replot();
 }
 
@@ -221,7 +221,7 @@ void QCustomPlot_custom::removeFunctionGraph(Graph *pGraph) {
  * This function is used when adding a new points graph
  */
 void QCustomPlot_custom::addPointsGraph(const QString &graphName, QListWidgetItem *listWidgetItem) {
-	Graph *graph = new Graph();
+	DataSet *graph = new DataSet();
 
 	graph->name = graphName;
 	graph->listWidgetItem = listWidgetItem;
@@ -236,18 +236,15 @@ void QCustomPlot_custom::addPointsGraph(const QString &graphName, QListWidgetIte
 	replot();
 }
 
-void QCustomPlot_custom::removePointsGraph(Graph *graph) {
-	removeGraph(graph->graph);
-	plottables.removeOne(graph);
-	replot();
-}
 
 void QCustomPlot_custom::replotGraphsOnRangeChange(QCPRange range) {
 	QVector<double> xArray = generateXArray(range.lower, range.upper, POINT_DENSITY);
 	static QVector<double> yArray(xArray.length());
 
-	for (Graph *graph : plottables) {
-		graph->graph->setData(xArray, graph->binaryTree->calculateTree(xArray));
+	for (DataSet *graph : plottables) {
+		if (graph->binaryTree) {
+			graph->graph->setData(xArray, graph->binaryTree->calculateTree(xArray));
+		}
 	}
 	replot();
 }

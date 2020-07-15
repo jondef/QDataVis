@@ -35,7 +35,7 @@ public slots:
 
 	//void QPushButton_PlotPoints_clicked();
 
-	void removeFunctionGraph();
+	void removeGraph();
 
 	void savePlotImage();
 
@@ -45,7 +45,6 @@ public slots:
 
 	void addPointsGraph();
 
-	void removePointsGraph();
 
 private:
 	friend class PlotPropertiesWindow;
@@ -56,14 +55,9 @@ private:
 	PointWindow *pointGraphDialog = new PointWindow(this);
 
 private:
-	QHash<QCPGraph *, BinaryTree *> *mFunctionGraph = new QHash<QCPGraph *, BinaryTree *>; // stores pointers of the function graphs and tree
-
-	QVector<Graph> plottables;
-
 	std::vector<std::future<void>> m_Futures;
 
 public:
-	inline static QColor getGraphColor(int colorIndex);
 
 	static int globalPointDensity;
 

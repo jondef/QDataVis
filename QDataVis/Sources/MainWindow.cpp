@@ -31,11 +31,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	// * points tab
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
-	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removePointsGraph);
+	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removeGraph);
 
 	// * function tab
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
-	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeFunctionGraph);
+	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeGraph);
 	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::globalPointDensityChanged);
 
 	// * settings tab
@@ -67,8 +67,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 }
 
 
-void MainWindow::graphDoubleClicked(QListWidgetItem *item) {
-	pointGraphDialog->setGraph(item, item->data(Qt::UserRole).value<QCPGraph *>());
+void MainWindow::graphDoubleClicked(QListWidgetItem *listWidgetItem) {
+	pointGraphDialog->setGraph(listWidgetItem);
 	pointGraphDialog->show();
 }
 
@@ -76,7 +76,6 @@ MainWindow::~MainWindow() {
 	delete ui;
 	delete plotWindow;
 	delete pointGraphDialog;
-	delete mFunctionGraph;
 }
 
 /**
@@ -156,14 +155,6 @@ void MainWindow::addFunctionGraph() {
 	ui->QListWidget_functionList->addItem(listWidgetItem);
 }
 
-void MainWindow::removeFunctionGraph() {
-	QListWidgetItem *selectedItem = ui->QListWidget_functionList->currentItem();
-	if (selectedItem) {
-		ui->customPlot->removeFunctionGraph(selectedItem->data(Qt::UserRole).value<Graph *>());
-		delete selectedItem;
-	}
-}
-
 void MainWindow::addPointsGraph() {
 	QListWidgetItem *listWidgetItem = new QListWidgetItem();
 	QString graphName = QString("Graph #%1").arg(ui->listWidget_PointGraphList->count() + 1);
@@ -172,10 +163,10 @@ void MainWindow::addPointsGraph() {
 	ui->listWidget_PointGraphList->addItem(listWidgetItem);
 }
 
-void MainWindow::removePointsGraph() {
-	QListWidgetItem *selectedItem = ui->listWidget_PointGraphList->currentItem();
+void MainWindow::removeGraph() {
+	QListWidgetItem *selectedItem = ui->QListWidget_functionList->currentItem();
 	if (selectedItem) {
-		ui->customPlot->removePointsGraph(selectedItem->data(Qt::UserRole).value<Graph *>());
+		ui->customPlot->deleteGraph(selectedItem->data(Qt::UserRole).value<DataSet *>());
 		delete selectedItem;
 	}
 }

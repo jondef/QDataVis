@@ -8,16 +8,10 @@
 #include <qcustomplot.h>
 #include "BinaryTree.hpp"
 
-// todo: refactor to DataSet
-struct Graph {
-	Graph() = default;
+struct DataSet {
+	DataSet() = default;
 
-	Graph(QCPGraph *aGraph, BinaryTree *aBinaryTree) {
-		QCPGraph *graph = aGraph;
-		BinaryTree *binaryTree = aBinaryTree;
-	}
-
-	~Graph() {
+	~DataSet() {
 		delete listWidgetItem;
 		delete graph;
 		delete binaryTree;

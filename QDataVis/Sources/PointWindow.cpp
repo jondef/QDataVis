@@ -78,13 +78,13 @@ void PointWindow::saveGraph() {
 	m_graph->setScatterStyle(static_cast<QCPScatterStyle::ScatterShape>(ui->comboBox_scatterStyle->currentData().toInt()));
 }
 
-void PointWindow::setGraph(QListWidgetItem *listWidgetItem, QCPGraph *pGraph) {
+void PointWindow::setGraph(QListWidgetItem *listWidgetItem) {
 	m_listWidgetItem = listWidgetItem;
-	m_graph = pGraph;
+	m_graph = listWidgetItem->data(Qt::UserRole).value<DataSet *>()->graph;
 
 	//set graphpoints in pointdata textedit
 	ui->textEdit_graphPoints->clear();
-	for (QCPDataContainer<QCPGraphData>::iterator i = pGraph->data()->begin(); i != pGraph->data()->end(); ++i) {
+	for (QCPDataContainer<QCPGraphData>::iterator i = m_graph->data()->begin(); i != m_graph->data()->end(); ++i) {
 		ui->textEdit_graphPoints->append(QString("%1, %2").arg(i->key).arg(i->value));
 	}
 

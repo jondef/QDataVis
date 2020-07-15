@@ -14,9 +14,9 @@
 
 
 #include "qcustomplot.h"
-#include "Graph.hpp"
+#include "DataSet.hpp"
 
-Q_DECLARE_METATYPE(Graph *)
+Q_DECLARE_METATYPE(DataSet *)
 
 struct QCPCursor {
 	QCPItemLine *hLine;
@@ -54,7 +54,7 @@ public:
 	QCPItemText *textLabel = new QCPItemText(this);
 	QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
-	QList<Graph *> plottables;
+	QList<DataSet *> plottables;
 
 	QCPGraph *selectedGraph;
 
@@ -107,9 +107,8 @@ public slots:
 
 	void addPointsGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
 
-	void removePointsGraph(Graph *graph);
+	void deleteGraph(DataSet *graph);
 
-	void removeFunctionGraph(Graph *pGraph);
 };
 
 

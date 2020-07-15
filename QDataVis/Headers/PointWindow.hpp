@@ -26,7 +26,7 @@ public:
 	QCPGraph *m_graph = nullptr;
 	QListWidgetItem *m_listWidgetItem = nullptr;
 
-	void setGraph(QListWidgetItem *listWidgetItem, QCPGraph *pGraph);
+	void setGraph(QListWidgetItem *listWidgetItem);
 
 	void saveGraph();
 
