@@ -12,6 +12,7 @@ QDataVis is a simple to use, UI based, interactive plotter powered by <img src="
   - Includes a mathematical expression parser written by me :)
   - Expect lots of bugs
   - Plot and visualise functions
+  - Plot points
 
 # New Features!
   - Plot cursor
@@ -26,25 +27,22 @@ You can also:
 
 Dependencies
 ---------
-
 QDataVis depends on a few libraries to work properly:
 
 * [Qt] - Great UI framework
-* [QCustomPlot] - Awesome Qt compatible Plotting widget
+* [QCustomPlot] - Awesome Qt compatible Plotting widget (included in repo)
 
 
 Building from source
 -------
+QDataVis requires [Qt] v5.12.3+ to be installed in included in PATH.
 
-QDataVis requires [Qt] v5.12.3+ and [QCustomPlot] v2.0.1, which is included in this repo.
-
-First make sure CMake finds your Qt installation by changing the CMAKE_PREFIX_PATH variable. Next, build QCustomPlot
-as a dll and finally, build QDataVis. In the future I might consider to include QCustomPlot as a static library.
+ * Clone the repository `git clone https://github.com/jondef/QDataVis.git`
+ * Load the CMake project and compile! `cmake ./QDataVis && make ./QDataVis/build`
 
 
 License
 ----
-
 Apache 2.0
 
 [//]: # (comment?)

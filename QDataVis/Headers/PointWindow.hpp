@@ -28,7 +28,7 @@ public:
 
 	void setGraph(QListWidgetItem *listWidgetItem);
 
-	void saveGraph();
+	void saveGraph() const;
 
 Q_SIGNALS:
 

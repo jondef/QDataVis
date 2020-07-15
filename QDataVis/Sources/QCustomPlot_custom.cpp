@@ -131,7 +131,7 @@ void QCustomPlot_custom::initGraph() {
 
 	// * context menu
 	// setup policy and connect slot for context menu popup:
-	this->setContextMenuPolicy(Qt::CustomContextMenu);
+	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QCustomPlot_custom::customContextMenuRequested, this, &QCustomPlot_custom::plotContextMenuRequest);
 
 
@@ -142,7 +142,7 @@ void QCustomPlot_custom::initGraph() {
 //	ui->customPlot->xAxis->setRange(now - now / 10, now);
 //	ui->customPlot->yAxis->setRange(0, 10000);
 
-	this->replot();
+	replot();
 }
 
 void QCustomPlot_custom::onMouseMoveReplotCursor(QMouseEvent *event) {

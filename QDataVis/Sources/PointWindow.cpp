@@ -48,6 +48,12 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 	ui->comboBox_scatterStyle->addItem("Peace", QVariant(QCPScatterStyle::ssPeace));
 	ui->comboBox_scatterStyle->addItem("Pixmap", QVariant(QCPScatterStyle::ssPixmap));
 	ui->comboBox_scatterStyle->addItem("Custom", QVariant(QCPScatterStyle::ssCustom));
+
+	connect(ui->pushButton_setColor, &QPushButton::clicked, this, [this]() {
+		QColorDialog *popUpColorDialog = new QColorDialog(this);
+		popUpColorDialog->open();
+		qDebug() << "fuck";
+	});
 }
 
 PointWindow::~PointWindow() {
@@ -56,11 +62,11 @@ PointWindow::~PointWindow() {
 	delete m_listWidgetItem;
 }
 
-void PointWindow::saveGraph() {
+void PointWindow::saveGraph() const {
 	// save point data
-	QVector<double> xArray;
-	QVector<double> yArray;
-	QStringList pointString = ui->textEdit_graphPoints->toPlainText().split('\n', QString::SkipEmptyParts);
+	QStringList pointString = ui->textEdit_graphPoints->toPlainText().split('\n', Qt::SkipEmptyParts);
+	QVector<double> xArray(pointString.size());
+	QVector<double> yArray(pointString.size());
 	for (QString &line : pointString) {
 		QStringList pointCoord = line.split(',');
 		xArray.append(pointCoord.at(0).toDouble());
