@@ -13,14 +13,31 @@
  * 2n+1 -> right child
  * n/2  -> parent
  */
-
 BinaryTree::BinaryTree(QString expression) {
-	expression.remove(" ");
+	explicitMaths(expression);
 	pRoot = new Node(expression);
 }
 
 BinaryTree::~BinaryTree() {
 	delete pRoot;
+}
+
+/**
+ * This functions refactors a mathematical expression
+ * to make it explicit. For example:
+ * (x+3)(x+4) will become (x+3)*(x+4)
+ * 3e^((5x+3)(-6x*4)) will become 3*e^x
+ */
+void BinaryTree::explicitMaths(QString &expression) {
+	expression.remove(" ");
+	expression.replace(")(", ")*(");
+	// make the implicit multiply symbol explicit
+	for (const QString &symbol : {"x", "pi", "e"}) {
+		// replace with positive look-behind
+		expression.replace(QRegularExpression(QString("(?<=\\d|\\))%1{1}").arg(symbol)), QString("*%1").arg(symbol));
+		// replace with positive look ahead
+		expression.replace(QRegularExpression(QString("%1{1}(?=\\d|\\()").arg(symbol)), QString("%1*").arg(symbol));
+	}
 }
 
 /**

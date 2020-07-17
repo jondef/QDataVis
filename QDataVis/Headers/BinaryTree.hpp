@@ -18,6 +18,8 @@ public:
 
 	~BinaryTree();
 
+	static void explicitMaths(QString &expression);
+
 	double calculateTree(double &xPlug) const;
 
 	QVector<double> calculateTree(QVector<double> &xArray) const;
