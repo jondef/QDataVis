@@ -16,20 +16,18 @@ class BinaryTree {
 public:
 	explicit BinaryTree(QString expression);
 
-	explicit BinaryTree();
-
 	~BinaryTree();
 
-	double calculateTree(double &xPlug);
+	double calculateTree(double &xPlug) const;
 
-	QVector<double> calculateTree(QVector<double> &xArray);
+	QVector<double> calculateTree(QVector<double> &xArray) const;
 
 	Node *pRoot;
 
-	void setPRoot(QString &expression);
+	void printTree() const;
 
 private:
-	void getNodeStats(Node *node);
+	[[maybe_unused]] static void getNodeStats(Node *node);
 };
 
 

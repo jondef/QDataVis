@@ -5,20 +5,22 @@
 #include "BinaryTree.hpp"
 
 
+/*
+ * todo: implement heap binary tree
+ * https://en.wikipedia.org/wiki/Binary_heap#/media/File:Binary_Heap_with_Array_Implementation.JPG
+ *
+ * 2n   -> left child
+ * 2n+1 -> right child
+ * n/2  -> parent
+ */
+
 BinaryTree::BinaryTree(QString expression) {
 	expression.remove(" ");
 	pRoot = new Node(expression);
 }
 
-BinaryTree::BinaryTree() = default;
-
-BinaryTree::~BinaryTree() noexcept {
+BinaryTree::~BinaryTree() {
 	delete pRoot;
-}
-
-
-void BinaryTree::setPRoot(QString &expression) {
-	pRoot = new Node(expression);
 }
 
 /**
@@ -26,7 +28,7 @@ void BinaryTree::setPRoot(QString &expression) {
  * @param xPlug: x value to insert in function
  * @return y
  */
-double BinaryTree::calculateTree(double &xPlug) {
+double BinaryTree::calculateTree(double &xPlug) const {
 	Node *currentNode = pRoot;
 	Node *previousNode = nullptr;
 	bool returning = false;
@@ -65,7 +67,7 @@ double BinaryTree::calculateTree(double &xPlug) {
 }
 
 
-QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
+QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) const {
 	QVector<double> yArray(xArray.length());
 
 	for (int i = 0; i < xArray.length(); ++i) {
@@ -75,9 +77,46 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) {
 }
 
 
-void BinaryTree::getNodeStats(Node *node) {
+[[maybe_unused]] void BinaryTree::getNodeStats(Node *node) {
 	qDebug() << "pParent: " << node->pParent << "\tpLeft_child: " << node->pLeftChild << "\tpRight_child: " << node->pRightChild;
 	qDebug() << "operation: [" << node->pLeftChild->strValue << " (" << node->pLeftChild->doubleValue << ")] " << node->mathOperation << " ["
 			 << node->pRightChild->strValue << " (" << node->pRightChild->doubleValue << ")]\n";
+}
+
+void BinaryTree::printTree() const {
+	QVector<QVector<QChar>> grid;
+
+	Node *currentNode = pRoot;
+	Node *previousNode = nullptr;
+	bool returning = false;
+	QPoint rootCoord = QPoint();
+	QPoint mostLeftNodeCoord = QPoint();
+
+
+	auto getChar = [&grid](int x, int y) -> QChar { return grid.at(y).at(x); };
+	auto setChar = [&grid, getChar](Node *node, QPoint coord) { getChar(0, 0); };
+
+	// go as far left as possible
+	while (currentNode->pLeftChild) {
+		currentNode = currentNode->pLeftChild;
+		rootCoord = QPoint(rootCoord.x() + 2, 0);
+		mostLeftNodeCoord = QPoint(0, mostLeftNodeCoord.y() + 2);
+	}
+	// go back to root
+	currentNode = pRoot;
+
+
+
+
+
+	// print the grid
+	QString result;
+	for (const QVector<QChar> &line : grid) {
+		for (const QChar &character : line) {
+			result.append(character);
+		}
+		result.append('\n');
+	}
+	qDebug() << result;
 }
 

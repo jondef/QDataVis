@@ -67,13 +67,13 @@ public:
 
 	~Node();
 
-	double computeOperation(double xPlug);
+	[[nodiscard]] double computeOperation(double xPlug) const;
 
 
 private:
 	static QList<int> getParenthesesArray(const QString &string);
 
-	static QList<int> findAllOccurences(QString string, const QString &ofWhat);
+	static QList<int> findAllOccurrences(QString string, const QString &what);
 
 	bool createChildren(QString string);
 

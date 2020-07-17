@@ -28,8 +28,8 @@ bool Node::createChildren(QString string) {
 
 	// remove parentheses only if there are one of them at beginning and end without any other
 	// handle cases such as (x*2+x*4)
-	if (findAllOccurences(string, "(").length() == 1 && string.at(0) == "(") {
-		if (findAllOccurences(string, ")").length() == 1 && string.at(string.length() - 1) == ")") {
+	if (findAllOccurrences(string, "(").length() == 1 && string.at(0) == "(") {
+		if (findAllOccurrences(string, ")").length() == 1 && string.at(string.length() - 1) == ")") {
 			string.remove(")");
 			string.remove("(");
 		}
@@ -52,22 +52,26 @@ bool Node::createChildren(QString string) {
 
 	// * normal operators
 	for (const QPair<QString, Operator> &Operator : operatorsPriority) {
-		QList<int> operatorIndexes = findAllOccurences(string, Operator.first);
+		QList<int> operatorIndexes = findAllOccurrences(string, Operator.first);
 
 		for (const int &operatorIndex : operatorIndexes) {
-			// check if operator is in a parentheses or not.
+			// if operator is not in a parentheses
 			if (parenthesesArray.at(operatorIndex) == 0) {
 				QString leftSide = string.left(operatorIndex);
 				QString rightSide = string.mid(operatorIndex + 1);
 
+				// todo: debug -sqrt(1-x^2)
 				// if you have -2*x you gotta add a zero on the left side
 				if (leftSide.isEmpty()) {
+					// if you have something like -2*x^4
 					if (!rightSide.contains("+") && !rightSide.contains("-")) {
 						leftSide = "0";
-					} else if (rightSide.at(0) == "(") {
+					} else if (rightSide.at(0) == "(") { // if you have something like -(x+2)
+						leftSide = "0";
+					} else if (true) { // fixme: dirty fix
 						leftSide = "0";
 					} else {
-						continue;
+						continue; // we must continue because left side is empty
 					}
 				}
 				mathOperation = Operator.second;
@@ -82,7 +86,7 @@ bool Node::createChildren(QString string) {
 	}
 	// * special operators | must be after normal operators!
 	for (const QPair<QString, Operator> &Operator : specialOperatorsPriority) {
-		QList<int> operatorIndexes = findAllOccurences(string, Operator.first);
+		QList<int> operatorIndexes = findAllOccurrences(string, Operator.first);
 
 		for (const int &operatorIndex : operatorIndexes) {
 			if (parenthesesArray.at(operatorIndex) == 0) {
@@ -110,20 +114,21 @@ bool Node::createChildren(QString string) {
 	return false; // failed
 }
 
+/**
+ * Unfold/expand sigma sign. Example:
+ * sigma(n*cos(n*10*2*pi*x),n,1,5)
+ * to
+ * cos(20*pi*x)+2*cos(40*pi*x)+3*cos(60*pi*x)+4*cos(80*pi*x)+5*cos(100*pi*x)
+ * @param aInput: function to expand
+ */
 void Node::sigmaExpand(QString &aInput) {
-	// unfold/expand sigma sign. Example:
-	// sigma(n*cos(n*10*2*pi*x),n,1,5)
-	// to
-	// cos(20*pi*x)+2*cos(40*pi*x)+3*cos(60*pi*x)+4*cos(80*pi*x)+5*cos(100*pi*x)
-	if (!aInput.contains("sigma(")) {
-		return;
-	}
+	if (!aInput.contains("sigma(")) { return; }
 
-	int sigmaIndex = aInput.indexOf("sigma("); // takes beginning of string -> +5
-	QString parenthesesContent = aInput.mid(sigmaIndex + 5);
+	int sigmaIndex = aInput.indexOf("sigma(") + 5; // takes beginning of string -> +5
+	QString parenthesesContent = aInput.mid(sigmaIndex);
 
 	{ // remove the stuff after the sigma if there is any
-		QList<int> parenthesesArray = getParenthesesArray(aInput.mid(sigmaIndex + 5));
+		QList<int> parenthesesArray = getParenthesesArray(aInput.mid(sigmaIndex));
 		int firstZero = parenthesesArray.indexOf(0);
 		if (firstZero != -1) { // if there is a zero in the parenthesesArray
 			parenthesesContent = parenthesesContent.left(firstZero);
@@ -158,8 +163,10 @@ void Node::sigmaExpand(QString &aInput) {
 	}
 }
 
+/**
+ * Returns false if node doesn't need children
+ */
 bool Node::needsChildren() {
-	// returns false if node doesn't need children
 	bool valueOk;
 	doubleValue = strValue.toDouble(&valueOk);
 
@@ -182,8 +189,10 @@ bool Node::needsChildren() {
 	}
 }
 
-
-double Node::computeOperation(double xPlug) {
+/**
+ * Compute the node value by taking the children's value
+ */
+double Node::computeOperation(double xPlug) const {
 	double doubleValueLeft = 0;
 	double doubleValueRight = 0;
 
@@ -296,19 +305,28 @@ double Node::computeOperation(double xPlug) {
 		case Ceil:
 			return ceil(doubleValueRight);
 		default:
-			// node has no children, but has a value
-			// functions that are just a number like 2
-			// fixme: what if you just enter x?
+			// if function is f(x) = x
+			if (!pParent && !pLeftChild && !pRightChild && isVariable) {
+				return xPlug;
+			}
+			// if function is f(x) = 2 for example
 			return doubleValue;
 	}
 }
 
-
+/**
+ * Returns a list that has the same size as param string.
+ * This list indicates inside how many parentheses every char
+ * of the string is. Take the following example:
+ *
+ * 5+(x-4)*(e^(x+2))+1 gives
+ * 0011111011122222100
+ */
 QList<int> Node::getParenthesesArray(const QString &string) {
 	QList<int> list;
-
 	int insideHowManyParentheses = 0;
-	for (auto &i : string) {
+
+	for (const QChar &i : string) {
 		if (i == '(') {
 			insideHowManyParentheses++;
 			list.append(insideHowManyParentheses);
@@ -322,16 +340,19 @@ QList<int> Node::getParenthesesArray(const QString &string) {
 	return list;
 }
 
-QList<int> Node::findAllOccurences(QString string, const QString &ofWhat) {
+/**
+ * Finds all occurrences in param string of param what.
+ * Returns a list containing the indexes of the QString what.
+ */
+QList<int> Node::findAllOccurrences(QString string, const QString &what) {
 	QList<int> operatorIndex;
-
 	int cutAwayParts = 0;
 
-	while (string.indexOf(ofWhat) != -1) {
-		operatorIndex.append(string.indexOf(ofWhat) + cutAwayParts);
-		cutAwayParts += string.left(string.indexOf(ofWhat) + 1).length();
+	while (string.indexOf(what) != -1) {
+		operatorIndex.append(string.indexOf(what) + cutAwayParts);
+		cutAwayParts += string.left(string.indexOf(what) + 1).length();
 
-		string = string.mid(string.indexOf(ofWhat) + 1);
+		string = string.mid(string.indexOf(what) + 1);
 	}
 	return operatorIndex;
 }
