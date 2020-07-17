@@ -4,7 +4,7 @@
 
 #include "MainWindow.hpp"
 #include "PlotPropertiesWindow.hpp"
-#include "QCustomPlot_custom.hpp"
+#include "QCustomPlotCustom.hpp"
 
 // todo: implement ui->customPlot->xAxis->setPadding(value);
 //ui->customPlot->yAxis->setNumberFormat("eb"); // e = exponential, b = beautiful decimal powers
@@ -1085,12 +1085,12 @@ void PlotPropertiesWindow::setUpGeneralPageConnections() {
 	// * set cursor
 	connect(ui->checkBox_enableCursor, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
-			connect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::mouseMove,
-					dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::onMouseMoveReplotCursor);
+			connect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::mouseMove,
+					dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::onMouseMoveReplotCursor);
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.cursorText->setVisible(true);
 		} else {
-			disconnect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::mouseMove,
-					   dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::onMouseMoveReplotCursor);
+			disconnect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::mouseMove,
+					   dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::onMouseMoveReplotCursor);
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.hLine->start->setCoords(0, 0);
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.hLine->end->setCoords(0, 0);
 
@@ -1105,12 +1105,12 @@ void PlotPropertiesWindow::setUpGeneralPageConnections() {
 	// * set stick axis to zero line
 	connect(ui->checkBox_stickAxisToZeroLines, &QCheckBox::toggled, this, [this](bool checked) {
 		if (checked) {
-			connect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::beforeReplot,
-					dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::stickAxisToZeroLines);
+			connect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::beforeReplot,
+					dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::stickAxisToZeroLines);
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->replot();
 		} else {
-			disconnect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::beforeReplot,
-					   dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlot_custom::stickAxisToZeroLines);
+			disconnect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::beforeReplot,
+					   dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::stickAxisToZeroLines);
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->axisRect()->setAutoMargins(QCP::msAll);
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->xAxis->setOffset(0);
 			dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->yAxis->setOffset(0);

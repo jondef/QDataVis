@@ -11,7 +11,7 @@
 #include <future>
 #include <memory>
 #include "ui_MainWindow.h"
-#include "QCustomPlot_custom.hpp"
+#include "QCustomPlotCustom.hpp"
 #include "Thread.hpp"
 #include "BinaryTree.hpp"
 #include "QPenDialog.hpp"

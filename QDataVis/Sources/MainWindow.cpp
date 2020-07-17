@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 		ui->customPlot->replotGraphsOnRangeChange(ui->customPlot->xAxis->range());
 		ui->customPlot->replot();
 	});
-	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlot_custom::centerPlot);
+	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlotCustom::centerPlot);
 
 	// * points tab
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
 	connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeFunctionGraph);
 	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), ui->customPlot,
-			&QCustomPlot_custom::globalPointDensityChanged);
+			&QCustomPlotCustom::globalPointDensityChanged);
 
 	// * settings tab
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);

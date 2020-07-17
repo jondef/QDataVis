@@ -10,7 +10,7 @@
 #include <QColorDialog>
 #include <QFontDialog>
 #include "ui_PointWindow.h"
-#include "QCustomPlot_custom.hpp"
+#include "QCustomPlotCustom.hpp"
 
 
 class PointWindow : public QDialog {

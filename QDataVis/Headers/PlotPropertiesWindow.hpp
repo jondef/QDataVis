@@ -10,7 +10,7 @@
 #include <QColorDialog>
 #include <QFontDialog>
 #include "ui_PlotPropertiesWindow.h"
-#include "QCustomPlot_custom.hpp"
+#include "QCustomPlotCustom.hpp"
 
 
 class PlotPropertiesWindow : public QWidget {

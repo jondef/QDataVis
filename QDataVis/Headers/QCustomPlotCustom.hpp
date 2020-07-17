@@ -35,13 +35,13 @@ static const QList<QColor> colors = {
 		QColor(23, 190, 207)
 };
 
-class QCustomPlot_custom : public QCustomPlot {
+class QCustomPlotCustom : public QCustomPlot {
 Q_OBJECT
 
 public:
-	explicit QCustomPlot_custom(QWidget *parent = nullptr);
+	explicit QCustomPlotCustom(QWidget *parent = nullptr);
 
-	~QCustomPlot_custom() override;
+	~QCustomPlotCustom() override;
 
 public:
 	void manageCursor(double x, double y);

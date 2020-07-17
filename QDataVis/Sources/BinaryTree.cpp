@@ -26,7 +26,7 @@ BinaryTree::~BinaryTree() {
  * This functions refactors a mathematical expression
  * to make it explicit. For example:
  * (x+3)(x+4) will become (x+3)*(x+4)
- * 3e^((5x+3)(-6x*4)) will become 3*e^x
+ * 3e^((5x+3)(-6x4)) will become 3*e^((5*x+3)*(-6*x*4))
  */
 void BinaryTree::explicitMaths(QString &expression) {
 	expression.remove(" ");
