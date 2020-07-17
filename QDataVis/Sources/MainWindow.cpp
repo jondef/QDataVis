@@ -78,6 +78,9 @@ MainWindow::~MainWindow() {
 	delete pointGraphDialog;
 }
 
+void MainWindow::setSelectedFunction(QListWidgetItem *listWidgetItem) {
+	ui->QListWidget_functionList->setCurrentItem(listWidgetItem);
+}
 
 void MainWindow::graphDoubleClicked(QListWidgetItem *listWidgetItem) {
 	pointGraphDialog->setGraph(listWidgetItem);

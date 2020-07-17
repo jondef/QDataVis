@@ -47,6 +47,8 @@ public slots:
 
 	void importData();
 
+	void setSelectedFunction(QListWidgetItem *listWidgetItem);
+
 private:
 	friend class PlotPropertiesWindow;
 

@@ -7,6 +7,7 @@
 //
 
 #include "QCustomPlotCustom.hpp"
+#include "MainWindow.hpp"
 
 
 QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) {
@@ -54,6 +55,15 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) {
 	connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::traceGraph);
 //	connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::showHideGraphTracer);
 	connect(xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
+
+	connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *graph) {
+		QList<DataSet *>::iterator btn = std::find_if(mDataSets.begin(), mDataSets.end(),
+													  [&](DataSet *dataSet) -> bool { return dataSet->graph == graph; });
+
+		if (btn != mDataSets.end()) {
+			dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedFunction((*btn)->listWidgetItem);
+		}
+	});
 
 	initGraph();
 }
