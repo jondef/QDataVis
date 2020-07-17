@@ -57,7 +57,7 @@ public:
 
 	QString strValue;
 	double doubleValue;
-	Operator mathOperation;
+	Operator mathOperation = static_cast<Operator>(-1);
 	double logBase;
 	bool hasChildren = false;
 	bool isVariable = false;

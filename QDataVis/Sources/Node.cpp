@@ -214,15 +214,15 @@ double Node::computeOperation(double xPlug) const {
 	}
 
 	switch (mathOperation) {
-		case Addition :
+		case Addition:
 			return doubleValueLeft + doubleValueRight;
-		case Subtraction :
+		case Subtraction:
 			return doubleValueLeft - doubleValueRight;
-		case Multiplication :
+		case Multiplication:
 			return doubleValueLeft * doubleValueRight;
-		case Division :
+		case Division:
 			return doubleValueLeft / doubleValueRight;
-		case Modulo :
+		case Modulo:
 			if (int(doubleValueRight) != 0) {
 				return int(doubleValueLeft) % int(doubleValueRight);
 			}
