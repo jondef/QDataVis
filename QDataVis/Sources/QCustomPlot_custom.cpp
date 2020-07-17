@@ -49,19 +49,19 @@ QCustomPlot_custom::QCustomPlot_custom(QWidget *parent) {
 	graphTracer->setSelectable(false);
 	graphTracer->setVisible(false);
 	graphTracer->setInterpolating(true);
-//	graphTracer->setStyle(QCPItemTracer::tsCrosshair);
 
-//	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
-	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::showHideGraphTracer);
+	connect(this, &QCustomPlot_custom::mouseMove, this, &QCustomPlot_custom::traceGraph);
+	connect(this, &QCustomPlot_custom::mouseRelease, this, &QCustomPlot_custom::traceGraph);
+//	connect(this, &QCustomPlot_custom::mousePress, this, &QCustomPlot_custom::showHideGraphTracer);
 	connect(xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this, &QCustomPlot_custom::replotGraphsOnRangeChange);
 
 	initGraph();
 }
 
 QCustomPlot_custom::~QCustomPlot_custom() {
-//	delete cursorLayer;
-	delete textLabel;
-	delete graphTracer;
+	removeLayer(cursorLayer);
+	removeItem(textLabel);
+	removeItem(graphTracer);
 }
 
 /**
@@ -247,7 +247,12 @@ void QCustomPlot_custom::replotGraphsOnRangeChange(QCPRange range) {
 }
 
 
-inline QColor QCustomPlot_custom::getGraphColor(int colorIndex) {
+/**
+ * This cannot be an inline function in release mode
+ * @param colorIndex
+ * @return
+ */
+QColor QCustomPlot_custom::getGraphColor(int colorIndex) {
 	// only take the last digit of the index
 	return colors.at(colorIndex % 10);
 }
@@ -267,7 +272,15 @@ void QCustomPlot_custom::stickAxisToZeroLines() {
  * at the nearest position to the mouse on the graph.
  */
 void QCustomPlot_custom::traceGraph(QMouseEvent *event) {
-	if (!selectedGraph) { return; }
+//	if (!selectedGraph) { return; }
+//	qDebug() << event->pos();
+	if (selectedGraphs().size() != 1) {
+		textLabel->setVisible(false);
+		graphTracer->setVisible(false);
+		this->layer("cursorLayer")->replot();
+		return;
+	}
+	selectedGraph = selectedGraphs().first();
 
 	QCPGraphDataContainer::const_iterator it = selectedGraph->data()->constEnd();
 	QVariant details;
