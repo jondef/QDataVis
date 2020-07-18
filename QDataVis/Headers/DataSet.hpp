@@ -51,10 +51,69 @@ struct DataSet {
 		double difference = upperLim - lowerLim;
 		double increment = difference / (length - 1);
 
-		for (unsigned int i = 0; i < length; i++) {
+		for (unsigned int i = 0; i < length; ++i) {
 			finalArray[i] = lowerLim + increment * i;
 		}
 		return finalArray;
+	}
+
+	/**
+	 * This method does a linear regression on the points of the dataset.
+     * @return QPair containing 'a' and 'b' numbers of a linear function f(x)=ax+b
+	 */
+	[[nodiscard]] QPair<double, double> linearRegression() const {
+		QSharedPointer<QCPGraphDataContainer> points = graph->data();
+		int numPoints = points->size();
+
+		QVector<QPair<double, double>> matrix_A;
+		for (int i = 0; i < numPoints; ++i) {
+			matrix_A.append(QPair(points->at(i)->value, 1));
+		}
+
+		QPair<QVector<double>, QVector<double>> matrix_AexpT;
+		for (int i = 0; i < numPoints; ++i) {
+			matrix_AexpT.first.append(points->at(i)->key); // append x coords
+			matrix_AexpT.second.append(1); // append the 1s
+		}
+		// a1 = x1 * x1 + x2 * x2 + x3 * x3...
+		double a1 = 0;
+		for (const double &x : matrix_AexpT.first) {
+			a1 += x * x;
+		}
+		// b1 = x1 * 1 + x2 * 1 + x3 * 1...
+		double b1 = 0;
+		for (const double &x : matrix_AexpT.first) {
+			b1 += x;
+		}
+		// c1 = 1 * x1 + 1 * x2 + 1 * x3...
+		double c1 = 0;
+		for (const double &x : matrix_AexpT.first) {
+			c1 += x;
+		}
+		// d1 = 1 * 1 + 1 * 1 + 1 * 1...
+		double d1 = 0;
+		for (const double &x : matrix_AexpT.second) {
+			d1 += x;
+		}
+
+		QVector<double> solvector; // y coordinates of points
+		for (const QCPGraphData &i : *points) {
+			solvector.append(i.value);
+		}
+		// g = y1 * x1 + y2 * x2 + y3 * x3...
+		double g = 0;
+		for (int x = 0; x < numPoints; ++x) {
+			g += solvector.at(x) * matrix_AexpT.first.at(x);
+		}
+		// h = y1 * 1 + y2 * 1 + y3 * 1...
+		double h = 0;
+		for (int x = 0; x < numPoints; ++x) {
+			h += solvector.at(x) * matrix_AexpT.second.at(x);
+		}
+
+		double a = (g * d1 - b1 * h) / (d1 * a1 - b1 * c1);
+		double b = h / d1 - (c1 / d1 * a);
+		return QPair(a, b);
 	}
 
 	QString name;

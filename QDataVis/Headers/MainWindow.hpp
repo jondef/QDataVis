@@ -47,10 +47,12 @@ public slots:
 
 	void importData();
 
-	void setSelectedFunction(QListWidgetItem *listWidgetItem);
+	void setSelectedDataSet(DataSet *dataSet);
 
 private:
 	friend class PlotPropertiesWindow;
+
+	friend class QCustomPlotCustom;
 
 	Ui::uiMainWindow *ui;
 

@@ -57,11 +57,10 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) {
 	connect(xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
 
 	connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *graph) {
-		QList<DataSet *>::iterator btn = std::find_if(mDataSets.begin(), mDataSets.end(),
-													  [&](DataSet *dataSet) -> bool { return dataSet->graph == graph; });
-
-		if (btn != mDataSets.end()) {
-			dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedFunction((*btn)->listWidgetItem);
+		QList<DataSet *>::iterator dataSet = std::find_if(mDataSets.begin(), mDataSets.end(),
+														  [&](DataSet *dataSet) { return dataSet->graph == graph; });
+		if (dataSet != mDataSets.end()) {
+			dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(*dataSet);
 		}
 	});
 
@@ -174,6 +173,9 @@ void QCustomPlotCustom::onMouseMoveReplotCursor(QMouseEvent *event) {
 
 
 void QCustomPlotCustom::centerPlot() {
+	qDebug() << dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->ui->listWidget_PointGraphList->selectedItems().at(0)->data(
+			Qt::UserRole).value<DataSet *>()->linearRegression();
+
 	xAxis->setRange(-10, 10);
 	yAxis->setRange(-10, 10);
 	replot();
@@ -199,7 +201,7 @@ void QCustomPlotCustom::addFunctionGraph(const QString &functionString, QListWid
 	pDataSet->name = functionString;
 	pDataSet->graph = new QCPGraph(xAxis, yAxis);
 	pDataSet->binaryTree = new BinaryTree(functionString);
-	pDataSet->graph->setData(xArray, yArray);
+	pDataSet->graph->setData(xArray, yArray, true);
 	pDataSet->graph->setName(functionString);
 	pDataSet->listWidgetItem = listWidgetItem;
 	pDataSet->graph->addToLegend();

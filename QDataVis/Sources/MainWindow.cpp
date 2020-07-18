@@ -78,8 +78,15 @@ MainWindow::~MainWindow() {
 	delete pointGraphDialog;
 }
 
-void MainWindow::setSelectedFunction(QListWidgetItem *listWidgetItem) {
-	ui->QListWidget_functionList->setCurrentItem(listWidgetItem);
+void MainWindow::setSelectedDataSet(DataSet *dataSet) {
+	// if dataset is a function
+	if (dataSet->binaryTree != nullptr) {
+		ui->tabWidget->setCurrentIndex(0);
+		ui->QListWidget_functionList->setCurrentItem(dataSet->listWidgetItem);
+	} else { // if dataset is a point dataset
+		ui->tabWidget->setCurrentIndex(1);
+		ui->listWidget_PointGraphList->setCurrentItem(dataSet->listWidgetItem);
+	}
 }
 
 void MainWindow::graphDoubleClicked(QListWidgetItem *listWidgetItem) {
