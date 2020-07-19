@@ -30,6 +30,7 @@ BinaryTree::~BinaryTree() {
  */
 void BinaryTree::explicitMaths(QString &expression) {
 	expression.remove(" ");
+	expression.replace("-", "+-");
 	expression.replace(")(", ")*(");
 	// make the implicit multiply symbol explicit
 	for (const QString &symbol : {"x", "pi", "e"}) {
