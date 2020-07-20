@@ -808,10 +808,10 @@ QCPPainter *QCPPaintBufferGlFbo::startPainting() {
 		return 0;
 	}
 
-	if (QOpenGLContext::currentContext() != mGlContext.data())
-		mGlContext.data()->makeCurrent(mGlContext.data()->surface());
+	if (QOpenGLContext::currentContext() != mGlContext.toStrongRef().data())
+		mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
 	mGlFrameBuffer->bind();
-	QCPPainter *result = new QCPPainter(mGlPaintDevice.data());
+	QCPPainter *result = new QCPPainter(mGlPaintDevice.toStrongRef().data());
 	result->setRenderHint(QPainter::Antialiasing);
 	return result;
 }
@@ -848,8 +848,8 @@ void QCPPaintBufferGlFbo::clear(const QColor &color) {
 		return;
 	}
 
-	if (QOpenGLContext::currentContext() != mGlContext.data())
-		mGlContext.data()->makeCurrent(mGlContext.data()->surface());
+	if (QOpenGLContext::currentContext() != mGlContext.toStrongRef().data())
+		mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
 	mGlFrameBuffer->bind();
 	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 	f->glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
@@ -877,15 +877,15 @@ void QCPPaintBufferGlFbo::reallocateBuffer() {
 	}
 
 	// create new fbo with appropriate size:
-	mGlContext.data()->makeCurrent(mGlContext.data()->surface());
+	mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
 	QOpenGLFramebufferObjectFormat frameBufferFormat;
-	frameBufferFormat.setSamples(mGlContext.data()->format().samples());
+	frameBufferFormat.setSamples(mGlContext.toStrongRef().data()->format().samples());
 	frameBufferFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
 	mGlFrameBuffer = new QOpenGLFramebufferObject(mSize * mDevicePixelRatio, frameBufferFormat);
-	if (mGlPaintDevice.data()->size() != mSize * mDevicePixelRatio)
-		mGlPaintDevice.data()->setSize(mSize * mDevicePixelRatio);
+	if (mGlPaintDevice.toStrongRef().data()->size() != mSize * mDevicePixelRatio)
+		mGlPaintDevice.toStrongRef().data()->setSize(mSize * mDevicePixelRatio);
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-	mGlPaintDevice.data()->setDevicePixelRatio(mDevicePixelRatio);
+	mGlPaintDevice.toStrongRef().data()->setDevicePixelRatio(mDevicePixelRatio);
 #endif
 }
 
@@ -1044,7 +1044,7 @@ void QCPLayer::setMode(QCPLayer::LayerMode mode) {
 	if (mMode != mode) {
 		mMode = mode;
 		if (!mPaintBuffer.isNull())
-			mPaintBuffer.data()->setInvalidated();
+			mPaintBuffer.toStrongRef().data()->setInvalidated();
 	}
 }
 
@@ -1076,13 +1076,13 @@ void QCPLayer::draw(QCPPainter *painter) {
 */
 void QCPLayer::drawToPaintBuffer() {
 	if (!mPaintBuffer.isNull()) {
-		if (QCPPainter *painter = mPaintBuffer.data()->startPainting()) {
+		if (QCPPainter *painter = mPaintBuffer.toStrongRef().data()->startPainting()) {
 			if (painter->isActive())
 				draw(painter);
 			else
 				qDebug() << Q_FUNC_INFO << "paint buffer returned inactive painter";
 			delete painter;
-			mPaintBuffer.data()->donePainting();
+			mPaintBuffer.toStrongRef().data()->donePainting();
 		} else
 			qDebug() << Q_FUNC_INFO << "paint buffer returned zero painter";
 	} else
@@ -1105,9 +1105,9 @@ void QCPLayer::drawToPaintBuffer() {
 void QCPLayer::replot() {
 	if (mMode == lmBuffered && !mParentPlot->hasInvalidatedPaintBuffers()) {
 		if (!mPaintBuffer.isNull()) {
-			mPaintBuffer.data()->clear(Qt::transparent);
+			mPaintBuffer.toStrongRef().data()->clear(Qt::transparent);
 			drawToPaintBuffer();
-			mPaintBuffer.data()->setInvalidated(false);
+			mPaintBuffer.toStrongRef().data()->setInvalidated(false);
 			mParentPlot->update();
 		} else
 			qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
@@ -1132,7 +1132,7 @@ void QCPLayer::addChild(QCPLayerable *layerable, bool prepend) {
 		else
 			mChildren.append(layerable);
 		if (!mPaintBuffer.isNull())
-			mPaintBuffer.data()->setInvalidated();
+			mPaintBuffer.toStrongRef().data()->setInvalidated();
 	} else
 		qDebug() << Q_FUNC_INFO << "layerable is already child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
@@ -1149,7 +1149,7 @@ void QCPLayer::addChild(QCPLayerable *layerable, bool prepend) {
 void QCPLayer::removeChild(QCPLayerable *layerable) {
 	if (mChildren.removeOne(layerable)) {
 		if (!mPaintBuffer.isNull())
-			mPaintBuffer.data()->setInvalidated();
+			mPaintBuffer.toStrongRef().data()->setInvalidated();
 	} else
 		qDebug() << Q_FUNC_INFO << "layerable is not child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
@@ -10713,11 +10713,11 @@ QCPItemAnchor::QCPItemAnchor(QCustomPlot *parentPlot, QCPAbstractItem *parentIte
 
 QCPItemAnchor::~QCPItemAnchor() {
 	// unregister as parent at children:
-			foreach (QCPItemPosition *child, mChildrenX.toList()) {
+			foreach (QCPItemPosition *child, mChildrenX.values()) {
 			if (child->parentAnchorX() == this)
 				child->setParentAnchorX(0); // this acts back on this anchor and child removes itself from mChildrenX
 		}
-			foreach (QCPItemPosition *child, mChildrenY.toList()) {
+			foreach (QCPItemPosition *child, mChildrenY.values()) {
 			if (child->parentAnchorY() == this)
 				child->setParentAnchorY(0); // this acts back on this anchor and child removes itself from mChildrenY
 		}
@@ -10878,11 +10878,11 @@ QCPItemPosition::~QCPItemPosition() {
 	// unregister as parent at children:
 	// Note: this is done in ~QCPItemAnchor again, but it's important QCPItemPosition does it itself, because only then
 	//       the setParentAnchor(0) call the correct QCPItemPosition::pixelPosition function instead of QCPItemAnchor::pixelPosition
-			foreach (QCPItemPosition *child, mChildrenX.toList()) {
+			foreach (QCPItemPosition *child, mChildrenX.values()) {
 			if (child->parentAnchorX() == this)
 				child->setParentAnchorX(0); // this acts back on this anchor and child removes itself from mChildrenX
 		}
-			foreach (QCPItemPosition *child, mChildrenY.toList()) {
+			foreach (QCPItemPosition *child, mChildrenY.values()) {
 			if (child->parentAnchorY() == this)
 				child->setParentAnchorY(0); // this acts back on this anchor and child removes itself from mChildrenY
 		}
@@ -13325,7 +13325,7 @@ bool QCustomPlot::removeLayer(QCPLayer *layer) {
 		setCurrentLayer(targetLayer);
 	// invalidate the paint buffer that was responsible for this layer:
 	if (!layer->mPaintBuffer.isNull())
-		layer->mPaintBuffer.data()->setInvalidated();
+		layer->mPaintBuffer.toStrongRef().data()->setInvalidated();
 	// remove layer:
 	delete layer;
 	mLayers.removeOne(layer);
@@ -13359,9 +13359,9 @@ bool QCustomPlot::moveLayer(QCPLayer *layer, QCPLayer *otherLayer, QCustomPlot::
 
 	// invalidate the paint buffers that are responsible for the layers:
 	if (!layer->mPaintBuffer.isNull())
-		layer->mPaintBuffer.data()->setInvalidated();
+		layer->mPaintBuffer.toStrongRef().data()->setInvalidated();
 	if (!otherLayer->mPaintBuffer.isNull())
-		otherLayer->mPaintBuffer.data()->setInvalidated();
+		otherLayer->mPaintBuffer.toStrongRef().data()->setInvalidated();
 
 	updateLayerIndices();
 	return true;
@@ -18354,7 +18354,7 @@ void QCPColorScale::setRangeDrag(bool enabled) {
 	if (enabled)
 		mAxisRect.data()->setRangeDrag(QCPAxis::orientation(mType));
 	else
-		mAxisRect.data()->setRangeDrag(0);
+		mAxisRect.data()->setRangeDrag(QFlags<Qt::Orientation>());
 }
 
 /*!
@@ -18372,7 +18372,7 @@ void QCPColorScale::setRangeZoom(bool enabled) {
 	if (enabled)
 		mAxisRect.data()->setRangeZoom(QCPAxis::orientation(mType));
 	else
-		mAxisRect.data()->setRangeZoom(0);
+		mAxisRect.data()->setRangeZoom(QFlags<Qt::Orientation>());
 }
 
 /*!
