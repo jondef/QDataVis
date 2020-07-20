@@ -44,8 +44,6 @@ public:
 	~QCustomPlotCustom() override;
 
 public:
-	void manageCursor(double x, double y);
-
 	QCPLayer *cursorLayer;
 	QCPCursor cursor;
 

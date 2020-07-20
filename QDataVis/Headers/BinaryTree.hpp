@@ -18,7 +18,7 @@ public:
 
 	~BinaryTree();
 
-	static void explicitMaths(QString &expression);
+	static void preprocessor(QString &expression);
 
 	double calculateTree(double &xPlug) const;
 

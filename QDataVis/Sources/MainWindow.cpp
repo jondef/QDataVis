@@ -5,11 +5,6 @@
 
 #include "MainWindow.hpp"
 
-#include <utility>
-
-#define ASYNC 0
-static std::mutex graphMutex;
-
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMainWindow) {
 	ui->setupUi(this);

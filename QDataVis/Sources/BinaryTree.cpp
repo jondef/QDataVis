@@ -14,7 +14,7 @@
  * n/2  -> parent
  */
 BinaryTree::BinaryTree(QString expression) {
-	explicitMaths(expression);
+	preprocessor(expression);
 	pRoot = new Node(expression);
 }
 
@@ -23,12 +23,12 @@ BinaryTree::~BinaryTree() {
 }
 
 /**
- * This functions refactors a mathematical expression
- * to make it explicit. For example:
- * (x+3)(x+4) will become (x+3)*(x+4)
+ * This functions makes changes to a mathematical expression
+ * to make it more explicit. For example:
+ * -x-1 will become +-x+-1
  * 3e^((5x+3)(-6x4)) will become 3*e^((5*x+3)*(-6*x*4))
  */
-void BinaryTree::explicitMaths(QString &expression) {
+void BinaryTree::preprocessor(QString &expression) {
 	expression.remove(" ");
 	expression.replace("-", "+-");
 	expression.replace(")(", ")*(");

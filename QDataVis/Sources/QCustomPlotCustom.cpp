@@ -100,6 +100,7 @@ void QCustomPlotCustom::updateColors() {
 		i->setTickPen(foregroundPen);
 		i->grid()->setPen(foregroundPen);
 		i->grid()->setSubGridPen(foregroundPen);
+		i->grid()->setZeroLinePen(QPen(QBrush(foregroundColor), 2));
 		i->setSubTickPen(foregroundPen);
 		i->setBasePen(foregroundPen);
 		i->setLabelColor(foregroundColor);
@@ -118,8 +119,7 @@ void QCustomPlotCustom::updateColors() {
 }
 
 void QCustomPlotCustom::initGraph() {
-	xAxis->setRange(-10, 10);
-	yAxis->setRange(-10, 10);
+	centerPlot();
 
 	// legend initialization
 	legend->setVisible(false);
@@ -166,7 +166,16 @@ void QCustomPlotCustom::onMouseMoveReplotCursor(QMouseEvent *event) {
 	double x = this->xAxis->pixelToCoord(event->pos().x());
 	double y = this->yAxis->pixelToCoord(event->pos().y());
 
-	this->manageCursor(x, y);
+	cursor.hLine->start->setCoords(xAxis->range().lower, y);
+	cursor.hLine->end->setCoords(xAxis->range().upper, y);
+
+	cursor.vLine->start->setCoords(x, yAxis->range().lower);
+	cursor.vLine->end->setCoords(x, yAxis->range().upper);
+
+	cursor.cursorText->setText(QString("(%1, %2)").arg(x).arg(y));
+	cursor.cursorText->position->setCoords(QPointF(x, y));
+	QPointF pp = cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
+	cursor.cursorText->position->setPixelPosition(pp);
 
 	this->layer("cursorLayer")->replot();
 }
@@ -326,19 +335,23 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
 	this->layer("cursorLayer")->replot();
 }
 
-
-void QCustomPlotCustom::manageCursor(double x, double y) {
-	cursor.hLine->start->setCoords(xAxis->range().lower, y);
-	cursor.hLine->end->setCoords(xAxis->range().upper, y);
-
-	cursor.vLine->start->setCoords(x, yAxis->range().lower);
-	cursor.vLine->end->setCoords(x, yAxis->range().upper);
-
-	cursor.cursorText->setText(QString("(%1, %2)").arg(x).arg(y));
-	cursor.cursorText->position->setCoords(QPointF(x, y));
-	QPointF pp = cursor.cursorText->position->pixelPosition() + QPointF(60.0, -15.0);
-	cursor.cursorText->position->setPixelPosition(pp);
-}
+//void BurgerMenu::setExpansionState(bool expanded) {
+//	if (mAnimated) {
+//		QPropertyAnimation *anim = new QPropertyAnimation(this, "minimumWidth", this);
+//		anim->setDuration(250);
+//		anim->setStartValue(mBurgerButton->width());
+//		anim->setEndValue(mBurgerButton->width() + mMenuWidth);
+//		anim->setDirection(expanded ? QAbstractAnimation::Forward : QAbstractAnimation::Backward);
+//		anim->setEasingCurve(expanded ? QEasingCurve::OutCubic : QEasingCurve::InCubic);
+//		anim->start(QAbstractAnimation::DeleteWhenStopped);
+//	} else {
+//		if (expanded) {
+//			setFixedWidth(mBurgerButton->width() + mMenuWidth);
+//		} else {
+//			setFixedWidth(mBurgerButton->width());
+//		}
+//	}
+//}
 
 
 void QCustomPlotCustom::plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part) {
