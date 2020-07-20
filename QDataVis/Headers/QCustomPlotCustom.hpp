@@ -56,9 +56,6 @@ public:
 
 	int mGlobalPointDensity = 1000;
 
-//	std::unique_ptr<QCPGraph *> selectedPlottable;
-//	std::unique_ptr<QCPGraph> v1 = std::make_unique<QCPGraph>();
-
 public slots:
 
 	void onMouseMoveReplotCursor(QMouseEvent *event);

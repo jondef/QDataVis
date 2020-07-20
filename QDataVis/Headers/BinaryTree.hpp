@@ -20,7 +20,7 @@ public:
 
 	static void preprocessor(QString &expression);
 
-	double calculateTree(double &xPlug) const;
+	double calculateTree(const double &xPlug) const;
 
 	QVector<double> calculateTree(QVector<double> &xArray) const;
 

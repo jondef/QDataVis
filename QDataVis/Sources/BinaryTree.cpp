@@ -46,7 +46,7 @@ void BinaryTree::preprocessor(QString &expression) {
  * @param xPlug: x value to insert in function
  * @return y
  */
-double BinaryTree::calculateTree(double &xPlug) const {
+double BinaryTree::calculateTree(const double &xPlug) const {
 	Node *currentNode = pRoot;
 	Node *previousNode = nullptr;
 	bool returning = false;

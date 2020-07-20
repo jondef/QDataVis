@@ -8,7 +8,7 @@ message("CMAKE VERSION IS " ${CMAKE_VERSION})
 message("BUILD TYPE SET TO " ${CMAKE_BUILD_TYPE})
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic")
 endif ()
 
 function(print_all_variables)
@@ -29,7 +29,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ################################
 # Qt
 ################################
-FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport Test QuickTest REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
@@ -48,4 +48,4 @@ add_subdirectory(QCustomPlot)
 ################################
 include_directories(QDataVis/Headers)
 add_subdirectory(QDataVis)
-#add_subdirectory(QDataVis_tests)
+add_subdirectory(Tests)
