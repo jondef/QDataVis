@@ -43,34 +43,31 @@ public:
 
 	~QCustomPlotCustom() override;
 
-public:
-	QCPLayer *cursorLayer;
-	QCPCursor cursor;
-
-	QCPItemText *textLabel = new QCPItemText(this);
-	QCPItemTracer *graphTracer = new QCPItemTracer(this);
-
-	QList<DataSet *> mDataSets;
-
-	QCPGraph *selectedGraph = nullptr;
-
-	int mGlobalPointDensity = 1000;
-
 public slots:
+
+	void globalPointDensityChanged(int density);
+
+	void updateColors();
 
 	void onMouseMoveReplotCursor(QMouseEvent *event);
 
-	void traceGraph(QMouseEvent *event);
-
 	void stickAxisToZeroLines();
-
-	void initGraph();
 
 	void centerPlot();
 
 	void replotGraphsOnRangeChange(QCPRange range);
 
-public slots:
+	void addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+
+	void addPointsGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+
+	void deleteGraph(DataSet *graph);
+
+private  slots:
+
+	void traceGraph(QMouseEvent *event);
+
+	void initGraph();
 
 	void plotOppositeAxesConnection();
 
@@ -90,19 +87,22 @@ public slots:
 
 	void plotMoveLegend();
 
-	void updateColors();
-
 	void showHideGraphTracer(QMouseEvent *event = nullptr);
 
 	static QColor getGraphColor(int colorIndex);
 
-	void addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+public:
+	QCPLayer *cursorLayer;
+	QCPCursor cursor;
 
-	void addPointsGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+	QCPItemText *textLabel = new QCPItemText(this);
+	QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
-	void deleteGraph(DataSet *graph);
+	QList<DataSet *> mDataSets;
 
-	void globalPointDensityChanged(int density);
+	QCPGraph *selectedGraph = nullptr;
+
+	int mGlobalPointDensity = 1000;
 };
 
 

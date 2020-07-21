@@ -51,24 +51,11 @@ const QVector<QPair<QString, Operator>> specialOperatorsPriority = {
 class Node {
 
 public:
-	Node *pParent = nullptr;
-	Node *pLeftChild = nullptr;
-	Node *pRightChild = nullptr;
-
-	QString strValue;
-	double doubleValue;
-	Operator mathOperation = static_cast<Operator>(-1);
-	double logBase;
-	bool hasChildren = false;
-	bool isVariable = false;
-
-public:
 	explicit Node(QString &input, Node *aParent = nullptr);
 
 	~Node();
 
 	[[nodiscard]] double computeOperation(double xPlug) const;
-
 
 private:
 	static QList<int> getParenthesesArray(const QString &string);
@@ -80,6 +67,18 @@ private:
 	bool needsChildren();
 
 	void sigmaExpand(QString &aInput);
+
+public:
+	Node *pParent = nullptr;
+	Node *pLeftChild = nullptr;
+	Node *pRightChild = nullptr;
+
+	QString strValue;
+	double doubleValue;
+	Operator mathOperation = static_cast<Operator>(-1);
+	double logBase;
+	bool hasChildren = false;
+	bool isVariable = false;
 };
 
 

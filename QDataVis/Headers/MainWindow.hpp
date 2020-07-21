@@ -29,13 +29,15 @@ public:
 
 public slots:
 
+	void setSelectedDataSet(DataSet *dataSet);
+
+private slots:
+
 	void addFunctionGraph();
 
 	void removeFunctionGraph();
 
 	void removePointGraph();
-
-	void savePlotImage();
 
 	void updateColors(bool checked);
 
@@ -43,27 +45,23 @@ public slots:
 
 	void addPointsGraph();
 
+	void savePlotImage();
+
+	void addLinearRegression();
+
 	void exportData();
 
 	void importData();
 
-	void setSelectedDataSet(DataSet *dataSet);
-
-	void addLinearRegression();
+	inline void statusBarMsg(const QString &msg, int time = 2000);
 
 private:
 	friend class PlotPropertiesWindow;
-
-	friend class QCustomPlotCustom;
 
 	Ui::uiMainWindow *ui;
 
 	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow(this);
 	PointWindow *pointGraphDialog = new PointWindow(this);
-
-private:
-	inline void statusBarMsg(const QString &msg, int time = 2000);
-
 };
 
 

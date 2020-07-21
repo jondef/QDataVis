@@ -21,12 +21,11 @@ public:
 
 	~PointWindow() override;
 
-	Ui::uiPointWindow *ui;
-
-	DataSet *pDataSet = nullptr;
-	QListWidgetItem *m_listWidgetItem = nullptr;
+public slots:
 
 	void setGraph(QListWidgetItem *listWidgetItem);
+
+private slots:
 
 	void saveGraph() const;
 
@@ -34,6 +33,13 @@ Q_SIGNALS:
 
 	void currentGraphChanged();
 
+public:
+	DataSet *pDataSet = nullptr;
+
+	QListWidgetItem *m_listWidgetItem = nullptr;
+
+private:
+	Ui::uiPointWindow *ui;
 };
 
 

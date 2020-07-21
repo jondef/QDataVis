@@ -15,7 +15,6 @@ class QPenDialog : public QDialog {
 Q_OBJECT
 
 public:
-	Ui::uiQPenDialog *ui;
 
 	explicit QPenDialog(QWidget *parent = nullptr);
 
@@ -23,14 +22,11 @@ public:
 
 	~QPenDialog() override;
 
+public:
+
 	void setCurrentPen(const QPen &apen);
 
 	QPen currentPen() const;
-
-private:
-	QPen *pen = new QPen;
-
-	QColorDialog *penColorDialog = new QColorDialog();
 
 private slots:
 
@@ -41,6 +37,13 @@ Q_SIGNALS:
 	void currentPenChanged(const QPen &apen);
 
 	void penSelected(const QPen &apen);
+
+private:
+	Ui::uiQPenDialog *ui;
+
+	QPen *pen = new QPen;
+
+	QColorDialog *penColorDialog = new QColorDialog();
 };
 
 

@@ -19,12 +19,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 
-	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
-		ui->customPlot->replotGraphsOnRangeChange(ui->customPlot->xAxis->range());
-		ui->customPlot->replot();
-	});
-	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlotCustom::centerPlot);
-
 	// * points tab
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
 	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removePointGraph);
@@ -36,8 +30,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	connect(ui->spinBox_setGlobalPointDensity, QOverload<int>::of(&QSpinBox::valueChanged), ui->customPlot,
 			&QCustomPlotCustom::globalPointDensityChanged);
 
-	// * settings tab
+	// * settings tab & general
 	connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
+	connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlotCustom::centerPlot);
+	connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
+		ui->customPlot->replotGraphsOnRangeChange(ui->customPlot->xAxis->range());
+	});
 
 	// region menubar connections
 	connect(ui->actionExport_data, &QAction::triggered, this, &MainWindow::exportData);

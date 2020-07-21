@@ -24,12 +24,13 @@ public:
 
 	QVector<double> calculateTree(QVector<double> &xArray) const;
 
-	Node *pRoot;
-
 	void printTree() const;
 
 private:
 	[[maybe_unused]] static void getNodeStats(Node *node);
+
+public:
+	Node *pRoot;
 };
 
 
