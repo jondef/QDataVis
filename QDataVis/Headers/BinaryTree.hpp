@@ -29,7 +29,7 @@ public:
 private:
 	[[maybe_unused]] static void getNodeStats(Node *node);
 
-public:
+private:
 	Node *pRoot;
 };
 

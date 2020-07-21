@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	plotWindow->setUpGeneralPageConnections();
 	plotWindow->setUpTitlePageConnections();
 
-	// * graph doubled clicked
+	// * listWidgetItem doubled clicked
 	connect(ui->listWidget_PointGraphList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 	connect(ui->QListWidget_functionList, &QListWidget::itemDoubleClicked, this, &MainWindow::graphDoubleClicked);
 

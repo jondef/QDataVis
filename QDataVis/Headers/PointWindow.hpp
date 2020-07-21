@@ -33,13 +33,10 @@ Q_SIGNALS:
 
 	void currentGraphChanged();
 
-public:
-	DataSet *pDataSet = nullptr;
-
-	QListWidgetItem *m_listWidgetItem = nullptr;
-
 private:
 	Ui::uiPointWindow *ui;
+
+	DataSet *pDataSet = nullptr; // ! don't delete this pointer
 };
 
 

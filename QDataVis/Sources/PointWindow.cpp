@@ -56,8 +56,6 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 
 PointWindow::~PointWindow() {
 	delete ui;
-	delete pDataSet;
-	delete m_listWidgetItem;
 }
 
 void PointWindow::saveGraph() const {
@@ -72,7 +70,7 @@ void PointWindow::saveGraph() const {
 	}
 	pDataSet->graph->setData(xArray, yArray);
 	// Save graph name
-	m_listWidgetItem->setText(ui->lineEdit_graphName->text());
+	pDataSet->listWidgetItem->setText(ui->lineEdit_graphName->text());
 	// Set graph line style
 	pDataSet->graph->setLineStyle(static_cast<QCPGraph::LineStyle>(ui->comboBox_lineStyle->currentData().toInt()));
 	// set line width
@@ -96,7 +94,6 @@ void PointWindow::saveGraph() const {
 }
 
 void PointWindow::setGraph(QListWidgetItem *listWidgetItem) {
-	m_listWidgetItem = listWidgetItem;
 	pDataSet = listWidgetItem->data(Qt::UserRole).value<DataSet *>();
 
 	// set graphpoints in pointdata textedit
