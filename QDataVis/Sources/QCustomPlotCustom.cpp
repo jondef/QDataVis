@@ -182,12 +182,8 @@ void QCustomPlotCustom::onMouseMoveReplotCursor(QMouseEvent *event) {
 
 
 void QCustomPlotCustom::centerPlot() {
-	qDebug() << dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->ui->listWidget_PointGraphList->selectedItems().at(0)->data(
-			Qt::UserRole).value<DataSet *>()->linearRegression();
-
 	xAxis->setRange(-10, 10);
 	yAxis->setRange(-10, 10);
-	replot();
 }
 
 /**
