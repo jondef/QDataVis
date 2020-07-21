@@ -11,10 +11,7 @@ inline double roundNumber(double value) {
 	return round(value * 1000.0) / 1000.0;
 }
 
-/**
- * To get the full double variables use:
- * qDebug() << Qt::fixed << qSetRealNumberPrecision(16) << var;
- */
+
 class BinaryTreeTest : public QObject {
 Q_OBJECT
 private slots:
