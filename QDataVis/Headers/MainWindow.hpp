@@ -49,6 +49,8 @@ public slots:
 
 	void setSelectedDataSet(DataSet *dataSet);
 
+	void addLinearRegression();
+
 private:
 	friend class PlotPropertiesWindow;
 

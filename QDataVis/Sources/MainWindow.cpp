@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 	// * points tab
 	connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
 	connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removePointGraph);
+	connect(ui->pushButton_linearRegression, &QPushButton::clicked, this, &MainWindow::addLinearRegression);
 
 	// * function tab
 	connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
@@ -148,6 +149,20 @@ void MainWindow::savePlotImage() {
 	if (savedOk) {
 		statusBarMsg(QString("Successfully saved plot as a %1 file").arg(ext), 5000);
 	}
+}
+
+void MainWindow::addLinearRegression() {
+	QListWidgetItem *selectedListWidgetItem = ui->listWidget_PointGraphList->currentItem();
+	if (!selectedListWidgetItem) {
+		statusBarMsg("Select a data set on which to do linear regression");
+		return;
+	}
+	DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
+	QPair<double, double> data = selectedDataSet->linearRegression();
+	QString oldText = ui->QLineEdit_addFunction->text();
+	ui->QLineEdit_addFunction->setText(QString("%1x+%2").arg(data.first).arg(data.second));
+	addFunctionGraph();
+	ui->QLineEdit_addFunction->setText(oldText);
 }
 
 void MainWindow::addFunctionGraph() {

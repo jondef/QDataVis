@@ -94,9 +94,6 @@
         <string>Points</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <widget class="QListWidget" name="listWidget_PointGraphList"/>
-        </item>
         <item row="1" column="0" rowspan="2">
          <layout class="QGridLayout" name="gridLayout_6">
           <item row="0" column="0">
@@ -114,6 +111,16 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="0" column="0">
+         <widget class="QListWidget" name="listWidget_PointGraphList"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="pushButton_linearRegression">
+          <property name="text">
+           <string>Linear regression</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
