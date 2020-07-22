@@ -19,8 +19,8 @@ struct DataSet {
 		delete binaryTree;
 	}
 
-	void changeColor(QColor color) {
-		this->color = std::move(color);
+	void changeColor(QColor aColor) {
+		this->color = std::move(aColor);
 		// * update the color on the list widget item
 		QPixmap pixmap = QPixmap(16, 16);
 		pixmap.fill(this->color);
@@ -59,7 +59,7 @@ struct DataSet {
 
 	/**
 	 * This method does a linear regression on the points of the dataset.
-     * @return QPair containing 'a' and 'b' numbers of a linear function f(x)=ax+b
+	 * @return QPair containing 'a' and 'b' numbers of a linear function f(x)=ax+b
 	 */
 	[[nodiscard]] QPair<double, double> linearRegression() const {
 		QSharedPointer<QCPGraphDataContainer> points = graph->data();
