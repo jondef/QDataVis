@@ -89,7 +89,9 @@ private  slots:
 
 	void showHideGraphTracer(QMouseEvent *event = nullptr);
 
-	static QColor getGraphColor(int colorIndex);
+	inline static QColor getGraphColor(int colorIndex) {
+		return colors.at(colorIndex % 10);
+	}
 
 public:
 	QCPLayer *cursorLayer;

@@ -10,7 +10,7 @@
 #include "MainWindow.hpp"
 
 
-QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) {
+QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
 	// enable openGL
 	setOpenGl(true, 16); // enable openGL
 
@@ -263,16 +263,6 @@ void QCustomPlotCustom::replotGraphsOnRangeChange(QCPRange range) {
 	replot();
 }
 
-
-/**
- * This cannot be an inline function in release mode
- * @param colorIndex
- * @return
- */
-QColor QCustomPlotCustom::getGraphColor(int colorIndex) {
-	// only take the last digit of the index
-	return colors.at(colorIndex % 10);
-}
 
 void QCustomPlotCustom::stickAxisToZeroLines() {
 	this->axisRect()->setAutoMargins(QCP::msNone);
