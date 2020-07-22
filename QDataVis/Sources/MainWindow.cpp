@@ -106,10 +106,6 @@ void MainWindow::updateColors(bool checked) {
 	qDebug() << "Dark mode enabled:" << checked;
 }
 
-inline void MainWindow::statusBarMsg(const QString &msg, int time) {
-	ui->statusBar->showMessage(msg, time);
-}
-
 
 void MainWindow::exportData() {
 
@@ -152,7 +148,7 @@ void MainWindow::savePlotImage() {
 void MainWindow::addLinearRegression() {
 	QListWidgetItem *selectedListWidgetItem = ui->listWidget_PointGraphList->currentItem();
 	if (!selectedListWidgetItem) {
-		statusBarMsg("Select a data set on which to do linear regression");
+		statusBarMsg("Select a dataset on which to do linear regression");
 		return;
 	}
 	DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();

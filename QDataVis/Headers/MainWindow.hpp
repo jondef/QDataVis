@@ -53,7 +53,9 @@ private slots:
 
 	void importData();
 
-	inline void statusBarMsg(const QString &msg, int time = 2000);
+	inline void statusBarMsg(const QString &msg, int time = 2000) {
+		ui->statusBar->showMessage(msg, time);
+	}
 
 private:
 	friend class PlotPropertiesWindow;
