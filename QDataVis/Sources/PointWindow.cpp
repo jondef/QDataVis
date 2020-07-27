@@ -52,6 +52,27 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
 	connect(ui->pushButton_setColor, &QPushButton::clicked, this, [this]() {
 		pDataSet->changeColor(QColorDialog::getColor(pDataSet->color));
 	});
+	connect(ui->pushButton_generateRandomData, &QPushButton::clicked, this, [this]() {
+		auto randint = [](int min, int max) -> int {
+			QRandomGenerator generator(QRandomGenerator::global()->generate64());
+			if (min <= max) {
+				return generator.bounded(min, max + 1); // inclusive, exclusive
+			} else {
+				return generator.bounded(max, min + 1); // inclusive, exclusive
+			}
+		};
+		QVector<int> xArray(1);
+		QVector<int> yArray(1);
+		int xrange = 1000;
+
+		for (int x = 1; x < xrange; ++x) {
+			xArray.append(x);
+			yArray.append(randint(yArray.at(x - 1) - 2, yArray.at(x - 1) + 2));
+		}
+		for (int i = 0; i < xrange; ++i) {
+			ui->textEdit_graphPoints->append(QString("%1,%2").arg(xArray.at(i)).arg(yArray.at(i)));
+		}
+	});
 }
 
 PointWindow::~PointWindow() {
