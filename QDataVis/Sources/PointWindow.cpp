@@ -60,15 +60,17 @@ PointWindow::~PointWindow() {
 
 void PointWindow::saveGraph() const {
 	// save point data
-	QStringList pointString = ui->textEdit_graphPoints->toPlainText().split('\n', Qt::SkipEmptyParts);
-	QVector<double> xArray(pointString.size());
-	QVector<double> yArray(pointString.size());
-	for (int lineNumber = 0; lineNumber < pointString.size(); ++lineNumber) {
-		QStringList pointCoord = pointString.at(lineNumber).split(',');
-		xArray.replace(lineNumber, pointCoord.at(0).toDouble());
-		yArray.replace(lineNumber, pointCoord.at(1).toDouble());
+	QString string = ui->textEdit_graphPoints->toPlainText(); // ! we need to save the string on the stack to avoid the references being invalid
+	QVector<QStringRef> pointString = string.remove(QRegularExpression(R"([^\d\,\.\-\n\r])")).splitRef('\n', Qt::SkipEmptyParts);
+	QVector<double> xArray;
+	QVector<double> yArray;
+	for (QStringRef &line : pointString) {
+		QVector<QStringRef> pointCoords = line.split(',', Qt::SkipEmptyParts);
+		if (pointCoords.length() != 2) { continue; }
+		xArray.append(pointCoords.at(0).toDouble());
+		yArray.append(pointCoords.at(1).toDouble());
 	}
-	pDataSet->graph->setData(xArray, yArray);
+	pDataSet->graph->setData(xArray, yArray, false);
 	// Save graph name
 	pDataSet->listWidgetItem->setText(ui->lineEdit_graphName->text());
 	// Set graph line style
