@@ -33,10 +33,10 @@ void BinaryTree::preprocessor(QString &expression) {
 	expression.replace("-", "+-");
 	expression.replace(")(", ")*(");
 
-	QRegularExpression regex = QRegularExpression("([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})");
+	QRegularExpression regex = QRegularExpression("((?<=\\W)[a-zA-Z][0-9(])|([0-9)][a-zA-Z])");
 	while (expression.indexOf(regex) != -1) {
-		int index = expression.indexOf(regex);
-		expression.insert(index + 1, '*');
+		int index = expression.indexOf(regex) + 1;
+		expression.insert(index, '*');
 	}
 
 	// make the implicit multiply symbol explicit
