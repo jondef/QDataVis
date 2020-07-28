@@ -32,6 +32,13 @@ void BinaryTree::preprocessor(QString &expression) {
 	expression.remove(" ");
 	expression.replace("-", "+-");
 	expression.replace(")(", ")*(");
+
+	QRegularExpression regex = QRegularExpression("([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})");
+	while (expression.indexOf(regex) != -1) {
+		int index = expression.indexOf(regex);
+		expression.insert(index + 1, '*');
+	}
+
 	// make the implicit multiply symbol explicit
 	for (const QString &symbol : {"x", "pi", "e"}) {
 		// replace with positive look-behind
