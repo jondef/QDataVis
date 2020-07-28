@@ -73,6 +73,11 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::setSelectedDataSet(DataSet *dataSet) {
+	if (dataSet == nullptr) {
+		ui->QListWidget_functionList->setCurrentItem(nullptr);
+		ui->listWidget_PointGraphList->setCurrentItem(nullptr);
+		return;
+	}
 	// if dataset is a function
 	if (dataSet->binaryTree != nullptr) {
 		ui->tabWidget->setCurrentIndex(0);

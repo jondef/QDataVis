@@ -63,7 +63,9 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
 			dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(*dataSet);
 		}
 	});
-
+	connect(this, &QCustomPlotCustom::mousePress, this, [this]() {
+		dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(nullptr);
+	});
 	initGraph();
 }
 
