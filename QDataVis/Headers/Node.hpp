@@ -69,7 +69,7 @@ private:
 	void sigmaExpand(QString &aInput);
 
 public:
-	Node *pParent = nullptr;
+	Node *pParent = nullptr; // ! do not delete this pointer in the destructor
 	Node *pLeftChild = nullptr;
 	Node *pRightChild = nullptr;
 

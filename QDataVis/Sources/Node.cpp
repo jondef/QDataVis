@@ -17,7 +17,6 @@ Node::Node(QString &aInput, Node *aParent) {
 }
 
 Node::~Node() {
-	delete pParent;
 	delete pLeftChild;
 	delete pRightChild;
 }
