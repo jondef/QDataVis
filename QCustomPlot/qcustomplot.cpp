@@ -4565,7 +4565,7 @@ Qt::Alignment QCPLayoutInset::insetAlignment(int index) const {
 		return mInsetAlignment.at(index);
 	else {
 		qDebug() << Q_FUNC_INFO << "Invalid element index:" << index;
-		return 0;
+		return Qt::Alignment();
 	}
 }
 
@@ -12154,7 +12154,7 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
 		mAutoAddPlottableToLegend(true),
 		mAntialiasedElements(QCP::aeNone),
 		mNotAntialiasedElements(QCP::aeNone),
-		mInteractions(0),
+		mInteractions(QCP::Interactions()),
 		mSelectionTolerance(8),
 		mNoAntialiasingOnDrag(false),
 		mBackgroundBrush(Qt::white, Qt::SolidPattern),
