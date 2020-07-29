@@ -5800,7 +5800,7 @@ double QCPAxisTickerDateTime::dateTimeToKey(const QDate date) {
 # if QT_VERSION < QT_VERSION_CHECK(4, 7, 0)
 	return QDateTime(date).toTime_t();
 # else
-	return QDateTime(date).toMSecsSinceEpoch() / 1000.0;
+	return QDateTime(date, QTime()).toSecsSinceEpoch();
 # endif
 }
 /* end of 'src/axis/axistickerdatetime.cpp' */
