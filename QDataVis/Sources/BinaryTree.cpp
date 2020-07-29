@@ -109,39 +109,151 @@ QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) const {
 }
 
 void BinaryTree::printTree() const {
-	QVector<QVector<QChar>> grid;
+	QVector<QPair<QPoint, Node *>> coords;
+	// region Navigate the tree and at every node save its coordinates to the coords vector
+	{
+		Node *currentNode = pRoot;
+		Node *previousNode = nullptr;
+		bool returning = false;
 
-	Node *currentNode = pRoot;
-	Node *previousNode = nullptr;
-	bool returning = false;
-	QPoint rootCoord = QPoint();
-	QPoint mostLeftNodeCoord = QPoint();
+		int offset = 5;
+		QPoint currentPosition = QPoint(0, 0);
+		while (true) {
+			if (currentNode->pLeftChild && !returning) {
+				currentPosition.setX(currentPosition.x() - offset);
+				currentPosition.setY(currentPosition.y() - offset);
+				currentNode = currentNode->pLeftChild;
+			} else if (currentNode->pRightChild && !returning) {
+				currentPosition.setX(currentPosition.x() + offset);
+				currentPosition.setY(currentPosition.y() - offset);
+				currentNode = currentNode->pRightChild;
+			}
+			// if node has no children
+			if (!currentNode->pLeftChild && !currentNode->pRightChild) {
+				coords.append(QPair(currentPosition, currentNode));
+				returning = true;
+			}
+			if (returning) {
+				if (currentNode->pParent) {
+					previousNode = currentNode;
+					currentNode = currentNode->pParent;
+					// if we're coming from the left child
+					if (previousNode == currentNode->pLeftChild) {
+						currentPosition.setX(currentPosition.x() + offset);
+						currentPosition.setY(currentPosition.y() + offset);
+					} else { // if we're coming from the right child
+						currentPosition.setX(currentPosition.x() - offset);
+						currentPosition.setY(currentPosition.y() + offset);
+					}
 
-
-	auto getChar = [&grid](int x, int y) -> QChar { return grid.at(y).at(x); };
-	auto setChar = [&grid, getChar](Node *node, QPoint coord) { getChar(0, 0); };
-
-	// go as far left as possible
-	while (currentNode->pLeftChild) {
-		currentNode = currentNode->pLeftChild;
-		rootCoord = QPoint(rootCoord.x() + 2, 0);
-		mostLeftNodeCoord = QPoint(0, mostLeftNodeCoord.y() + 2);
+				}
+				// only go right if we haven't been right
+				if (currentNode->pRightChild && currentNode->pRightChild != previousNode) {
+					returning = false;
+					currentPosition.setX(currentPosition.x() + offset);
+					currentPosition.setY(currentPosition.y() - offset);
+					currentNode = currentNode->pRightChild;
+					continue;
+				}
+				coords.append(QPair(currentPosition, currentNode));
+			}
+			if (currentNode == pRoot && returning) {
+				break; // done navigating the tree
+			}
+		}
 	}
-	// go back to root
-	currentNode = pRoot;
+	// endregion
+	// region get the nodes that are the farthest from the origin
+	int leftMostNodeX = 0;
+	int bottomMostNodeY = 0;
+	int rightMostNodeX = 0;
+	for (const QPair<QPoint, Node *> &pair : coords) {
+		if (pair.first.x() < leftMostNodeX) {
+			leftMostNodeX = pair.first.x();
+		} else if (pair.first.x() > rightMostNodeX) {
+			rightMostNodeX = pair.first.x();
+		}
+		if (pair.first.y() < bottomMostNodeY) {
+			bottomMostNodeY = pair.first.y();
+		}
+	}
+	// endregion
 
+	int gridWidth = rightMostNodeX - leftMostNodeX;
+	int gridHeight = 0 - bottomMostNodeY;
+	QVector<QVector<QString>> grid(gridHeight + 1, QVector<QString>(gridWidth + 1, "   "));
 
+	auto getChar = [&grid](QPoint point) -> QString * {
+		qDebug() << "Accessing " << point;
+		return &(grid[point.y()][point.x()]);
+	};
 
+	/**
+	 * Example input: (-2,-2)
+	 * 1. Move origin on xAxis (0, -2) (coordX - leftMostX, y)
+	 * 2. Flip y Axis (0, 2) (newCoordX, -y)
+	 */
+	auto mapCoordToArray = [&leftMostNodeX](QPoint point) -> QPoint {
+		return QPoint(point.x() - leftMostNodeX, -point.y());
+	};
 
+	auto getOperationChar = [](Operator anOperator) -> QString {
+		const QPair<QString, Operator> *pair = std::find_if(operatorsPriority.begin(), operatorsPriority.end(),
+															[&](const QPair<QString, Operator> &pairIterating) {
+																return pairIterating.second == anOperator;
+															});
+		if (pair) {
+			return QString(" %1 ").arg(pair->first);
+		} else {
+			return std::find_if(specialOperatorsPriority.begin(), specialOperatorsPriority.end(),
+								[&](const QPair<QString, Operator> &pairIterating) { return pairIterating.second == anOperator; })->first;
+		}
+	};
 
+	auto setChar = [&getChar, &getOperationChar, &mapCoordToArray](QPoint coord, Node *node) {
+		if (node->mathOperation != -1) { // if node is a math operation
+			*(getChar(mapCoordToArray(coord))) = getOperationChar(node->mathOperation);
+		} else if (node->isVariable) {
+			*(getChar(mapCoordToArray(coord))) = " x ";
+		} else { // if node is a constant
+			*(getChar(mapCoordToArray(coord))) = QString::number(node->doubleValue, 'g', 3);
+		}
+
+	};
+	// fill the grid with the values
+	for (const QPair<QPoint, Node *> &pair : coords) {
+		// set the node value
+		setChar(pair.first, pair.second);
+		// set the lines
+		Node *currentNode = pair.second;
+		QPoint currentPoint = pair.first;
+		if (currentNode->pLeftChild) {
+			QPoint leftChildCoord = std::find_if(coords.begin(), coords.end(), [&](const QPair<QPoint, Node *> &pairIterating) {
+				return (pairIterating.second->pParent == currentNode);
+			})->first;
+			// since it's the left child, leftChildCoord < currentPoint
+			for (int i = 1; i < currentPoint.x() - leftChildCoord.x(); ++i) {
+				*(getChar(mapCoordToArray(QPoint(leftChildCoord.x() + i, leftChildCoord.y() + i)))) = " / ";
+			}
+		}
+		if (currentNode->pRightChild) {
+			QPoint rightChildCoord = std::find_if(coords.begin(), coords.end(), [&](const QPair<QPoint, Node *> &pairIterating) {
+				return currentNode->pRightChild == pairIterating.second;
+			})->first;
+			// since it's the right child, rightChildCoord > currentPoint
+			for (int i = 1; i < rightChildCoord.x() - currentPoint.x(); ++i) {
+				*(getChar(mapCoordToArray(QPoint(currentPoint.x() + i, currentPoint.y() - i)))) = " \\ ";
+			}
+		}
+	}
 	// print the grid
 	QString result;
-	for (const QVector<QChar> &line : grid) {
-		for (const QChar &character : line) {
+	for (const QVector<QString> &line : grid) {
+		for (const QString &character : line) {
 			result.append(character);
 		}
-		result.append('\n');
+		result.append("\n");
 	}
-	qDebug() << result;
+	qDebug() << result.toUtf8().constData();
 }
 
