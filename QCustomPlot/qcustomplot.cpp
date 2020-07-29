@@ -14408,7 +14408,7 @@ void QCustomPlot::processRectSelection(QRect rect, QMouseEvent *event) {
 	bool selectionStateChanged = false;
 
 	if (mInteractions.testFlag(QCP::iSelectPlottables)) {
-		QMap<int, QPair<QCPAbstractPlottable *, QCPDataSelection> > potentialSelections; // map key is number of selected data points, so we have selections sorted by size
+		QMultiMap<int, QPair<QCPAbstractPlottable *, QCPDataSelection> > potentialSelections; // map key is number of selected data points, so we have selections sorted by size
 		QRectF rectF(rect.normalized());
 		if (QCPAxisRect *affectedAxisRect = axisRectAt(rectF.topLeft())) {
 			// determine plottables that were hit by the rect and thus are candidates for selection:
@@ -14416,8 +14416,7 @@ void QCustomPlot::processRectSelection(QRect rect, QMouseEvent *event) {
 					if (QCPPlottableInterface1D *plottableInterface = plottable->interface1D()) {
 						QCPDataSelection dataSel = plottableInterface->selectTestRect(rectF, true);
 						if (!dataSel.isEmpty())
-							potentialSelections.insertMulti(dataSel.dataPointCount(),
-															QPair<QCPAbstractPlottable *, QCPDataSelection>(plottable, dataSel));
+							potentialSelections.insert(dataSel.dataPointCount(), QPair<QCPAbstractPlottable *, QCPDataSelection>(plottable, dataSel));
 					}
 				}
 
