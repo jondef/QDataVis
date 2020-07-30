@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(QDataVis)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 message("CMAKE VERSION IS " ${CMAKE_VERSION})

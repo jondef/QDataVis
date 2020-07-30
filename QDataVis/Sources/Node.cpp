@@ -28,10 +28,10 @@ Node::~Node() {
 bool Node::createChildren(QString string) {
 	// remove parentheses only if there are one of them at beginning and end without any other
 	// handle cases such as (x*2+x*4)
-	if (findAllOccurrences(string, "(").length() == 1 && string.at(0) == "(") {
-		if (findAllOccurrences(string, ")").length() == 1 && string.at(string.length() - 1) == ")") {
-			string.remove(")");
-			string.remove("(");
+	if (findAllOccurrences(string, "(").length() == 1 && string.at(0) == '(') {
+		if (findAllOccurrences(string, ")").length() == 1 && string.at(string.length() - 1) == ')') {
+			string.remove(')');
+			string.remove('(');
 		}
 	}
 
@@ -41,7 +41,7 @@ bool Node::createChildren(QString string) {
 		// developed expressions / not entirely factored
 		// aka if the whole expression is in useless parentheses
 		if (!parenthesesArray.contains(0)) {
-			if (string.at(0) == "(" && string.at(string.length() - 1) == ")") {
+			if (string.at(0) == '(' && string.at(string.length() - 1) == ')') {
 				QString x = string.mid(1);
 				string = x.left(x.length() - 1);
 			}
@@ -64,9 +64,9 @@ bool Node::createChildren(QString string) {
 				// if you have -2*x you gotta add a zero on the left side
 				if (leftSide.isEmpty()) {
 					// if you have something like -2*x^4
-					if (!rightSide.contains("+") && !rightSide.contains("-")) {
+					if (!rightSide.contains('+') && !rightSide.contains('-')) {
 						leftSide = "0";
-					} else if (rightSide.at(0) == "(") { // if you have something like -(x+2)
+					} else if (rightSide.at(0) == '(') { // if you have something like -(x+2)
 						leftSide = "0";
 					} else if (true) { // fixme: dirty fix
 						leftSide = "0";
@@ -93,7 +93,7 @@ bool Node::createChildren(QString string) {
 				QString parenthesesContent = string.left(string.length() - 1).mid(operatorIndex + Operator.first.length() + 1);
 
 				if (Operator.first == "log") {
-					QString logBaseString = parenthesesContent.split(",").at(1);
+					QString logBaseString = parenthesesContent.split(',').at(1);
 					if (logBaseString == "e") {
 						logBase = M_E;
 					} else if (logBaseString == "pi") {
@@ -101,7 +101,7 @@ bool Node::createChildren(QString string) {
 					} else {
 						logBase = logBaseString.toDouble();
 					}
-					parenthesesContent = parenthesesContent.split(",").at(0);
+					parenthesesContent = parenthesesContent.split(',').at(0);
 				}
 
 				mathOperation = Operator.second;
@@ -150,7 +150,7 @@ void Node::sigmaExpand(QString &aInput) {
 		expandedForm.append(temp.replace(QRegularExpression(QString("(?<!\\w)[%1]{1}(?!\\w)").arg(variable)), QString::number(i)));
 
 		if (i < finish) {
-			expandedForm.append("+");
+			expandedForm.append('+');
 		}
 	}
 
