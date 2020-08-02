@@ -201,13 +201,11 @@ void QCustomPlotCustom::addFunctionGraph(const QString &functionString, QListWid
 	DataSet *pDataSet = new DataSet();
 
 	pDataSet->binaryTree = new BinaryTree(functionString);
-
 	QVector<double> xArray = DataSet::generateXArray(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
 	QVector<double> yArray = pDataSet->binaryTree->calculateTree(xArray);
 
 	pDataSet->name = functionString;
 	pDataSet->graph = new QCPGraph(xAxis, yAxis);
-	pDataSet->binaryTree = new BinaryTree(functionString);
 	pDataSet->graph->setData(xArray, yArray, true);
 	pDataSet->graph->setName(functionString);
 	pDataSet->listWidgetItem = listWidgetItem;
