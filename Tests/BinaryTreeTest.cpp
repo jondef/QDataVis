@@ -12,6 +12,13 @@ inline double roundNumber(double value) {
 }
 
 
+/*
+ * todo: test the following functions:
+ * sigma((x^(2*n+1))/(x*n^2),n,0,20)
+ * sigma(cos(x*n),n,0,20)
+ * sigma((1/n)*cos(x*n),n,0,20)
+ */
+
 class BinaryTreeTest : public QObject {
 Q_OBJECT
 private slots:
