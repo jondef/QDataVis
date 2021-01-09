@@ -38,7 +38,9 @@ Building from source
 QDataVis requires [Qt] v5.12.3+ to be installed in included in PATH.
 
  * Clone the repository `git clone https://github.com/jondef/QDataVis.git`
+ * Fetch submodule(s) `git submodule update --init`
  * Load the CMake project and compile! `cmake ./QDataVis && make ./QDataVis/build`
+ * To pull submodule(s): `git submodule update --remote`
 
 
 License
