@@ -51,18 +51,10 @@ execute_process(
 )
 
 add_definitions(-DVERSION="${VERSION}")
-if (NOT BUILDDATE STREQUAL "")
-	add_definitions(-DBUILDDATE="${BUILDDATE}")
-endif ()
-if (NOT GIT_COMMIT_HASH STREQUAL "")
-	add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
-endif ()
-if (NOT GIT_COMMIT_DATE STREQUAL "")
-	add_definitions(-DGIT_COMMIT_DATE="${GIT_COMMIT_DATE}")
-endif ()
-if (NOT GIT_BRANCH STREQUAL "")
-	add_definitions(-DGIT_BRANCH="${GIT_BRANCH}")
-endif ()
+add_definitions(-DBUILDDATE="${BUILDDATE}")
+add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+add_definitions(-DGIT_COMMIT_DATE="${GIT_COMMIT_DATE}")
+add_definitions(-DGIT_BRANCH="${GIT_BRANCH}")
 
 ################################
 # Pre-compilation steps
