@@ -1,5 +1,10 @@
 # Default ignored files
 build/
+build-release/
+build-debug/
+*-build-*-Release/
+*-build-*-Debug/
+*-build-*/
 bin/
 .idea/
 .vscode/
