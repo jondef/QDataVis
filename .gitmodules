@@ -1,0 +1,4 @@
+[submodule "QCustomPlot"]
+	path = QCustomPlot
+	url = https://github.com/jondef/QCustomPlot.git
+	branch = Qt6
