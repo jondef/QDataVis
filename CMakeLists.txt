@@ -40,7 +40,7 @@ SET(QT_USE_QTNETWORK true)
 ################################
 # QCustomPlot
 ################################
-include_directories(QCustomPlot)
+include_directories(QCustomPlot/src)
 add_subdirectory(QCustomPlot)
 
 ################################

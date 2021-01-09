@@ -5,7 +5,7 @@
 #ifndef QDATAVIS_GRAPH_H
 #define QDATAVIS_GRAPH_H
 
-#include <qcustomplot.h>
+#include <qcp.h>
 
 #include <utility>
 #include "BinaryTree.hpp"

@@ -11,7 +11,7 @@
 
 #define QCUSTOMPLOT_USE_OPENGL // use openGL
 
-#include "qcustomplot.h"
+#include "qcp.h"
 #include "DataSet.hpp"
 
 Q_DECLARE_METATYPE(DataSet *)
