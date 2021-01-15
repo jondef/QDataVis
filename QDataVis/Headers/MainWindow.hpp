@@ -26,6 +26,10 @@ public:
 
 	~MainWindow() override;
 
+    void closeEvent(QCloseEvent *event) override {
+        writeSettings();
+    }
+
 public slots:
 
 	void setSelectedDataSet(DataSet *dataSet);
@@ -47,6 +51,10 @@ private slots:
 	void savePlotImage();
 
 	void addLinearRegression();
+
+	void readSettings();
+
+	void writeSettings();
 
 	void exportData();
 

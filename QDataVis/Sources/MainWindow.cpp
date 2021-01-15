@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
 	// emit the signal of the checkbox to update the plot colors
 	emit(ui->checkBox_settingsDarkMode->toggled(false));
+	readSettings();
 }
 
 
@@ -71,6 +72,25 @@ MainWindow::~MainWindow() {
 	delete plotWindow;
 	delete pointGraphDialog;
 }
+
+
+void MainWindow::readSettings() {
+    QSettings settings;
+
+    settings.beginGroup("settings");
+    ui->checkBox_settingsDarkMode->setChecked(settings.value("darkModeEnabled").toBool());
+    settings.endGroup();
+}
+
+
+void MainWindow::writeSettings() {
+    QSettings settings;
+
+    settings.beginGroup("settings");
+    settings.setValue("darkModeEnabled", ui->checkBox_settingsDarkMode->isChecked());
+    settings.endGroup();
+}
+
 
 void MainWindow::setSelectedDataSet(DataSet *dataSet) {
 	if (dataSet == nullptr) {
@@ -125,7 +145,6 @@ void MainWindow::updateColors(bool checked) {
 		QApplication::setPalette(QApplication::style()->standardPalette());
 	}
 	ui->customPlot->updateColors();
-	qDebug() << "Dark mode enabled:" << checked;
 }
 
 
