@@ -87,7 +87,7 @@ file(GLOB QRC_FILES
 ################################
 qt5_wrap_ui(ui_wrap ${UI_FILES})
 
-if (WIN32)
+if (WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL Release)  # if on windows and release, disable cmd prompt
     add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
 else ()
     add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
