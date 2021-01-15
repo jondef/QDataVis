@@ -10,6 +10,10 @@
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
 
+    QFont font("Arial");
+    font.setPointSize(10);
+    QApplication::setFont(font);
+
 	// these are used for qSettings
 	QCoreApplication::setOrganizationName("QDataVis");
 	QCoreApplication::setOrganizationDomain("qdatavis.com");
