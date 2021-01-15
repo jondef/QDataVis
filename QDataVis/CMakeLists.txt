@@ -55,6 +55,7 @@ add_definitions(-DBUILDDATE="${BUILDDATE}")
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 add_definitions(-DGIT_COMMIT_DATE="${GIT_COMMIT_DATE}")
 add_definitions(-DGIT_BRANCH="${GIT_BRANCH}")
+add_definitions(-DQCUSTOMPLOT_USE_LIBRARY)
 
 ################################
 # Pre-compilation steps
