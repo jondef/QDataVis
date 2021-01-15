@@ -41,3 +41,6 @@ bin/
 *.exe
 *.out
 *.app
+
+# qt designer autosave files
+*.autosave
