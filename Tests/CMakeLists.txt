@@ -5,13 +5,13 @@ enable_testing()
 # Pre-compilation steps
 ################################
 include_directories(
-		${CMAKE_SOURCE_DIR}/QDataVis/Headers
+        ${CMAKE_SOURCE_DIR}/QDataVis/Headers
 )
 
 file(GLOB SOURCE_FILES
-		${CMAKE_SOURCE_DIR}/QDataVis/Sources/BinaryTree.cpp
-		${CMAKE_SOURCE_DIR}/QDataVis/Sources/Node.cpp
-		)
+        ${CMAKE_SOURCE_DIR}/QDataVis/Sources/BinaryTree.cpp
+        ${CMAKE_SOURCE_DIR}/QDataVis/Sources/Node.cpp
+        )
 
 find_package(Qt5 COMPONENTS Test REQUIRED)
 
