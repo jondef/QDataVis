@@ -18,45 +18,45 @@ Q_OBJECT
 
 public:
 
-	explicit PlotPropertiesWindow(QWidget *parent = nullptr);
+    explicit PlotPropertiesWindow(QWidget *parent = nullptr);
 
-	~PlotPropertiesWindow() override;
+    ~PlotPropertiesWindow() override;
 
 protected:
 
-	void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 signals:
 
-	void windowClosed();
+    void windowClosed();
 
 public slots:
 
-	void setUpAxesPageConnections();
+    void setUpAxesPageConnections();
 
-	void setUpTitlePageConnections();
+    void setUpTitlePageConnections();
 
-	void setUpGeneralPageConnections();
+    void setUpGeneralPageConnections();
 
 private slots:
 
-	void changeAxisTicker(QCPAxis *axis, const QString &value);
+    void changeAxisTicker(QCPAxis *axis, const QString &value);
 
-	void okButtonPressed();
+    void okButtonPressed();
 
 private:
 
-	Ui::uiPlotPropertiesWindow *ui;
+    Ui::uiPlotPropertiesWindow *ui;
 
-	// todo: add this to the custom_customplot class
-	QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
+    // todo: add this to the custom_customplot class
+    QHash<QListWidgetItem *, QCPTextElement *> *graphTextElements = new QHash<QListWidgetItem *, QCPTextElement *>;
 
-	QFontDialog *titleFontDialog = new QFontDialog(this);
-	QColorDialog *titleColorDialog = new QColorDialog(this);
+    QFontDialog *titleFontDialog = new QFontDialog(this);
+    QColorDialog *titleColorDialog = new QColorDialog(this);
 
-	QColorDialog *popUpColorDialog = new QColorDialog(this);
-	QFontDialog *popUpFontDialog = new QFontDialog(this);
-	QPenDialog *popUpPenDialog = new QPenDialog(this);
+    QColorDialog *popUpColorDialog = new QColorDialog(this);
+    QFontDialog *popUpFontDialog = new QFontDialog(this);
+    QPenDialog *popUpPenDialog = new QPenDialog(this);
 };
 
 

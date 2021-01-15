@@ -17,26 +17,26 @@ class PointWindow : public QDialog {
 Q_OBJECT
 
 public:
-	explicit PointWindow(QWidget *parent = nullptr);
+    explicit PointWindow(QWidget *parent = nullptr);
 
-	~PointWindow() override;
+    ~PointWindow() override;
 
 public slots:
 
-	void setGraph(QListWidgetItem *listWidgetItem);
+    void setGraph(QListWidgetItem *listWidgetItem);
 
 private slots:
 
-	void saveGraph() const;
+    void saveGraph() const;
 
 Q_SIGNALS:
 
-	void currentGraphChanged();
+    void currentGraphChanged();
 
 private:
-	Ui::uiPointWindow *ui;
+    Ui::uiPointWindow *ui;
 
-	DataSet *pDataSet = nullptr; // ! don't delete this pointer
+    DataSet *pDataSet = nullptr; // ! don't delete this pointer
 };
 
 

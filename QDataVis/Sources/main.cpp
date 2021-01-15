@@ -15,18 +15,18 @@ int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
 
-	// these are used for qSettings
-	QCoreApplication::setOrganizationName("QDataVis");
-	QCoreApplication::setOrganizationDomain("qdatavis.com");
-	QCoreApplication::setApplicationName("QDataVis");
+    // these are used for qSettings
+    QCoreApplication::setOrganizationName("QDataVis");
+    QCoreApplication::setOrganizationDomain("qdatavis.com");
+    QCoreApplication::setApplicationName("QDataVis");
 
-	uint16_t result;
-	do {
-		MainWindow window;
-		window.show();
-		result = QCoreApplication::exec();
-	} while (result == 1337);
+    uint16_t result;
+    do {
+        MainWindow window;
+        window.show();
+        result = QCoreApplication::exec();
+    } while (result == 1337);
 
-	return result;
+    return result;
 }
 

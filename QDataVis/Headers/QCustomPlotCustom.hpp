@@ -17,94 +17,94 @@
 Q_DECLARE_METATYPE(DataSet *)
 
 struct QCPCursor {
-	QCPItemLine *hLine;
-	QCPItemLine *vLine;
-	QCPItemText *cursorText;
+    QCPItemLine *hLine;
+    QCPItemLine *vLine;
+    QCPItemText *cursorText;
 };
 
 static const QList<QColor> colors = {
-		QColor(31, 119, 180),
-		QColor(255, 127, 14),
-		QColor(44, 160, 44),
-		QColor(214, 39, 40),
-		QColor(148, 103, 189),
-		QColor(140, 86, 75),
-		QColor(244, 119, 194),
-		QColor(127, 127, 127),
-		QColor(188, 189, 34),
-		QColor(23, 190, 207)
+        QColor(31, 119, 180),
+        QColor(255, 127, 14),
+        QColor(44, 160, 44),
+        QColor(214, 39, 40),
+        QColor(148, 103, 189),
+        QColor(140, 86, 75),
+        QColor(244, 119, 194),
+        QColor(127, 127, 127),
+        QColor(188, 189, 34),
+        QColor(23, 190, 207)
 };
 
 class QCustomPlotCustom : public QCustomPlot {
 Q_OBJECT
 
 public:
-	explicit QCustomPlotCustom(QWidget *parent = nullptr);
+    explicit QCustomPlotCustom(QWidget *parent = nullptr);
 
-	~QCustomPlotCustom() override;
+    ~QCustomPlotCustom() override;
 
 public slots:
 
-	void globalPointDensityChanged(int density);
+    void globalPointDensityChanged(int density);
 
-	void updateColors();
+    void updateColors();
 
-	void onMouseMoveReplotCursor(QMouseEvent *event);
+    void onMouseMoveReplotCursor(QMouseEvent *event);
 
-	void stickAxisToZeroLines();
+    void stickAxisToZeroLines();
 
-	void centerPlot();
+    void centerPlot();
 
-	void replotGraphsOnRangeChange(QCPRange range);
+    void replotGraphsOnRangeChange(QCPRange range);
 
-	void addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+    void addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
 
-	void addPointsGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
+    void addPointsGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
 
-	void deleteGraph(DataSet *graph);
+    void deleteGraph(DataSet *graph);
 
 private  slots:
 
-	void traceGraph(QMouseEvent *event);
+    void traceGraph(QMouseEvent *event);
 
-	void initGraph();
+    void initGraph();
 
-	void plotOppositeAxesConnection();
+    void plotOppositeAxesConnection();
 
-	void plotAxisLockDrag();
+    void plotAxisLockDrag();
 
-	void plotAxisLockZoom();
+    void plotAxisLockZoom();
 
-	void plotContextMenuRequest(QPoint pos);
+    void plotContextMenuRequest(QPoint pos);
 
-	void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
+    void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
 
-	void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
+    void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
 
-	void plotContextMenuRemoveAllGraphs();
+    void plotContextMenuRemoveAllGraphs();
 
-	void plotContextMenuRemoveSelectedGraph();
+    void plotContextMenuRemoveSelectedGraph();
 
-	void plotMoveLegend();
+    void plotMoveLegend();
 
-	void showHideGraphTracer(QMouseEvent *event = nullptr);
+    void showHideGraphTracer(QMouseEvent *event = nullptr);
 
-	inline static QColor getGraphColor(int colorIndex) {
-		return colors.at(colorIndex % 10);
-	}
+    inline static QColor getGraphColor(int colorIndex) {
+        return colors.at(colorIndex % 10);
+    }
 
 public:
-	QCPLayer *cursorLayer;
-	QCPCursor cursor;
+    QCPLayer *cursorLayer;
+    QCPCursor cursor;
 
-	QCPItemText *textLabel = new QCPItemText(this);
-	QCPItemTracer *graphTracer = new QCPItemTracer(this);
+    QCPItemText *textLabel = new QCPItemText(this);
+    QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
-	QList<DataSet *> mDataSets;
+    QList<DataSet *> mDataSets;
 
-	QCPGraph *selectedGraph = nullptr;
+    QCPGraph *selectedGraph = nullptr;
 
-	int mGlobalPointDensity = 1000;
+    int mGlobalPointDensity = 1000;
 };
 
 

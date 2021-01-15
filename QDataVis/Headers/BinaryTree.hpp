@@ -14,23 +14,23 @@
 class BinaryTree {
 
 public:
-	explicit BinaryTree(QString expression);
+    explicit BinaryTree(QString expression);
 
-	~BinaryTree();
+    ~BinaryTree();
 
-	static void preprocessor(QString &expression);
+    static void preprocessor(QString &expression);
 
-	double calculateTree(const double &xPlug) const;
+    double calculateTree(const double &xPlug) const;
 
-	QVector<double> calculateTree(QVector<double> &xArray) const;
+    QVector<double> calculateTree(QVector<double> &xArray) const;
 
-	void printTree() const;
-
-private:
-	[[maybe_unused]] static void getNodeStats(Node *node);
+    void printTree() const;
 
 private:
-	Node *pRoot;
+    [[maybe_unused]] static void getNodeStats(Node *node);
+
+private:
+    Node *pRoot;
 };
 
 

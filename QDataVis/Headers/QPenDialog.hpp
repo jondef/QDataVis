@@ -16,34 +16,34 @@ Q_OBJECT
 
 public:
 
-	explicit QPenDialog(QWidget *parent = nullptr);
+    explicit QPenDialog(QWidget *parent = nullptr);
 
-	explicit QPenDialog(const QPen &initial, QWidget *parent = nullptr);
+    explicit QPenDialog(const QPen &initial, QWidget *parent = nullptr);
 
-	~QPenDialog() override;
+    ~QPenDialog() override;
 
 public:
 
-	void setCurrentPen(const QPen &apen);
+    void setCurrentPen(const QPen &apen);
 
-	QPen currentPen() const;
+    QPen currentPen() const;
 
 private slots:
 
-	void penChanged();
+    void penChanged();
 
 Q_SIGNALS:
 
-	void currentPenChanged(const QPen &apen);
+    void currentPenChanged(const QPen &apen);
 
-	void penSelected(const QPen &apen);
+    void penSelected(const QPen &apen);
 
 private:
-	Ui::uiQPenDialog *ui;
+    Ui::uiQPenDialog *ui;
 
-	QPen *pen = new QPen;
+    QPen *pen = new QPen;
 
-	QColorDialog *penColorDialog = new QColorDialog();
+    QColorDialog *penColorDialog = new QColorDialog();
 };
 
 

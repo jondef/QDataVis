@@ -22,9 +22,9 @@ class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
 
-	~MainWindow() override;
+    ~MainWindow() override;
 
     void closeEvent(QCloseEvent *event) override {
         writeSettings();
@@ -32,45 +32,45 @@ public:
 
 public slots:
 
-	void setSelectedDataSet(DataSet *dataSet);
+    void setSelectedDataSet(DataSet *dataSet);
 
 private slots:
 
-	void addFunctionGraph();
+    void addFunctionGraph();
 
-	void removeFunctionGraph();
+    void removeFunctionGraph();
 
-	void removePointGraph();
+    void removePointGraph();
 
-	void updateColors(bool checked);
+    void updateColors(bool checked);
 
-	void graphDoubleClicked(QListWidgetItem *item);
+    void graphDoubleClicked(QListWidgetItem *item);
 
-	void addPointsGraph();
+    void addPointsGraph();
 
-	void savePlotImage();
+    void savePlotImage();
 
-	void addLinearRegression();
+    void addLinearRegression();
 
-	void readSettings();
+    void readSettings();
 
-	void writeSettings();
+    void writeSettings();
 
-	void exportData();
+    void exportData();
 
-	void importData();
+    void importData();
 
-	inline void statusBarMsg(const QString &msg, int time = 2000) {
-		ui->statusBar->showMessage(msg, time);
-	}
+    inline void statusBarMsg(const QString &msg, int time = 2000) {
+        ui->statusBar->showMessage(msg, time);
+    }
 
 private:
-	friend class PlotPropertiesWindow;
+    friend class PlotPropertiesWindow;
 
-	Ui::uiMainWindow *ui;
+    Ui::uiMainWindow *ui;
 
-	PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow(this);
-	PointWindow *pointGraphDialog = new PointWindow(this);
+    PlotPropertiesWindow *plotWindow = new PlotPropertiesWindow(this);
+    PointWindow *pointGraphDialog = new PointWindow(this);
 };
 
 
