@@ -29,13 +29,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ################################
 # Qt
 ################################
-FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets Network PrintSupport REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets PrintSupport REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
 set(CMAKE_AUTORCC ON) # Create Resource files
-SET(QT_USE_QTNETWORK true)
 
 ################################
 # QCustomPlot

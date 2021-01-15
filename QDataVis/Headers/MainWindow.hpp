@@ -6,7 +6,6 @@
 #define GUI_APP_MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtNetwork>
 #include <QObject>
 #include <future>
 #include <memory>

@@ -7,47 +7,47 @@ project(QDataVis)
 set(VERSION 0.1)
 # get current date time
 if (WIN32)
-	execute_process(
-			COMMAND date -R # date /t
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-			OUTPUT_VARIABLE BUILDDATE
-			OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
+    execute_process(
+            COMMAND date -R # date /t
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE BUILDDATE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 elseif (UNIX)
-	execute_process(
-			COMMAND date -R
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-			OUTPUT_VARIABLE BUILDDATE
-			OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
+    execute_process(
+            COMMAND date -R
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE BUILDDATE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 elseif (APPLE)
-	execute_process(
-			COMMAND date -R
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-			OUTPUT_VARIABLE BUILDDATE
-			OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
+    execute_process(
+            COMMAND date -R
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE BUILDDATE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 endif ()
 # Get git commit hash
 execute_process(
-		COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} rev-parse HEAD
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-		OUTPUT_VARIABLE GIT_COMMIT_HASH
-		OUTPUT_STRIP_TRAILING_WHITESPACE
+        COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} rev-parse HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 # Get git commit date
 execute_process(
-		COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} show -s --format=%ci HEAD
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-		OUTPUT_VARIABLE GIT_COMMIT_DATE
-		OUTPUT_STRIP_TRAILING_WHITESPACE
+        COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} show -s --format=%ci HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_DATE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 # Get git branch
 execute_process(
-		COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} rev-parse --abbrev-ref HEAD
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-		OUTPUT_VARIABLE GIT_BRANCH
-		OUTPUT_STRIP_TRAILING_WHITESPACE
+        COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_BRANCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 add_definitions(-DVERSION="${VERSION}")
@@ -60,26 +60,26 @@ add_definitions(-DGIT_BRANCH="${GIT_BRANCH}")
 # Pre-compilation steps
 ################################
 include_directories(
-		${CMAKE_CURRENT_SOURCE_DIR}/Headers
+        ${CMAKE_CURRENT_SOURCE_DIR}/Headers
 )
 
 file(GLOB SOURCE_FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/Sources/*.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Sources/*.c
-		)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Sources/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Sources/*.c
+        )
 
 file(GLOB HEADER_FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.h
-		${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.hpp
-		)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.hpp
+        )
 
 file(GLOB UI_FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.ui
-		)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.ui
+        )
 
 file(GLOB QRC_FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.qrc
-		)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.qrc
+        )
 
 ################################
 # Compiling
@@ -87,9 +87,9 @@ file(GLOB QRC_FILES
 qt5_wrap_ui(ui_wrap ${UI_FILES})
 
 if (WIN32)
-	add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
+    add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
 else ()
-	add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
+    add_executable(QDataVis ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
 endif ()
 
 ################################
@@ -97,5 +97,5 @@ endif ()
 ################################
 link_directories(${CMAKE_BINARY_DIR}/lib)
 
-target_link_libraries(QDataVis PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
+target_link_libraries(QDataVis PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
 target_link_libraries(QDataVis PUBLIC QCustomPlot)
