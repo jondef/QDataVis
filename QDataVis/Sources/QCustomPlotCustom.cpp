@@ -54,7 +54,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
 	connect(this, &QCustomPlotCustom::mouseMove, this, &QCustomPlotCustom::traceGraph);
 	connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::traceGraph);
 //	connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::showHideGraphTracer);
-	connect(xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
+	connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
 
 	connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *graph) {
 		QList<DataSet *>::iterator dataSet = std::find_if(mDataSets.begin(), mDataSets.end(),
@@ -139,8 +139,8 @@ void QCustomPlotCustom::initGraph() {
 	connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::plotAxisLockDrag);
 	connect(this, &QCustomPlotCustom::mouseWheel, this, &QCustomPlotCustom::plotAxisLockZoom);
 	// make bottom and left axes transfer their ranges to top and right axes:
-	connect(this->xAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this->xAxis2, QOverload<const QCPRange &>::of(&QCPAxis::setRange));
-	connect(this->yAxis, QOverload<const QCPRange &>::of(&QCPAxis::rangeChanged), this->yAxis2, QOverload<const QCPRange &>::of(&QCPAxis::setRange));
+	connect(this->xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this->xAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
+	connect(this->yAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this->yAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
 
 	// * click interaction
 	// axis label double click

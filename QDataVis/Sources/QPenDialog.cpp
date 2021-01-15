@@ -31,11 +31,11 @@ QPenDialog::QPenDialog(QWidget *parent) : QDialog(parent), ui(new Ui::uiQPenDial
 	ui->comboBox_penJoin->addItem(tr("Bevel"), Qt::BevelJoin);
 	ui->comboBox_penJoin->addItem(tr("Round"), Qt::RoundJoin);
 
-	connect(ui->spinBox_penWidth, QOverload<int>::of(&QSpinBox::valueChanged), this, &QPenDialog::penChanged);
+	connect(ui->spinBox_penWidth, qOverload<int>(&QSpinBox::valueChanged), this, &QPenDialog::penChanged);
 	connect(penColorDialog, &QColorDialog::currentColorChanged, this, &QPenDialog::penChanged);
-	connect(ui->comboBox_penStyle, QOverload<int>::of(&QComboBox::activated), this, &QPenDialog::penChanged);
-	connect(ui->comboBox_penCap, QOverload<int>::of(&QComboBox::activated), this, &QPenDialog::penChanged);
-	connect(ui->comboBox_penJoin, QOverload<int>::of(&QComboBox::activated), this, &QPenDialog::penChanged);
+	connect(ui->comboBox_penStyle, qOverload<int>(&QComboBox::activated), this, &QPenDialog::penChanged);
+	connect(ui->comboBox_penCap, qOverload<int>(&QComboBox::activated), this, &QPenDialog::penChanged);
+	connect(ui->comboBox_penJoin, qOverload<int>(&QComboBox::activated), this, &QPenDialog::penChanged);
 
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, [=]() {
 		emit penSelected(*pen);
