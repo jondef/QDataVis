@@ -100,9 +100,26 @@ void MainWindow::graphDoubleClicked(QListWidgetItem *listWidgetItem) {
 void MainWindow::updateColors(bool checked) {
 	setAutoFillBackground(true);
 	if (checked) { // enabled dark mode // window = background, windowText = foreground
+	    QColor foreground(255,255,255);
+	    QColor background(50,50,50);
+
 		QPalette pal = QApplication::palette();
-		pal.setColor(QPalette::Window, QApplication::palette().color(foregroundRole()));
-		pal.setColor(QPalette::WindowText, QApplication::palette().color(backgroundRole()));
+		pal.setColor(QPalette::Window, background); // now black
+		pal.setColor(QPalette::WindowText, foreground); // now white
+
+        pal.setColor(QPalette::Base, QColor(60,60,60));
+        pal.setColor(QPalette::AlternateBase, QColor(75,75,75));
+
+        pal.setColor(QPalette::Button, QColor(75,75,75));
+        pal.setColor(QPalette::ButtonText, foreground);
+
+        pal.setColor(QPalette::ToolTipBase, QColor(72, 98, 140));
+        pal.setColor(QPalette::ToolTipText, foreground);
+
+        pal.setColor(QPalette::Text, foreground);
+        pal.setColor(QPalette::PlaceholderText, QColor(150,150,150));
+        pal.setColor(QPalette::BrightText, QColor(150,150,150));
+
 		QApplication::setPalette(pal);
 	} else { // dark mode disabled
 		QApplication::setPalette(QApplication::style()->standardPalette());

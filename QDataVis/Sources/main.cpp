@@ -8,11 +8,12 @@
 #include "MainWindow.hpp"
 
 int main(int argc, char *argv[]) {
-	QApplication app(argc, argv);
-
     QFont font("Arial");
     font.setPointSize(10);
     QApplication::setFont(font);
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+
+    QApplication app(argc, argv);
 
 	// these are used for qSettings
 	QCoreApplication::setOrganizationName("QDataVis");
