@@ -257,7 +257,6 @@ void QCustomPlotCustom::stickAxisToZeroLines() {
 
 
 /**
- * todo: sqrt(-x^2-4*x+46)-4 -> fix tracer on this function
  * This function draws the text label and the graph tracer
  * at the nearest position to the mouse on the graph.
  */
@@ -274,29 +273,38 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
         return;
     }
     QCPGraph *selectedGraph = selectedGraphs().first();
-    QCPGraphDataContainer::const_iterator it = selectedGraph->data()->constEnd();
     QVariant details;
 
     if ((bool) selectedGraph->selectTest(event->pos(), false, &details)) {
         QCPDataSelection dataPoints = details.value<QCPDataSelection>();
-        // abort if event position is invalid
+        // abort if point of graph is nan, for example sqrt(x) for negative values.
+        if (dataPoints.dataRange().end() > selectedGraph->data()->size()) { return; }
+        // abort if event position is invalid // can happen if mouse is outside the plot
         if (dataPoints.dataPointCount() < 1) { return; }
+
+        QCPGraphDataContainer::const_iterator it_begin = selectedGraph->data()->at(dataPoints.dataRange().begin());
+        QCPGraphDataContainer::const_iterator it_end = selectedGraph->data()->at(dataPoints.dataRange().end());
         // set tracer text alignment
-        if (selectedGraph->data()->at(dataPoints.dataRange().begin())->value < selectedGraph->data()->at(dataPoints.dataRange().end())->value) {
+        if (it_begin->value < it_end->value) {
             textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
-        } else if (selectedGraph->data()->at(dataPoints.dataRange().begin())->value >= selectedGraph->data()->at(dataPoints.dataRange().end())->value) {
+        } else if (it_begin->value >= it_end->value) {
             textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
         }
-        it = selectedGraph->data()->at(dataPoints.dataRange().begin());
-    }
-    graphTracer->setVisible(true);
-    graphTracer->setGraph(selectedGraph);
-    graphTracer->setGraphKey(it->key);
-    textLabel->setVisible(true);
-    textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
-    textLabel->position->setCoords(it->key, it->value + yAxis->range().size() * 0.01);
+        textLabel->setVisible(true);
+        textLabel->setText(QString("(%1, %2)").arg(QString::number(it_begin->key, 'f', 3)).arg(QString::number(it_begin->value, 'f', 3)));
+        textLabel->position->setCoords(it_begin->key, it_begin->value + yAxis->range().size() * 0.01);
 
-    this->layer("cursorLayer")->replot();
+        graphTracer->setVisible(true);
+        graphTracer->setGraph(selectedGraph);
+        graphTracer->setGraphKey(it_begin->key);
+
+        graphTracer->updatePosition(); // if graphTracer position is nan, take next data point.
+        if (_isnan(graphTracer->position->value())) {
+            graphTracer->setGraphKey(it_end->key);
+            textLabel->position->setCoords(it_end->key, it_end->value + yAxis->range().size() * 0.01);
+        }
+        this->layer("cursorLayer")->replot();
+    }
 }
 
 
