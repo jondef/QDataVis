@@ -87,8 +87,6 @@ private  slots:
 
     void plotMoveLegend();
 
-    void showHideGraphTracer(QMouseEvent *event = nullptr);
-
     inline static QColor getGraphColor(int colorIndex) {
         return colors.at(colorIndex % 10);
     }
@@ -101,8 +99,6 @@ public:
     QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
     QList<DataSet *> mDataSets;
-
-    QCPGraph *selectedGraph = nullptr;
 
     int mGlobalPointDensity = 1000;
 };

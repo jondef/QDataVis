@@ -52,16 +52,15 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     graphTracer->setVisible(false);
     graphTracer->setInterpolating(true);
 
+    // connections for graph tracers
     connect(this, &QCustomPlotCustom::mouseMove, this, &QCustomPlotCustom::traceGraph);
-    connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::showHideGraphTracer);
-    connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event) { showHideGraphTracer(event); });
-
+    connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::traceGraph);
+    connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event) { traceGraph(event); });
 
     connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
 
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *graph) {
-        QList<DataSet *>::iterator dataSet = std::find_if(mDataSets.begin(), mDataSets.end(),
-                                                          [&](DataSet *dataSet) { return dataSet->graph == graph; });
+        QList<DataSet *>::iterator dataSet = std::find_if(mDataSets.begin(), mDataSets.end(),[&](DataSet *dataSet) { return dataSet->graph == graph; });
         if (dataSet != mDataSets.end()) {
             dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(*dataSet);
         }
@@ -206,10 +205,6 @@ void QCustomPlotCustom::addFunctionGraph(const QString &functionString, QListWid
 }
 
 void QCustomPlotCustom::deleteGraph(DataSet *graph) {
-    // we need to set selectedGraph to nullptr in case it's selected
-    // to avoid a dangling pointer
-    showHideGraphTracer();
-
     removeGraph(graph->graph);
     mDataSets.removeOne(graph);
     replot();
@@ -260,24 +255,6 @@ void QCustomPlotCustom::stickAxisToZeroLines() {
     yAxis->setOffset(this->axisRect()->left() - pxy);
 }
 
-/**
- *
- * @param event
- */
-void QCustomPlotCustom::showHideGraphTracer(QMouseEvent *event) {
-    // if there is a plottable at the event position
-    if (event != nullptr && plottableAt(event->pos(), true)) {
-        selectedGraph = dynamic_cast<QCPGraph *>(plottableAt(event->pos(), true));
-        traceGraph(event);
-        return;
-    }
-    qDebug() << "damn";
-    // if there is no plottable on click position
-    textLabel->setVisible(false);
-    graphTracer->setVisible(false);
-    selectedGraph = nullptr;
-    replot();
-}
 
 /**
  * todo: sqrt(-x^2-4*x+46)-4 -> fix tracer on this function
@@ -285,29 +262,29 @@ void QCustomPlotCustom::showHideGraphTracer(QMouseEvent *event) {
  * at the nearest position to the mouse on the graph.
  */
 void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
-//	if (!selectedGraph) { return; }
-	qDebug() << event->pos();
-    if (selectedGraphs().size() != 1) {
+    // (if event is a click AND there's no plottable on click position) OR selectedGraphs is not equal to one
+    if ((event->button() == Qt::LeftButton && !plottableAt(event->pos(), true)) || selectedGraphs().size() != 1) {
         textLabel->setVisible(false);
         graphTracer->setVisible(false);
         this->layer("cursorLayer")->replot();
         return;
     }
-    qDebug() << selectedGraphs().size();
-    selectedGraph = selectedGraphs().first();
-
+    // cancel if event isn't a mouse move
+    if (event->buttons() != Qt::NoButton) {
+        return;
+    }
+    QCPGraph *selectedGraph = selectedGraphs().first();
     QCPGraphDataContainer::const_iterator it = selectedGraph->data()->constEnd();
     QVariant details;
 
-    if (selectedGraph->selectTest(event->pos(), false, &details)) {
+    if ((bool) selectedGraph->selectTest(event->pos(), false, &details)) {
         QCPDataSelection dataPoints = details.value<QCPDataSelection>();
-
         // abort if event position is invalid
         if (dataPoints.dataPointCount() < 1) { return; }
-
+        // set tracer text alignment
         if (selectedGraph->data()->at(dataPoints.dataRange().begin())->value < selectedGraph->data()->at(dataPoints.dataRange().end())->value) {
             textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
-        } else if (selectedGraph->data()->at(dataPoints.dataRange().begin())->value > selectedGraph->data()->at(dataPoints.dataRange().end())->value) {
+        } else if (selectedGraph->data()->at(dataPoints.dataRange().begin())->value >= selectedGraph->data()->at(dataPoints.dataRange().end())->value) {
             textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
         }
         it = selectedGraph->data()->at(dataPoints.dataRange().begin());
@@ -315,12 +292,8 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
     graphTracer->setVisible(true);
     graphTracer->setGraph(selectedGraph);
     graphTracer->setGraphKey(it->key);
-    graphTracer->position->setCoords(it->key, it->value);
-//	qDebug() << graphTracer->position->key() << graphTracer->position->value();
-    graphTracer->updatePosition();
-    //qDebug() << it->key << it->value;
-    textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
     textLabel->setVisible(true);
+    textLabel->setText(QString("(%1, %2)").arg(QString::number(it->key, 'f', 3)).arg(QString::number(it->value, 'f', 3)));
     textLabel->position->setCoords(it->key, it->value + yAxis->range().size() * 0.01);
 
     this->layer("cursorLayer")->replot();
