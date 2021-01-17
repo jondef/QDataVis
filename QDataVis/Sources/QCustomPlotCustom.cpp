@@ -277,10 +277,10 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
 
     if ((bool) selectedGraph->selectTest(event->pos(), false, &details)) {
         QCPDataSelection dataPoints = details.value<QCPDataSelection>();
-        // abort if point of graph is nan, for example sqrt(x) for negative values.
-        if (dataPoints.dataRange().end() > selectedGraph->data()->size()) { return; }
         // abort if event position is invalid // can happen if mouse is outside the plot
         if (dataPoints.dataPointCount() < 1) { return; }
+        // abort if point of graph is nan, for example sqrt(x) for negative values.
+        if (dataPoints.dataRange().end() > selectedGraph->data()->size()) { return; }
 
         QCPGraphDataContainer::const_iterator it_begin = selectedGraph->data()->at(dataPoints.dataRange().begin());
         QCPGraphDataContainer::const_iterator it_end = selectedGraph->data()->at(dataPoints.dataRange().end());
