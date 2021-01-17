@@ -10,10 +10,32 @@
 #include "MainWindow.hpp"
 
 
+QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal progress) {
+    QVariant done;
+
+    double upper;
+    if (start.upper >= end.upper) {
+        upper = start.upper - abs(start.upper - end.upper) * progress;
+    } else {
+        upper = start.upper + abs(start.upper - end.upper) * progress;
+    }
+    double lower;
+    if (start.lower >= end.lower) {
+        lower = start.lower - abs(start.lower - end.lower) * progress;
+    } else {
+        lower = start.lower + abs(start.lower - end.lower) * progress;
+    }
+    done.setValue(QCPRange(lower, upper));
+
+    return done;
+}
+
+
 QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     // enable openGL
     setOpenGl(true, 16); // enable openGL
     qDebug() << "using openGL:" << openGl();
+    qRegisterAnimationInterpolator<QCPRange>(QCPRangeInterpolator);
 
     // * cursor stuff
     this->addLayer("cursorLayer", nullptr, QCustomPlot::limAbove);
@@ -106,7 +128,7 @@ void QCustomPlotCustom::updateColors() {
 }
 
 void QCustomPlotCustom::initGraph() {
-    centerPlot();
+    setPlotRange(QCPRange(-10, 10), QCPRange(-10, 10));
 
     // legend initialization
     legend->setVisible(false);
@@ -168,10 +190,32 @@ void QCustomPlotCustom::onMouseMoveReplotCursor(QMouseEvent *event) {
 }
 
 
-void QCustomPlotCustom::centerPlot() {
-    xAxis->setRange(-10, 10);
-    yAxis->setRange(-10, 10);
-    replot();
+void QCustomPlotCustom::setPlotRange(QCPRange xAxisRange, QCPRange yAxisRange) {
+    QVariant start;
+    QVariant end;
+
+    QPropertyAnimation *animation1 = new QPropertyAnimation(xAxis, "range", this);
+    animation1->setDuration(1000);
+    start.setValue(xAxis->range());
+    animation1->setStartValue(start);
+    end.setValue(xAxisRange);
+    animation1->setEndValue(end);
+    animation1->setDirection(QAbstractAnimation::Forward);
+    animation1->setEasingCurve(QEasingCurve::InOutQuart);
+
+    QPropertyAnimation *animation2 = new QPropertyAnimation(yAxis, "range", this);
+    animation2->setDuration(1000);
+    start.setValue(xAxis->range());
+    animation2->setStartValue(start);
+    end.setValue(yAxisRange);
+    animation2->setEndValue(end);
+    animation2->setDirection(QAbstractAnimation::Forward);
+    animation2->setEasingCurve(QEasingCurve::InOutQuart);
+
+    QParallelAnimationGroup *group = new QParallelAnimationGroup(this);
+    group->addAnimation(animation1);
+    group->addAnimation(animation2);
+    group->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 /**

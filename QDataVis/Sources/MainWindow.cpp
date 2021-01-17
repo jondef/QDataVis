@@ -32,7 +32,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
     // * settings tab & general
     connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
-    connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, &QCustomPlotCustom::centerPlot);
+    connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, [this](){
+        ui->customPlot->setPlotRange(QCPRange(-10,10), QCPRange(-10,10));
+    });
     connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
         ui->customPlot->replotGraphsOnRangeChange(ui->customPlot->xAxis->range());
     });

@@ -53,7 +53,7 @@ public slots:
 
     void stickAxisToZeroLines();
 
-    void centerPlot();
+    void setPlotRange(QCPRange xAxisRange, QCPRange yAxisRange);
 
     void replotGraphsOnRangeChange(QCPRange range);
 
