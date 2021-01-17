@@ -26,29 +26,16 @@ Node::~Node() {
  * @return true if split successful, otherwise false
  */
 bool Node::createChildren(QString string) {
-    // remove parentheses only if there are one of them at beginning and end without any other
-    // handle cases such as (x*2+x*4)
-    if (findAllOccurrences(string, "(").length() == 1 && string.at(0) == '(') {
-        if (findAllOccurrences(string, ")").length() == 1 && string.at(string.length() - 1) == ')') {
-            string.remove(')');
-            string.remove('(');
-        }
-    }
-
-    {
-        QList<int> parenthesesArray = getParenthesesArray(string);
-        // handle cases such as ((-x^2-4*x+46)^(1/2)-4)
-        // developed expressions / not entirely factored
-        // aka if the whole expression is in useless parentheses
-        if (!parenthesesArray.contains(0)) {
-            if (string.at(0) == '(' && string.at(string.length() - 1) == ')') {
-                QString x = string.mid(1);
-                string = x.left(x.length() - 1);
-            }
-        }
-    }
-
     QList<int> parenthesesArray = getParenthesesArray(string);
+    // handle cases such as ((-x^2-4*x+46)^(1/2)-4)
+    // aka if the whole expression is in useless parentheses
+    if (!parenthesesArray.contains(0)) {
+        if (string.at(0) == '(' && string.at(string.length() - 1) == ')') {
+            string.chop(1); // remove 1 char from end of string
+            string.remove(0, 1); // remove 1st char from string
+        }
+    }
+    parenthesesArray = getParenthesesArray(string);
 
     // * normal operators
     for (const QPair<QString, Operator> &Operator : operatorsPriority) {
@@ -59,8 +46,6 @@ bool Node::createChildren(QString string) {
             if (parenthesesArray.at(operatorIndex) == 0) {
                 QString leftSide = string.left(operatorIndex);
                 QString rightSide = string.mid(operatorIndex + 1);
-
-                // todo: debug -sqrt(1-x^2)
                 // if you have -2*x you gotta add a zero on the left side
                 if (leftSide.isEmpty()) {
                     // if you have something like -2*x^4
@@ -105,7 +90,7 @@ bool Node::createChildren(QString string) {
                 }
 
                 mathOperation = Operator.second;
-                qDebug() << Operator.first << parenthesesContent;
+//                qDebug() << Operator.first << parenthesesContent;
                 pRightChild = new Node(parenthesesContent, this);
                 return true; // success
             }
