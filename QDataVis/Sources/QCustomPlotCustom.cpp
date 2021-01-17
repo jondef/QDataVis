@@ -54,7 +54,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
 
     // connections for graph tracers
     connect(this, &QCustomPlotCustom::mouseMove, this, &QCustomPlotCustom::traceGraph);
-    connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::traceGraph);
+    connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::traceGraph);
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event) { traceGraph(event); });
 
     connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
@@ -65,7 +65,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
             dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(*dataSet);
         }
     });
-    connect(this, &QCustomPlotCustom::mousePress, this, [this]() {
+    connect(this, &QCustomPlotCustom::mouseRelease, this, [this]() {
         dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(nullptr);
     });
     initGraph();
@@ -262,8 +262,8 @@ void QCustomPlotCustom::stickAxisToZeroLines() {
  * at the nearest position to the mouse on the graph.
  */
 void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
-    // (if event is a click AND there's no plottable on click position) OR selectedGraphs is not equal to one
-    if ((event->button() == Qt::LeftButton && !plottableAt(event->pos(), true)) || selectedGraphs().size() != 1) {
+    // (if event is a click AND mouse hasn't moved AND there's no plottable on click position) OR selectedGraphs is not equal to one
+    if ((event->button() == Qt::LeftButton && !mMouseHasMoved && !plottableAt(event->pos(), true)) || selectedGraphs().size() != 1) {
         textLabel->setVisible(false);
         graphTracer->setVisible(false);
         this->layer("cursorLayer")->replot();
