@@ -73,9 +73,7 @@ private  slots:
 
     void plotOppositeAxesConnection();
 
-    void plotAxisLockDrag();
-
-    void plotAxisLockZoom();
+    void plotAxisLockDragZoom();
 
     void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
 

@@ -94,8 +94,8 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     // connect slot that ties some axis selections together (especially opposite axes):
     connect(this, &QCustomPlotCustom::selectionChangedByUser, this, &QCustomPlotCustom::plotOppositeAxesConnection);
     // connect slots that takes care that when an axis is selected, only that direction can be dragged and zoomed
-    connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::plotAxisLockDrag);
-    connect(this, &QCustomPlotCustom::mouseWheel, this, &QCustomPlotCustom::plotAxisLockZoom);
+    connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::plotAxisLockDragZoom);
+    connect(this, &QCustomPlotCustom::mouseWheel, this, &QCustomPlotCustom::plotAxisLockDragZoom);
     // make bottom and left axes transfer their ranges to top and right axes
     connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), xAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
     connect(yAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), yAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
@@ -369,27 +369,19 @@ void QCustomPlotCustom::plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstrac
     }
 }
 
-void QCustomPlotCustom::plotAxisLockDrag() {
-    // if an axis is selected, only allow the direction of that axis to be dragged
-    // if no axis is selected, both directions may be dragged
+/**
+ * if an axis is selected, only allow the direction of that axis to be dragged / zoomed
+ * if no axis is selected, both directions may be dragged / zoomed
+ */
+void QCustomPlotCustom::plotAxisLockDragZoom() {
     if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
         this->axisRect()->setRangeDrag(this->xAxis->orientation());
-    } else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
-        this->axisRect()->setRangeDrag(this->yAxis->orientation());
-    } else {
-        this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
-    }
-}
-
-
-void QCustomPlotCustom::plotAxisLockZoom() {
-    // if an axis is selected, only allow the direction of that axis to be zoomed
-    // if no axis is selected, both directions may be zoomed
-    if (this->xAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
         this->axisRect()->setRangeZoom(this->xAxis->orientation());
     } else if (this->yAxis->selectedParts().testFlag(QCPAxis::spAxis)) {
+        this->axisRect()->setRangeDrag(this->yAxis->orientation());
         this->axisRect()->setRangeZoom(this->yAxis->orientation());
     } else {
+        this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
         this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
     }
 }
