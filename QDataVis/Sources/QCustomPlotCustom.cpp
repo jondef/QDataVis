@@ -5,6 +5,13 @@
 // ! Taken and modified from
 // https://stackoverflow.com/questions/49477877/qcustomplot-replot-qcplayer
 //
+//	QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+//	dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
+//	ui->customPlot->xAxis->setTicker(dateTicker);
+//	double now = QDateTime::currentDateTime().toTime_t();
+//	ui->customPlot->xAxis->setRange(now - now / 10, now);
+//	ui->customPlot->yAxis->setRange(0, 10000);
+
 
 #include "QCustomPlotCustom.hpp"
 #include "SettingManager.hpp"
@@ -34,7 +41,7 @@ QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal 
 
 QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     // enable openGL
-    setOpenGl(SettingManager::getSetting("settings/useOpenGL").toBool(), 16); // enable openGL // todo: add button in settings to toggle opengl
+    setOpenGl(SettingManager::getSetting("settings/useOpenGL").toBool(), 16); // enable openGL
     qDebug() << "using openGL:" << openGl();
     qRegisterAnimationInterpolator<QCPRange>(QCPRangeInterpolator);
 
@@ -57,7 +64,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     this->cursor.vLine->setLayer("cursorLayer");
     this->cursor.cursorText->setLayer("cursorLayer");
 
-    // * graph tracer stuff
+    // region graph tracer stuff
     textLabel->setLayer(this->cursorLayer);
     textLabel->setFont(QFont("MS Shell Dlg 2", -1, QFont::Bold));
     textLabel->setSelectable(false);
@@ -74,14 +81,24 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     graphTracer->setSelectable(false);
     graphTracer->setVisible(false);
     graphTracer->setInterpolating(true);
+    // endregion
 
-    // connections for graph tracers
+    // * connections for graph tracers
     connect(this, &QCustomPlotCustom::mouseMove, this, &QCustomPlotCustom::traceGraph);
     connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::traceGraph);
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event) { traceGraph(event); });
-    // connection for replot on xAxis range change
+    // * axes connections
     connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
-
+    connect(this, &QCustomPlotCustom::axisDoubleClick, this, &QCustomPlotCustom::plotAxisLabelDoubleClick);
+    // connect slot that ties some axis selections together (especially opposite axes):
+    connect(this, &QCustomPlotCustom::selectionChangedByUser, this, &QCustomPlotCustom::plotOppositeAxesConnection);
+    // connect slots that takes care that when an axis is selected, only that direction can be dragged and zoomed
+    connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::plotAxisLockDrag);
+    connect(this, &QCustomPlotCustom::mouseWheel, this, &QCustomPlotCustom::plotAxisLockZoom);
+    // make bottom and left axes transfer their ranges to top and right axes
+    connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), xAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
+    connect(yAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), yAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
+    // graph selection -> update widget on the right
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *graph) {
         QList<DataSet *>::iterator dataSet = std::find_if(mDataSets.begin(), mDataSets.end(),[&](DataSet *dataSet) { return dataSet->graph == graph; });
         if (dataSet != mDataSets.end()) {
@@ -92,9 +109,27 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
         dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(nullptr);
     });
 
+
+
+    // * context menu
+    // setup policy and connect slot for context menu popup:
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &QCustomPlotCustom::customContextMenuRequested, this, &QCustomPlotCustom::plotContextMenuRequest);
+
+
+    // region legend initialization
+    legend->setVisible(false);
+    QFont legendFont = font();
+    legendFont.setPointSize(10);
+    legend->setFont(legendFont);
+    legend->setSelectedFont(legendFont);
+    legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+    connect(this, &QCustomPlotCustom::legendDoubleClick, this, &QCustomPlotCustom::plotLegendGraphDoubleClick);
+    // endregion
+
     stickAxisToZeroLine(false);
     setCursor(false);
-    initGraph();
+    setPlotRange(QCPRange(-10, 10), QCPRange(-10, 10));
 }
 
 QCustomPlotCustom::~QCustomPlotCustom() {
@@ -127,50 +162,6 @@ void QCustomPlotCustom::updateColors() {
     cursor.cursorText->setBrush(QBrush(backgroundColor));
     cursor.hLine->setPen(QColor(foregroundColor));
     cursor.vLine->setPen(QColor(foregroundColor));
-
-    replot();
-}
-
-void QCustomPlotCustom::initGraph() {
-    setPlotRange(QCPRange(-10, 10), QCPRange(-10, 10));
-
-    // legend initialization
-    legend->setVisible(false);
-    QFont legendFont = font();
-    legendFont.setPointSize(10);
-    legend->setFont(legendFont);
-    legend->setSelectedFont(legendFont);
-    legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-
-    // ! GRAPH RELATED CONNECTIONS
-    // * axes configuration
-    // connect slot that ties some axis selections together (especially opposite axes):
-    connect(this, &QCustomPlotCustom::selectionChangedByUser, this, &QCustomPlotCustom::plotOppositeAxesConnection);
-    // connect slots that takes care that when an axis is selected, only that direction can be dragged and zoomed:
-    connect(this, &QCustomPlotCustom::mousePress, this, &QCustomPlotCustom::plotAxisLockDrag);
-    connect(this, &QCustomPlotCustom::mouseWheel, this, &QCustomPlotCustom::plotAxisLockZoom);
-    // make bottom and left axes transfer their ranges to top and right axes:
-    connect(this->xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this->xAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
-    connect(this->yAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this->yAxis2, qOverload<const QCPRange &>(&QCPAxis::setRange));
-
-    // * click interaction
-    // axis label double click
-    connect(this, &QCustomPlotCustom::axisDoubleClick, this, &QCustomPlotCustom::plotAxisLabelDoubleClick);
-    // legend double click
-    connect(this, &QCustomPlotCustom::legendDoubleClick, this, &QCustomPlotCustom::plotLegendGraphDoubleClick);
-
-    // * context menu
-    // setup policy and connect slot for context menu popup:
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &QCustomPlotCustom::customContextMenuRequested, this, &QCustomPlotCustom::plotContextMenuRequest);
-
-
-//	QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-//	dateTicker->setDateTimeFormat("d. MMMM\nyyyy");
-//	ui->customPlot->xAxis->setTicker(dateTicker);
-//	double now = QDateTime::currentDateTime().toTime_t();
-//	ui->customPlot->xAxis->setRange(now - now / 10, now);
-//	ui->customPlot->yAxis->setRange(0, 10000);
 
     replot();
 }

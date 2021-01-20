@@ -71,8 +71,6 @@ private  slots:
 
     void traceGraph(QMouseEvent *event);
 
-    void initGraph();
-
     void plotOppositeAxesConnection();
 
     void plotAxisLockDrag();
