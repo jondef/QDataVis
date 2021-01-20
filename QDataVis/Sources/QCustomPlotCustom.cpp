@@ -45,7 +45,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     qDebug() << "using openGL:" << openGl();
     qRegisterAnimationInterpolator<QCPRange>(QCPRangeInterpolator);
 
-    // * cursor stuff
+    // region cursor stuff
     this->addLayer("cursorLayer", nullptr, QCustomPlot::limAbove);
     this->cursorLayer = this->layer("cursorLayer");
     this->cursorLayer->setMode(QCPLayer::lmBuffered);
@@ -63,6 +63,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     this->cursor.hLine->setLayer("cursorLayer");
     this->cursor.vLine->setLayer("cursorLayer");
     this->cursor.cursorText->setLayer("cursorLayer");
+    // endregion
 
     // region graph tracer stuff
     textLabel->setLayer(this->cursorLayer);
@@ -108,14 +109,6 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     connect(this, &QCustomPlotCustom::mouseRelease, this, [this]() {
         dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(nullptr);
     });
-
-
-
-    // * context menu
-    // setup policy and connect slot for context menu popup:
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &QCustomPlotCustom::customContextMenuRequested, this, &QCustomPlotCustom::plotContextMenuRequest);
-
 
     // region legend initialization
     legend->setVisible(false);
@@ -376,30 +369,6 @@ void QCustomPlotCustom::plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstrac
     }
 }
 
-void QCustomPlotCustom::plotMoveLegend() {
-    // make sure this slot is really called by a context menu action, so it carries the data we need
-    if (QAction *contextAction = qobject_cast<QAction *>(sender())) {
-        bool ok;
-        int dataInt = contextAction->data().toInt(&ok);
-        if (ok) {
-            this->axisRect()->insetLayout()->setInsetAlignment(0, (Qt::Alignment) dataInt);
-            this->replot();
-        }
-    }
-}
-
-void QCustomPlotCustom::plotContextMenuRemoveAllGraphs() {
-    this->clearGraphs();
-    this->replot();
-}
-
-void QCustomPlotCustom::plotContextMenuRemoveSelectedGraph() {
-    if (!this->selectedGraphs().empty()) {
-        this->removeGraph(this->selectedGraphs().first());
-        this->replot();
-    }
-}
-
 void QCustomPlotCustom::plotAxisLockDrag() {
     // if an axis is selected, only allow the direction of that axis to be dragged
     // if no axis is selected, both directions may be dragged
@@ -423,34 +392,6 @@ void QCustomPlotCustom::plotAxisLockZoom() {
     } else {
         this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
     }
-}
-
-
-void QCustomPlotCustom::plotContextMenuRequest(QPoint pos) {
-    QMenu *menu = new QMenu(this);
-    menu->setAttribute(Qt::WA_DeleteOnClose);
-
-    if (this->legend->selectTest(pos, false) >= 0) { // context menu on legend requested
-        menu->addAction("Move to top left", this, &QCustomPlotCustom::plotMoveLegend)->setData(
-                (int) (Qt::AlignTop | Qt::AlignLeft));
-        menu->addAction("Move to top center", this, &QCustomPlotCustom::plotMoveLegend)->setData(
-                (int) (Qt::AlignTop | Qt::AlignHCenter));
-        menu->addAction("Move to top right", this, &QCustomPlotCustom::plotMoveLegend)->setData(
-                (int) (Qt::AlignTop | Qt::AlignRight));
-        menu->addAction("Move to bottom right", this, &QCustomPlotCustom::plotMoveLegend)->setData(
-                (int) (Qt::AlignBottom | Qt::AlignRight));
-        menu->addAction("Move to bottom left", this, &QCustomPlotCustom::plotMoveLegend)->setData(
-                (int) (Qt::AlignBottom | Qt::AlignLeft));
-    } else { // general context menu on graphs requested
-        menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
-        if (!this->selectedGraphs().empty()) {
-            menu->addAction("Remove selected graph", this, &QCustomPlotCustom::plotContextMenuRemoveSelectedGraph);
-        }
-        if (this->graphCount() > 0) {
-            menu->addAction("Remove all graphs", this, &QCustomPlotCustom::plotContextMenuRemoveAllGraphs);
-        }
-    }
-    menu->popup(this->mapToGlobal(pos));
 }
 
 

@@ -77,17 +77,9 @@ private  slots:
 
     void plotAxisLockZoom();
 
-    void plotContextMenuRequest(QPoint pos);
-
     void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
 
     void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
-
-    void plotContextMenuRemoveAllGraphs();
-
-    void plotContextMenuRemoveSelectedGraph();
-
-    void plotMoveLegend();
 
     inline static QColor getGraphColor(int colorIndex) {
         return colors.at(colorIndex % 10);
