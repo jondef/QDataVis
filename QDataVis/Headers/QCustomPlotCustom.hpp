@@ -14,7 +14,6 @@
 #include "qcp.h"
 #include "DataSet.hpp"
 
-Q_DECLARE_METATYPE(DataSet *)
 
 struct QCPCursor {
     QCPItemLine *hLine;

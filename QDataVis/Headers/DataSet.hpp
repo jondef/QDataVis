@@ -128,6 +128,6 @@ struct DataSet {
     int minimumDomain = -10;
     int maximumDomain = 10;
 };
-
+Q_DECLARE_METATYPE(DataSet *)
 
 #endif //QDATAVIS_GRAPH_H
