@@ -206,7 +206,7 @@ void QCustomPlotCustom::setPlotRange(QCPRange xAxisRange, QCPRange yAxisRange) {
 
     QPropertyAnimation *animation2 = new QPropertyAnimation(yAxis, "range", this);
     animation2->setDuration(1000);
-    start.setValue(xAxis->range());
+    start.setValue(yAxis->range());
     animation2->setStartValue(start);
     end.setValue(yAxisRange);
     animation2->setEndValue(end);
@@ -217,6 +217,7 @@ void QCustomPlotCustom::setPlotRange(QCPRange xAxisRange, QCPRange yAxisRange) {
     group->addAnimation(animation1);
     group->addAnimation(animation2);
     group->start(QAbstractAnimation::DeleteWhenStopped);
+    connect(group, &QParallelAnimationGroup::finished, this, [this]() { replot(QCustomPlot::rpQueuedReplot); });
 }
 
 /**
@@ -287,7 +288,7 @@ void QCustomPlotCustom::replotGraphsOnRangeChange(QCPRange range) {
             graph->graph->setData(xArray, graph->binaryTree->calculateTree(xArray));
         }
     }
-    replot();
+    replot(QCustomPlotCustom::rpQueuedRefresh);
 }
 
 
