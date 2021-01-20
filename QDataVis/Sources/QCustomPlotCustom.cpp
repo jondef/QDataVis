@@ -7,6 +7,7 @@
 //
 
 #include "QCustomPlotCustom.hpp"
+#include "SettingManager.hpp"
 #include "MainWindow.hpp"
 
 
@@ -33,7 +34,7 @@ QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal 
 
 QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     // enable openGL
-    setOpenGl(true, 16); // enable openGL
+    setOpenGl(SettingManager::getSetting("settings/useOpenGL").toBool(), 16); // enable openGL // todo: add button in settings to toggle opengl
     qDebug() << "using openGL:" << openGl();
     qRegisterAnimationInterpolator<QCPRange>(QCPRangeInterpolator);
 

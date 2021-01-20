@@ -81,6 +81,7 @@ void MainWindow::readSettings() {
 
     settings.beginGroup("settings");
     ui->checkBox_settingsDarkMode->setChecked(settings.value("darkModeEnabled").toBool());
+    ui->checkBox_settingsOpenGL->setChecked(settings.value("useOpenGL").toBool());
     settings.endGroup();
 }
 
@@ -90,6 +91,7 @@ void MainWindow::writeSettings() {
 
     settings.beginGroup("settings");
     settings.setValue("darkModeEnabled", ui->checkBox_settingsDarkMode->isChecked());
+    settings.setValue("useOpenGL", ui->checkBox_settingsOpenGL->isChecked());
     settings.endGroup();
 }
 
