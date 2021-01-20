@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
     // * settings tab & general
     connect(ui->checkBox_settingsDarkMode, &QCheckBox::toggled, this, &MainWindow::updateColors);
+    connect(ui->checkBox_stickAxisToZeroLines, &QCheckBox::toggled, ui->customPlot, &QCustomPlotCustom::stickAxisToZeroLine);
+    connect(ui->checkBox_enableCursor, &QCheckBox::toggled, ui->customPlot, &QCustomPlotCustom::setCursor);
     connect(ui->pushButton_centerPlot, &QPushButton::clicked, ui->customPlot, [this](){
         ui->customPlot->setPlotRange(QCPRange(-10,10), QCPRange(-10,10));
     });

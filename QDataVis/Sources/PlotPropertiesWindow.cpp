@@ -1082,45 +1082,6 @@ void PlotPropertiesWindow::setUpGeneralPageConnections() {
         });
     });
 
-    // * set cursor
-    connect(ui->checkBox_enableCursor, &QCheckBox::toggled, this, [this](bool checked) {
-        if (checked) {
-            connect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::mouseMove,
-                    dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::onMouseMoveReplotCursor);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.cursorText->setVisible(true);
-        } else {
-            disconnect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::mouseMove,
-                       dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::onMouseMoveReplotCursor);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.hLine->start->setCoords(0, 0);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.hLine->end->setCoords(0, 0);
-
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.vLine->start->setCoords(0, 0);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.vLine->end->setCoords(0, 0);
-
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->cursor.cursorText->setVisible(false);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->layer("cursorLayer")->replot();
-        }
-    });
-
-    // * set stick axis to zero line
-    connect(ui->checkBox_stickAxisToZeroLines, &QCheckBox::toggled, this, [this](bool checked) {
-        if (checked) {
-            connect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::beforeReplot,
-                    dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::stickAxisToZeroLines);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->replot();
-        } else {
-            disconnect(dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::beforeReplot,
-                       dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot, &QCustomPlotCustom::stickAxisToZeroLines);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->axisRect()->setAutoMargins(QCP::msAll);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->xAxis->setOffset(0);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->yAxis->setOffset(0);
-            dynamic_cast<MainWindow *>(parentWidget())->ui->customPlot->replot();
-        }
-    });
-
-    emit(ui->checkBox_stickAxisToZeroLines->toggled(false));
-    emit(ui->checkBox_enableCursor->toggled(false));
-    ui->checkBox_enableCursor->setChecked(false);
     ui->checkBox_RangeDrag->setChecked(true);
     ui->checkBox_RangeZoom->setChecked(true);
     ui->checkBox_MultiSelect->setChecked(true);

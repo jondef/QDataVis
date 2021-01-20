@@ -79,7 +79,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     connect(this, &QCustomPlotCustom::mouseMove, this, &QCustomPlotCustom::traceGraph);
     connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::traceGraph);
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event) { traceGraph(event); });
-
+    // connection for replot on xAxis range change
     connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
 
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *graph) {
@@ -91,6 +91,9 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     connect(this, &QCustomPlotCustom::mouseRelease, this, [this]() {
         dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(nullptr);
     });
+
+    stickAxisToZeroLine(false);
+    setCursor(false);
     initGraph();
 }
 
@@ -499,5 +502,36 @@ void QCustomPlotCustom::plotOppositeAxesConnection() {
             item->setSelected(true);
             graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
         }
+    }
+}
+
+void QCustomPlotCustom::stickAxisToZeroLine(bool enabled) {
+    if (enabled) {
+        connect(this, &QCustomPlotCustom::beforeReplot, this, &QCustomPlotCustom::stickAxisToZeroLines);
+        replot();
+    } else {
+        disconnect(this, &QCustomPlotCustom::beforeReplot, this, &QCustomPlotCustom::stickAxisToZeroLines);
+        axisRect()->setAutoMargins(QCP::msAll);
+        xAxis->setOffset(0);
+        yAxis->setOffset(0);
+        replot();
+    }
+}
+
+
+void QCustomPlotCustom::setCursor(bool enabled) {
+    if (enabled) {
+        connect(this, &QCustomPlotCustom::mouseMove, this, &QCustomPlotCustom::onMouseMoveReplotCursor);
+        cursor.cursorText->setVisible(true);
+    } else {
+        disconnect(this, &QCustomPlotCustom::mouseMove,this, &QCustomPlotCustom::onMouseMoveReplotCursor);
+        cursor.hLine->start->setCoords(0, 0);
+        cursor.hLine->end->setCoords(0, 0);
+
+        cursor.vLine->start->setCoords(0, 0);
+        cursor.vLine->end->setCoords(0, 0);
+
+        cursor.cursorText->setVisible(false);
+        layer("cursorLayer")->replot();
     }
 }

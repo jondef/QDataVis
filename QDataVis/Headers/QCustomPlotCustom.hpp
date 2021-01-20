@@ -63,6 +63,10 @@ public slots:
 
     void deleteGraph(DataSet *graph);
 
+    void stickAxisToZeroLine(bool enabled);
+
+    void setCursor(bool enabled);
+
 private  slots:
 
     void traceGraph(QMouseEvent *event);

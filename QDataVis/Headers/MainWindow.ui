@@ -129,14 +129,7 @@
         <string>Settings</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="QCheckBox" name="checkBox_settingsDarkMode">
-          <property name="text">
-           <string>Dark Mode</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
+        <item row="4" column="0">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -153,6 +146,27 @@
          <widget class="QCheckBox" name="checkBox_settingsOpenGL">
           <property name="text">
            <string>Use OpenGL (requires restart)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QCheckBox" name="checkBox_enableCursor">
+          <property name="text">
+           <string>Enable cursor</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="checkBox_settingsDarkMode">
+          <property name="text">
+           <string>Dark Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="checkBox_stickAxisToZeroLines">
+          <property name="text">
+           <string>Stick axis to zero line</string>
           </property>
          </widget>
         </item>
