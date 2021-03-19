@@ -19,6 +19,16 @@ struct DataSet {
         delete binaryTree;
     }
 
+    enum Type {
+        FunctionGraph,
+        PointGraph
+    };
+
+    Type getDataSetType() const {
+        return (binaryTree && !overrideGlobalPointDensity) ? FunctionGraph : PointGraph;
+    }
+
+
     void changeColor(QColor aColor) {
         this->color = std::move(aColor);
         // * update the color on the list widget item
