@@ -263,9 +263,10 @@ void QCustomPlotCustom::replotGraphsOnRangeChange(QCPRange range) {
     connect(fw, &QFutureWatcher<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*>::finished, this, [this, fw]() {
         QFuture<void> future2 = QtConcurrent::run(QThreadPool::globalInstance(), [this, fw]() {
             replotMutex.lock();
-            for (DataSet *graph : fw->result()->keys()) {
-                graph->graph->setData(fw->result()->value(graph).first, fw->result()->value(graph).second, true);
+            for (QHash<DataSet *, QPair<QVector<double>, QVector<double>>>::key_iterator graph = fw->result()->keyBegin(), end = fw->result()->keyEnd(); graph != end; ++graph) {
+                (*graph)->graph->setData(fw->result()->value(*graph).first, fw->result()->value(*graph).second, true);
             }
+            delete fw->result();
             replotMutex.unlock();
         });
         QFutureWatcher<void> *fw2 = new QFutureWatcher<void>();
@@ -327,7 +328,7 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
             textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
         }
         textLabel->setVisible(true);
-        textLabel->setText(QString("(%1, %2)").arg(QString::number(it_begin->key, 'f', 3)).arg(QString::number(it_begin->value, 'f', 3)));
+        textLabel->setText(QString("(%1, %2)").arg(QString::number(it_begin->key, 'f', 3), QString::number(it_begin->value, 'f', 3)));
         textLabel->position->setCoords(it_begin->key, it_begin->value + yAxis->range().size() * 0.01);
 
         graphTracer->setVisible(true);

@@ -201,7 +201,7 @@ void MainWindow::addLinearRegression() {
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
     QPair<double, double> data = selectedDataSet->linearRegression();
     QString oldText = ui->QLineEdit_addFunction->text();
-    ui->QLineEdit_addFunction->setText(QString("%1x+%2").arg(QString::number(data.first, 'g', 10)).arg(QString::number(data.second, 'g', 10)));
+    ui->QLineEdit_addFunction->setText(QString("%1x+%2").arg(QString::number(data.first, 'g', 10), QString::number(data.second, 'g', 10)));
     addFunctionGraph();
     ui->QLineEdit_addFunction->setText(oldText);
 }
