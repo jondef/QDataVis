@@ -92,7 +92,7 @@ double BinaryTree::calculateTree(const double &xPlug) const {
 }
 
 
-QVector<double> BinaryTree::calculateTree(QVector<double> &xArray) const {
+QVector<double> BinaryTree::calculateTree(const QVector<double> &xArray) const {
     QVector<double> yArray(xArray.length());
 
     for (int i = 0; i < xArray.length(); ++i) {

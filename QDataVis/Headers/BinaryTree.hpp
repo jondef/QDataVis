@@ -22,7 +22,7 @@ public:
 
     double calculateTree(const double &xPlug) const;
 
-    QVector<double> calculateTree(QVector<double> &xArray) const;
+    QVector<double> calculateTree(const QVector<double> &xArray) const;
 
     void printTree() const;
 
