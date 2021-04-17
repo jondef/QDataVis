@@ -82,6 +82,9 @@ private  slots:
         return colors.at(colorIndex % 10);
     }
 
+private:
+    static QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal progress);
+
 public:
     QMutex replotMutex;
 

@@ -19,32 +19,11 @@
 #include "MainWindow.hpp"
 
 
-QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal progress) {
-    QVariant done;
-
-    double upper;
-    if (start.upper >= end.upper) {
-        upper = start.upper - abs(start.upper - end.upper) * progress;
-    } else {
-        upper = start.upper + abs(start.upper - end.upper) * progress;
-    }
-    double lower;
-    if (start.lower >= end.lower) {
-        lower = start.lower - abs(start.lower - end.lower) * progress;
-    } else {
-        lower = start.lower + abs(start.lower - end.lower) * progress;
-    }
-    done.setValue(QCPRange(lower, upper));
-
-    return done;
-}
-
-
 QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     // enable openGL
     setOpenGl(SettingManager::getSetting("settings/useOpenGL").toBool(), 16); // enable openGL
     qDebug() << "using openGL:" << openGl();
-    qRegisterAnimationInterpolator<QCPRange>(QCPRangeInterpolator);
+    qRegisterAnimationInterpolator<QCPRange>(QCustomPlotCustom::QCPRangeInterpolator);
 
     // region cursor stuff
     this->addLayer("cursorLayer", nullptr, QCustomPlot::limAbove);
@@ -482,4 +461,24 @@ void QCustomPlotCustom::setCursor(bool enabled) {
         cursor.cursorText->setVisible(false);
         layer("cursorLayer")->replot();
     }
+}
+
+QVariant QCustomPlotCustom::QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal progress) {
+    QVariant done;
+
+    double upper;
+    if (start.upper >= end.upper) {
+        upper = start.upper - abs(start.upper - end.upper) * progress;
+    } else {
+        upper = start.upper + abs(start.upper - end.upper) * progress;
+    }
+    double lower;
+    if (start.lower >= end.lower) {
+        lower = start.lower - abs(start.lower - end.lower) * progress;
+    } else {
+        lower = start.lower + abs(start.lower - end.lower) * progress;
+    }
+    done.setValue(QCPRange(lower, upper));
+
+    return done;
 }
