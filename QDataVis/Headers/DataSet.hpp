@@ -28,6 +28,10 @@ struct DataSet {
         return (binaryTree && !overrideGlobalPointDensity) ? FunctionGraph : PointGraph;
     }
 
+    bool dataSetIsFunction() const {
+        return getDataSetType() == FunctionGraph;
+    }
+
 
     void changeColor(QColor aColor) {
         this->color = std::move(aColor);

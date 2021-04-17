@@ -83,6 +83,8 @@ private  slots:
     }
 
 public:
+    QMutex replotMutex;
+
     QCPLayer *cursorLayer;
     QCPCursor cursor;
 
