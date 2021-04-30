@@ -14,6 +14,7 @@
 
 
 #include <QtConcurrent/QtConcurrent>
+#include <utility>
 #include "QCustomPlotCustom.hpp"
 #include "SettingManager.hpp"
 #include "MainWindow.hpp"
@@ -89,6 +90,9 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     });
     connect(this, &QCustomPlotCustom::mouseRelease, this, [this]() {
         dynamic_cast<MainWindow *>(parentWidget()->parentWidget())->setSelectedDataSet(nullptr);
+    });
+    connect(this, &QCustomPlotCustom::updateDataSetData, this, [](DataSet *dataSet, QSharedPointer<QCPGraphDataContainer> data) {
+        dataSet->graph->setData(std::move(data));
     });
 
     // region legend initialization
@@ -208,7 +212,7 @@ void QCustomPlotCustom::addFunctionGraph(const QString &functionString, QListWid
 
     QtConcurrent::run(QThreadPool::globalInstance(), [this, pDataSet, functionString]() {
         pDataSet->binaryTree = new BinaryTree(functionString);
-        pDataSet->graph->setData(pDataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity));
+        emit updateDataSetData(pDataSet, pDataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity));
         replot(QCustomPlotCustom::rpQueuedReplot);
     });
     pDataSet->changeColor(getGraphColor(mDataSets.size()));
@@ -247,9 +251,8 @@ void QCustomPlotCustom::globalPointDensityChanged(int density) {
 
 /**
  * ! When making changes here, make sure it also works with opengl.
- * The problem in this function is that it updates the dataSet data while a replot is happening.
- * This causes crashes that are hard to trace.
- * Can crash if user uses mouse wheel to zoom in/out while the mutex is locked. Solution is to mutex plottable-graph.cpp:1723 mDataContainer
+ * Updating the dataSet while a replot is in progress must be avoided because
+ * it will crash. Solution is to update the data in the main thread.
  */
 void QCustomPlotCustom::replotGraphsOnRangeChange() {
     QThreadPool::globalInstance()->clear(); // clear the queue
@@ -257,15 +260,7 @@ void QCustomPlotCustom::replotGraphsOnRangeChange() {
     QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
         for (DataSet *dataSet : mDataSets) {
             if (dataSet->dataSetIsFunction()) {
-                QSharedPointer<QCPGraphDataContainer> data = dataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
-                if (mReplotting) {
-                    QEventLoop loop;
-                    connect(this, &QCustomPlotCustom::afterReplot, &loop, &QEventLoop::quit);
-                    loop.exec(QEventLoop::AllEvents);
-                }
-                dataSet->mutex.lock();
-                dataSet->graph->setData(data);
-                dataSet->mutex.unlock();
+                emit updateDataSetData(dataSet, dataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity));
             }
         }
         replot(QCustomPlotCustom::rpQueuedReplot);

@@ -85,6 +85,9 @@ private  slots:
 private:
     static QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal progress);
 
+signals:
+    void updateDataSetData(DataSet *, QSharedPointer<QCPGraphDataContainer>);
+
 public:
     QCPLayer *cursorLayer;
     QCPCursor cursor;
