@@ -83,7 +83,7 @@ file(GLOB QRC_FILES
         )
 
 ################################
-# Compiling
+# Compilation
 ################################
 qt6_wrap_ui(ui_wrap ${UI_FILES})
 
@@ -102,14 +102,11 @@ target_link_libraries(QDataVis PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 target_link_libraries(QDataVis PUBLIC QCustomPlot)
 
 ################################
-# Post build
+# Post-build
 ################################
 if (WIN32)
     set(DEBUG_SUFFIX)
     set(PROJECT_NAME QDataVis)
-#    if (CMAKE_BUILD_TYPE MATCHES "Debug")  # not required because qt doesn't use suffixes anymore?
-#        set(DEBUG_SUFFIX "d")
-#    endif ()
     # find the qt install path
     set(QT_INSTALL_PATH "${CMAKE_PREFIX_PATH}")
     if (NOT EXISTS "${QT_INSTALL_PATH}/bin")
@@ -118,6 +115,7 @@ if (WIN32)
             set(QT_INSTALL_PATH "${QT_INSTALL_PATH}/..")
         endif ()
     endif ()
+    # copy the /plugins/platforms/qwindows dll if it exists
     if (EXISTS "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E make_directory
@@ -127,6 +125,7 @@ if (WIN32)
                 "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll"
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
     endif ()
+    # copy the remaining required dlls
     foreach (QT_LIB ${REQUIRED_LIBS})
         add_custom_command(TARGET QDataVis POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
