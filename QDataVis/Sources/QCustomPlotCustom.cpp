@@ -247,6 +247,8 @@ void QCustomPlotCustom::globalPointDensityChanged(int density) {
 
 /**
  * ! When making changes here, make sure it also works with opengl.
+ * The problem in this function is that it updates the dataSet data while a replot is happening.
+ * This causes crashes that are hard to trace.
  */
 void QCustomPlotCustom::replotGraphsOnRangeChange() {
     QThreadPool::globalInstance()->clear(); // clear the queue
@@ -255,12 +257,15 @@ void QCustomPlotCustom::replotGraphsOnRangeChange() {
         for (DataSet *dataSet : mDataSets) {
             if (dataSet->dataSetIsFunction()) {
                 QSharedPointer<QCPGraphDataContainer> data = dataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
+                while(mReplotting) {
+                    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+                }
                 replotMutex.lock();
                 dataSet->graph->setData(data);
                 replotMutex.unlock();
-                replot(QCustomPlotCustom::rpQueuedReplot);
             }
         }
+        replot(QCustomPlotCustom::rpQueuedReplot);
     });
 }
 
