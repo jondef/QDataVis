@@ -249,6 +249,7 @@ void QCustomPlotCustom::globalPointDensityChanged(int density) {
  * ! When making changes here, make sure it also works with opengl.
  * The problem in this function is that it updates the dataSet data while a replot is happening.
  * This causes crashes that are hard to trace.
+ * Can crash if user uses mouse wheel to zoom in/out while the mutex is locked. Solution is to mutex plottable-graph.cpp:1723 mDataContainer
  */
 void QCustomPlotCustom::replotGraphsOnRangeChange() {
     QThreadPool::globalInstance()->clear(); // clear the queue
@@ -262,9 +263,9 @@ void QCustomPlotCustom::replotGraphsOnRangeChange() {
                     connect(this, &QCustomPlotCustom::afterReplot, &loop, &QEventLoop::quit);
                     loop.exec(QEventLoop::AllEvents);
                 }
-                replotMutex.lock();
+                dataSet->mutex.lock();
                 dataSet->graph->setData(data);
-                replotMutex.unlock();
+                dataSet->mutex.unlock();
             }
         }
         replot(QCustomPlotCustom::rpQueuedReplot);

@@ -86,8 +86,6 @@ private:
     static QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal progress);
 
 public:
-    QMutex replotMutex;
-
     QCPLayer *cursorLayer;
     QCPCursor cursor;
 

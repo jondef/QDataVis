@@ -130,6 +130,7 @@ struct DataSet {
         return QPair<double, double>(a, b);
     }
 
+    QMutex mutex;
     QString name;
     QListWidgetItem *listWidgetItem;
     QCPGraph *graph;
