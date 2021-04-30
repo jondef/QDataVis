@@ -206,11 +206,9 @@ void QCustomPlotCustom::addFunctionGraph(const QString &functionString, QListWid
     pDataSet->name = functionString;
     pDataSet->graph->addToLegend();
 
-    QFuture<void> future = QtConcurrent::run(QThreadPool::globalInstance(), [this, pDataSet, functionString]() {
+    QtConcurrent::run(QThreadPool::globalInstance(), [this, pDataSet, functionString]() {
         pDataSet->binaryTree = new BinaryTree(functionString);
-        QVector<double> xArray = DataSet::generateXArray(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
-        QVector<double> yArray = pDataSet->binaryTree->calculateTree(xArray);
-        pDataSet->graph->setData(xArray, yArray, true);
+        pDataSet->graph->setData(pDataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity));
     });
     pDataSet->changeColor(getGraphColor(mDataSets.size()));
     pDataSet->configureListWidgetItem();
@@ -253,30 +251,17 @@ void QCustomPlotCustom::globalPointDensityChanged(int density) {
 void QCustomPlotCustom::replotGraphsOnRangeChange() {
     QThreadPool::globalInstance()->clear(); // clear the queue
 
-    QFuture<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*> future = QtConcurrent::run(QThreadPool::globalInstance(), [this, range]() {
-        QVector<double> xArray = DataSet::generateXArray(range.lower, range.upper, mGlobalPointDensity);
-        auto result = new QHash<DataSet*, QPair<QVector<double>,QVector<double>>>();
-        for (DataSet *graph : mDataSets) {
-            if (graph->dataSetIsFunction()) {
-                result->insert(graph, QPair<QVector<double>, QVector<double>>(xArray, graph->binaryTree->calculateTree(xArray)));
+    QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
+        for (DataSet *dataSet : mDataSets) {
+            if (dataSet->dataSetIsFunction()) {
+                QSharedPointer<QCPGraphDataContainer> data = dataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
+                replotMutex.lock();
+                dataSet->graph->setData(data);
+                replotMutex.unlock();
+                replot(QCustomPlotCustom::rpQueuedReplot);
             }
         }
-        return result;
     });
-    QFutureWatcher<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*> *fw = new QFutureWatcher<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*>();
-    connect(fw, &QFutureWatcher<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*>::finished, this, [this, fw]() {
-        QtConcurrent::run(QThreadPool::globalInstance(), [this, fw]() {
-            replotMutex.lock();
-            for (QHash<DataSet *, QPair<QVector<double>, QVector<double>>>::key_iterator graph = fw->result()->keyBegin(), end = fw->result()->keyEnd(); graph != end; ++graph) {
-                (*graph)->graph->setData(fw->result()->value(*graph).first, fw->result()->value(*graph).second, true);
-            }
-            replot(QCustomPlotCustom::rpQueuedRefresh);
-            replotMutex.unlock();
-            delete fw->result();
-            fw->deleteLater();
-        });
-    });
-    fw->setFuture(future);
 }
 
 
