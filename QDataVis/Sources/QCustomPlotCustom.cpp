@@ -257,8 +257,10 @@ void QCustomPlotCustom::replotGraphsOnRangeChange() {
         for (DataSet *dataSet : mDataSets) {
             if (dataSet->dataSetIsFunction()) {
                 QSharedPointer<QCPGraphDataContainer> data = dataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity);
-                while(mReplotting) {
-                    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+                if (mReplotting) {
+                    QEventLoop loop;
+                    connect(this, &QCustomPlotCustom::afterReplot, &loop, &QEventLoop::quit);
+                    loop.exec(QEventLoop::AllEvents);
                 }
                 replotMutex.lock();
                 dataSet->graph->setData(data);
