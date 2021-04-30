@@ -24,6 +24,8 @@ public:
 
     QVector<double> calculateTree(const QVector<double> &xArray) const;
 
+    QSharedPointer<QCPGraphDataContainer> calculateTree(double lowerLim, double upperLim, unsigned int length) const;
+
     void printTree() const;
 
 private:

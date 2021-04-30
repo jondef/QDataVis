@@ -2,6 +2,7 @@
 // Created by John on 12/06/2019.
 //
 
+#include <plottables/plottable-graph.h>
 #include "BinaryTree.hpp"
 
 
@@ -99,6 +100,24 @@ QVector<double> BinaryTree::calculateTree(const QVector<double> &xArray) const {
         yArray[i] = calculateTree(xArray[i]);
     }
     return yArray;
+}
+
+
+QSharedPointer<QCPGraphDataContainer> BinaryTree::calculateTree(double lowerLim, double upperLim, unsigned int length) const {
+    double difference = upperLim - lowerLim;
+    double increment = difference / (length - 1);
+
+    QVector<QCPGraphData> tempData(length);
+    QVector<QCPGraphData>::iterator it = tempData.begin();
+
+    for (unsigned int i = 0; i < length; ++i) {
+        it->key = lowerLim + increment * i;
+        it->value = calculateTree(it->key);
+        ++it;
+    }
+    QSharedPointer<QCPGraphDataContainer> data = QSharedPointer<QCPGraphDataContainer>(new QCPGraphDataContainer);
+    data->set(tempData, true);
+    return data;
 }
 
 
