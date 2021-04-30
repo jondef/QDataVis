@@ -35,7 +35,7 @@ QDataVis depends on a few libraries to work properly:
 
 Building from source
 -------
-QDataVis requires [Qt] v5.12.3+ to be installed in included in PATH.
+QDataVis requires [Qt] v6.1.0+ to be installed in included in PATH.
 
  * Clone the repository `git clone https://github.com/jondef/QDataVis.git`
  * Fetch submodule(s) `git submodule update --init`
