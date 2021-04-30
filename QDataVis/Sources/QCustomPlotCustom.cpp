@@ -261,23 +261,16 @@ void QCustomPlotCustom::replotGraphsOnRangeChange(QCPRange range) {
     });
     QFutureWatcher<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*> *fw = new QFutureWatcher<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*>();
     connect(fw, &QFutureWatcher<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*>::finished, this, [this, fw]() {
-        QFuture<void> future2 = QtConcurrent::run(QThreadPool::globalInstance(), [this, fw]() {
+        QtConcurrent::run(QThreadPool::globalInstance(), [this, fw]() {
             replotMutex.lock();
             for (QHash<DataSet *, QPair<QVector<double>, QVector<double>>>::key_iterator graph = fw->result()->keyBegin(), end = fw->result()->keyEnd(); graph != end; ++graph) {
                 (*graph)->graph->setData(fw->result()->value(*graph).first, fw->result()->value(*graph).second, true);
             }
+            replot(QCustomPlotCustom::rpQueuedRefresh);
+            replotMutex.unlock();
             delete fw->result();
-            replotMutex.unlock();
-        });
-        QFutureWatcher<void> *fw2 = new QFutureWatcher<void>();
-        connect(fw2, &QFutureWatcher<void>::finished, this, [this, fw, fw2]() {
-            replotMutex.lock();
-            replot(QCustomPlotCustom::rpImmediateRefresh);
-            replotMutex.unlock();
             fw->deleteLater();
-            fw2->deleteLater();
         });
-        fw2->setFuture(future2);
     });
     fw->setFuture(future);
 }
