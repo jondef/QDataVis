@@ -209,11 +209,11 @@ void QCustomPlotCustom::addFunctionGraph(const QString &functionString, QListWid
     QtConcurrent::run(QThreadPool::globalInstance(), [this, pDataSet, functionString]() {
         pDataSet->binaryTree = new BinaryTree(functionString);
         pDataSet->graph->setData(pDataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity));
+        replot(QCustomPlotCustom::rpQueuedReplot);
     });
     pDataSet->changeColor(getGraphColor(mDataSets.size()));
     pDataSet->configureListWidgetItem();
     mDataSets.append(pDataSet);
-    replot();
 }
 
 void QCustomPlotCustom::deleteGraph(DataSet *graph) {
