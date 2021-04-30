@@ -29,7 +29,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ################################
 # Qt
 ################################
-FIND_PACKAGE(Qt6 COMPONENTS Core Gui Widgets PrintSupport REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets OpenGL PrintSupport REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
