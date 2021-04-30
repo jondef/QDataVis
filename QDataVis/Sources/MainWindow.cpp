@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
         ui->customPlot->setPlotRange(QCPRange(-10,10), QCPRange(-10,10));
     });
     connect(pointGraphDialog, &PointWindow::currentGraphChanged, this, [this]() {
-        ui->customPlot->replotGraphsOnRangeChange(ui->customPlot->xAxis->range());
+        ui->customPlot->replotGraphsOnRangeChange();
     });
 
     // region menubar connections

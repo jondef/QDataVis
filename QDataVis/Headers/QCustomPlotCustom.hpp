@@ -54,7 +54,7 @@ public slots:
 
     void setPlotRange(QCPRange xAxisRange, QCPRange yAxisRange);
 
-    void replotGraphsOnRangeChange(QCPRange range);
+    void replotGraphsOnRangeChange();
 
     void addFunctionGraph(const QString &functionString, QListWidgetItem *listWidgetItem);
 

@@ -69,7 +69,8 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::traceGraph);
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event) { traceGraph(event); });
     // * axes connections
-    connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
+    connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this,
+            &QCustomPlotCustom::replotGraphsOnRangeChange);
     connect(this, &QCustomPlotCustom::axisDoubleClick, this, &QCustomPlotCustom::plotAxisLabelDoubleClick);
     // connect slot that ties some axis selections together (especially opposite axes):
     connect(this, &QCustomPlotCustom::selectionChangedByUser, this, &QCustomPlotCustom::plotOppositeAxesConnection);
@@ -243,10 +244,13 @@ void QCustomPlotCustom::addPointsGraph(const QString &graphName, QListWidgetItem
 
 void QCustomPlotCustom::globalPointDensityChanged(int density) {
     mGlobalPointDensity = density;
-    replotGraphsOnRangeChange(xAxis->range());
+    replotGraphsOnRangeChange();
 }
 
-void QCustomPlotCustom::replotGraphsOnRangeChange(QCPRange range) {
+/**
+ * ! When making changes here, make sure it also works with opengl.
+ */
+void QCustomPlotCustom::replotGraphsOnRangeChange() {
     QThreadPool::globalInstance()->clear(); // clear the queue
 
     QFuture<QHash<DataSet*, QPair<QVector<double>,QVector<double>>>*> future = QtConcurrent::run(QThreadPool::globalInstance(), [this, range]() {
