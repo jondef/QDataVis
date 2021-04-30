@@ -130,7 +130,7 @@ void BinaryTree::printTree() const {
             }
             // if node has no children
             if (!currentNode->pLeftChild && !currentNode->pRightChild) {
-                coords.append(QPair(currentPosition, currentNode));
+                coords.append(QPair<QPoint, Node *>(currentPosition, currentNode));
                 returning = true;
             }
             if (returning) {
@@ -155,7 +155,7 @@ void BinaryTree::printTree() const {
                     currentNode = currentNode->pRightChild;
                     continue;
                 }
-                coords.append(QPair(currentPosition, currentNode));
+                coords.append(QPair<QPoint, Node *>(currentPosition, currentNode));
             }
             if (currentNode == pRoot && returning) {
                 break; // done navigating the tree

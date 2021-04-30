@@ -82,11 +82,11 @@ PointWindow::~PointWindow() {
 void PointWindow::saveGraph() const {
     // save point data
     QString string = ui->textEdit_graphPoints->toPlainText(); // ! we need to save the string on the stack to avoid the references being invalid
-    QVector<QStringRef> pointString = string.remove(QRegularExpression(R"([^\d\,\.\-\n\r])")).splitRef('\n', Qt::SkipEmptyParts);
+    QVector<QString> pointString = string.remove(QRegularExpression(R"([^\d\,\.\-\n\r])")).split('\n', Qt::SkipEmptyParts);
     QVector<double> xArray;
     QVector<double> yArray;
-    for (QStringRef &line : pointString) {
-        QVector<QStringRef> pointCoords = line.split(',', Qt::SkipEmptyParts);
+    for (QString &line : pointString) {
+        QVector<QString> pointCoords = line.split(',', Qt::SkipEmptyParts);
         if (pointCoords.length() != 2) { continue; }
         xArray.append(pointCoords.at(0).toDouble());
         yArray.append(pointCoords.at(1).toDouble());

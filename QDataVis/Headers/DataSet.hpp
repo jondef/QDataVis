@@ -81,7 +81,7 @@ struct DataSet {
 
         QVector<QPair<double, double>> matrix_A;
         for (int i = 0; i < numPoints; ++i) {
-            matrix_A.append(QPair(points->at(i)->value, 1));
+            matrix_A.append(QPair<double, double>(points->at(i)->value, 1));
         }
 
         QPair<QVector<double>, QVector<double>> matrix_AexpT;
@@ -127,7 +127,7 @@ struct DataSet {
 
         double a = (g * d1 - b1 * h) / (d1 * a1 - b1 * c1);
         double b = h / d1 - (c1 / d1 * a);
-        return QPair(a, b);
+        return QPair<double, double>(a, b);
     }
 
     QString name;

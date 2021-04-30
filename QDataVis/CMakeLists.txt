@@ -85,7 +85,7 @@ file(GLOB QRC_FILES
 ################################
 # Compiling
 ################################
-qt5_wrap_ui(ui_wrap ${UI_FILES})
+qt6_wrap_ui(ui_wrap ${UI_FILES})
 
 if (WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL Release)  # if on windows and release, disable cmd prompt
     add_executable(QDataVis WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${ui_wrap} ${QRC_FILES})
@@ -98,5 +98,5 @@ endif ()
 ################################
 link_directories(${CMAKE_BINARY_DIR}/lib)
 
-target_link_libraries(QDataVis PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
+target_link_libraries(QDataVis PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 target_link_libraries(QDataVis PUBLIC QCustomPlot)

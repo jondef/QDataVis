@@ -254,7 +254,7 @@ void QCustomPlotCustom::replotGraphsOnRangeChange(QCPRange range) {
         auto result = new QHash<DataSet*, QPair<QVector<double>,QVector<double>>>();
         for (DataSet *graph : mDataSets) {
             if (graph->dataSetIsFunction()) {
-                result->insert(graph, QPair(xArray, graph->binaryTree->calculateTree(xArray)));
+                result->insert(graph, QPair<QVector<double>, QVector<double>>(xArray, graph->binaryTree->calculateTree(xArray)));
             }
         }
         return result;

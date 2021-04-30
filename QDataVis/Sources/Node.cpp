@@ -335,7 +335,7 @@ QList<int> Node::findAllOccurrences(QString string, const QString &what) {
 
     while (string.indexOf(what) != -1) {
         operatorIndex.append(string.indexOf(what) + cutAwayParts);
-        cutAwayParts += string.leftRef(string.indexOf(what) + 1).length();
+        cutAwayParts += string.left(string.indexOf(what) + 1).length();
 
         string = string.mid(string.indexOf(what) + 1);
     }

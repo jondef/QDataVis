@@ -13,7 +13,7 @@ file(GLOB SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/QDataVis/Sources/Node.cpp
         )
 
-find_package(Qt5 COMPONENTS Test REQUIRED)
+find_package(Qt6 COMPONENTS Test REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -27,4 +27,4 @@ add_test(Tests Tests)
 ################################
 # Linking
 ################################
-target_link_libraries(Tests Qt5::Test)
+target_link_libraries(Tests Qt6::Test)
