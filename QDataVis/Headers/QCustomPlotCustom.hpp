@@ -13,6 +13,7 @@
 
 #include "qcp.h"
 #include "DataSet.hpp"
+#include "QCPItemTextCustom.hpp"
 
 
 struct QCPCursor {
@@ -92,7 +93,7 @@ public:
     QCPLayer *cursorLayer;
     QCPCursor cursor;
 
-    QCPItemText *textLabel = new QCPItemText(this);
+    QCPItemTextCustom *textLabel = new QCPItemTextCustom(this);
     QCPItemTracer *graphTracer = new QCPItemTracer(this);
 
     QList<DataSet *> mDataSets;

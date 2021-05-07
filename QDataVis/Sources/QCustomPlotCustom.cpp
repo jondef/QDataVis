@@ -52,6 +52,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     textLabel->setSelectable(false);
     textLabel->setBrush(QBrush(QColor(Qt::white)));
     textLabel->setAntialiased(true);
+    textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignHCenter);
     textLabel->position->setType(QCPItemPosition::ptPlotCoords);
     textLabel->setVisible(false);
     graphTracer->setLayer(this->cursorLayer);
@@ -307,10 +308,13 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
         QCPGraphDataContainer::const_iterator it_begin = selectedGraph->data()->at(dataPoints.dataRange().begin());
         QCPGraphDataContainer::const_iterator it_end = selectedGraph->data()->at(dataPoints.dataRange().end());
         // set tracer text alignment
+        double xLeftPos = textLabel->topLeft->pixelPosition().x();
+        double xRightPos = textLabel->topRight->pixelPosition().x();
+        double rectWidth = xAxis->pixelToCoord(xRightPos) - xAxis->pixelToCoord(xLeftPos);
         if (it_begin->value < it_end->value) {
-            textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignRight);
+            textLabel->position->setCoords(it_begin->key - rectWidth / 2, it_begin->value + yAxis->range().size() * 0.01);
         } else if (it_begin->value >= it_end->value) {
-            textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignLeft);
+            textLabel->position->setCoords(it_begin->key + rectWidth / 2, it_begin->value + yAxis->range().size() * 0.01);
         }
         textLabel->setVisible(true);
         textLabel->setText(QString("(%1, %2)").arg(QString::number(it_begin->key, 'f', 3), QString::number(it_begin->value, 'f', 3)));
