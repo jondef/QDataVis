@@ -109,6 +109,10 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     stickAxisToZeroLine(false);
     setCursor(false);
     setPlotRange(QCPRange(-10, 10), QCPRange(-10, 10));
+
+    // this is required to so that when the user clicks on a graph to trace it, it's not slow.
+    // I guess it's loading something into memory.
+    textLabel->topLeft->pixelPosition();
 }
 
 QCustomPlotCustom::~QCustomPlotCustom() {
