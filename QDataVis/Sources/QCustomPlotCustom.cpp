@@ -56,6 +56,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     textLabel->setPositionAlignment(Qt::AlignBottom | Qt::AlignHCenter);
     textLabel->position->setType(QCPItemPosition::ptPlotCoords);
     textLabel->setVisible(false);
+    textLabel->topLeft->pixelPosition(); // this is required to so that when the user clicks on a graph to trace it for the 1st time, it's not slow.
     graphTracer->setLayer(this->cursorLayer);
     graphTracer->setInterpolating(true);
     graphTracer->setStyle(QCPItemTracer::tsCircle);
@@ -109,10 +110,6 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     stickAxisToZeroLine(false);
     setCursor(false);
     setPlotRange(QCPRange(-10, 10), QCPRange(-10, 10));
-
-    // this is required to so that when the user clicks on a graph to trace it, it's not slow.
-    // I guess it's loading something into memory.
-    textLabel->topLeft->pixelPosition();
 }
 
 QCustomPlotCustom::~QCustomPlotCustom() {

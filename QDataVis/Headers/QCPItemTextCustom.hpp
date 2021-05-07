@@ -19,10 +19,6 @@ public:
         return position->coords();
     }
 
-    QRect getRect() const {
-        return clipRect();
-    }
-
     static QVariant QCPTextPosInterpolator(const QPointF &start, const QPointF &end, qreal progress) {
         QVariant done;
 
