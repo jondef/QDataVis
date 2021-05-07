@@ -325,7 +325,7 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
         end.setValue(QPointF(it_begin->value < it_end->value ? (it_begin->key + rectWidth / 2) : (it_begin->key - rectWidth / 2), it_begin->value + yAxis->range().size() * 0.01));
         animation1->setEndValue(end);
         animation1->setDirection(QAbstractAnimation::Forward);
-        animation1->setEasingCurve(QEasingCurve::InOutQuart);
+        animation1->setEasingCurve(QEasingCurve::Linear);
         connect(animation1, &QVariantAnimation::valueChanged, this, [this]() { layer("cursorLayer")->replot(); });
         animation1->start(QAbstractAnimation::DeleteWhenStopped);
 
