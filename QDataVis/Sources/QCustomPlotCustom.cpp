@@ -25,6 +25,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     setOpenGl(SettingManager::getSetting("settings/useOpenGL").toBool(), 16); // enable openGL
     qDebug() << "using openGL:" << openGl();
     qRegisterAnimationInterpolator<QCPRange>(QCustomPlotCustom::QCPRangeInterpolator);
+    qRegisterAnimationInterpolator<QPointF>(QCPItemTextCustom::QCPTextPosInterpolator);
 
     // region cursor stuff
     this->addLayer("cursorLayer", nullptr, QCustomPlot::limAbove);
@@ -71,8 +72,7 @@ QCustomPlotCustom::QCustomPlotCustom(QWidget *parent) : QCustomPlot(parent) {
     connect(this, &QCustomPlotCustom::mouseRelease, this, &QCustomPlotCustom::traceGraph);
     connect(this, &QCustomPlotCustom::plottableClick, this, [this](QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event) { traceGraph(event); });
     // * axes connections
-    connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this,
-            &QCustomPlotCustom::replotGraphsOnRangeChange);
+    connect(xAxis, qOverload<const QCPRange &>(&QCPAxis::rangeChanged), this, &QCustomPlotCustom::replotGraphsOnRangeChange);
     connect(this, &QCustomPlotCustom::axisDoubleClick, this, &QCustomPlotCustom::plotAxisLabelDoubleClick);
     // connect slot that ties some axis selections together (especially opposite axes):
     connect(this, &QCustomPlotCustom::selectionChangedByUser, this, &QCustomPlotCustom::plotOppositeAxesConnection);
@@ -308,17 +308,22 @@ void QCustomPlotCustom::traceGraph(QMouseEvent *event) {
         QCPGraphDataContainer::const_iterator it_begin = selectedGraph->data()->at(dataPoints.dataRange().begin());
         QCPGraphDataContainer::const_iterator it_end = selectedGraph->data()->at(dataPoints.dataRange().end());
         // set tracer text alignment
-        double xLeftPos = textLabel->topLeft->pixelPosition().x();
-        double xRightPos = textLabel->topRight->pixelPosition().x();
-        double rectWidth = xAxis->pixelToCoord(xRightPos) - xAxis->pixelToCoord(xLeftPos);
-        if (it_begin->value < it_end->value) {
-            textLabel->position->setCoords(it_begin->key - rectWidth / 2, it_begin->value + yAxis->range().size() * 0.01);
-        } else if (it_begin->value >= it_end->value) {
-            textLabel->position->setCoords(it_begin->key + rectWidth / 2, it_begin->value + yAxis->range().size() * 0.01);
-        }
         textLabel->setVisible(true);
         textLabel->setText(QString("(%1, %2)").arg(QString::number(it_begin->key, 'f', 3), QString::number(it_begin->value, 'f', 3)));
-        textLabel->position->setCoords(it_begin->key, it_begin->value + yAxis->range().size() * 0.01);
+
+        QPropertyAnimation *animation1 = new QPropertyAnimation(textLabel, "position", this);
+        animation1->setDuration(150);
+        QVariant start;
+        start.setValue(textLabel->position->coords());
+        animation1->setStartValue(start);
+        double rectWidth = xAxis->pixelToCoord(textLabel->topLeft->pixelPosition().x()) - xAxis->pixelToCoord(textLabel->topRight->pixelPosition().x());
+        QVariant end;
+        end.setValue(QPointF(it_begin->value < it_end->value ? (it_begin->key + rectWidth / 2) : (it_begin->key - rectWidth / 2), it_begin->value + yAxis->range().size() * 0.01));
+        animation1->setEndValue(end);
+        animation1->setDirection(QAbstractAnimation::Forward);
+        animation1->setEasingCurve(QEasingCurve::InOutQuart);
+        connect(animation1, &QVariantAnimation::valueChanged, this, [this]() { layer("cursorLayer")->replot(); });
+        animation1->start(QAbstractAnimation::DeleteWhenStopped);
 
         graphTracer->setVisible(true);
         graphTracer->setGraph(selectedGraph);
@@ -472,3 +477,4 @@ QVariant QCustomPlotCustom::QCPRangeInterpolator(const QCPRange &start, const QC
 
     return done;
 }
+
