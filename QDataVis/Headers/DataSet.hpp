@@ -34,7 +34,7 @@ struct DataSet {
 
 
     void changeColor(QColor aColor) {
-        this->color = std::move(aColor);
+        this->color = aColor;
         // * update the color on the list widget item
         QPixmap pixmap = QPixmap(16, 16);
         pixmap.fill(this->color);
@@ -55,8 +55,7 @@ struct DataSet {
     }
 
     inline void recalculatePoints() const {
-        QVector<double> xArray = generateXArray(minimumDomain, maximumDomain, pointDensity);
-        graph->setData(xArray, binaryTree->calculateTree(xArray));
+        graph->setData(binaryTree->calculateTree(minimumDomain, maximumDomain, pointDensity));
     }
 
     static QVector<double> generateXArray(double lowerLim, double upperLim, unsigned int length) {
@@ -143,5 +142,21 @@ struct DataSet {
     int maximumDomain = 10;
 };
 Q_DECLARE_METATYPE(DataSet *)
+//QDataStream &operator<<(QDataStream &, const DataSet &);
+//QDataStream &operator>>(QDataStream &, DataSet &);
+
+//QDataStream &operator<<(QDataStream &out, const DataSet &dataSet) {
+//    out << dataSet.name << dataSet.color << quint32(dataSet.pointDensity);
+//    return out;
+//}
+//
+//QDataStream &operator>>(QDataStream &in, DataSet &painting) {
+//    QString name;
+//    QColor color;
+//    quint32 pointDensity;
+//    in >> name >> color >> pointDensity;
+//    painting = DataSet();
+//    return in;
+//}
 
 #endif //QDATAVIS_GRAPH_H
