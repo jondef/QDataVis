@@ -50,6 +50,10 @@ git clone --recurse-submodules https://github.com/jondef/QDataVis.git
 cmake ./QDataVis && make ./QDataVis/build
 ```
 
+❤️ Feedback
+--------
+Found a bug? Got suggestions? [Create an issue](https://github.com/jondef/QDataVis/issues/new)!
+
 📝License
 -------
 Apache 2.0
