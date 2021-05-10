@@ -18,7 +18,7 @@ QDataVis is a simple to use, UI based, interactive plotter powered by <img src="
   - Plot datasets
   - Dark mode
 
-🚀Features
+🚀 Features
 -----------
   - Plot cursor
   - Stick tick labels to the zero on the axes
@@ -34,7 +34,7 @@ QDataVis is a simple to use, UI based, interactive plotter powered by <img src="
 --------
 Pre-built executables for Windows, macOS, and Linux are found on the [Releases](https://github.com/jondef/QDataVis/releases) page.
 
-⚙️Building from source
+⚙️ Building from source
 ----------
 To build QDataVis from source, you'll need:
 * [Qt6] - v6.1.0+ installed and included in PATH
@@ -54,7 +54,7 @@ cmake ./QDataVis && make ./QDataVis/build
 --------
 Found a bug? Got suggestions? [Create an issue](https://github.com/jondef/QDataVis/issues/new)!
 
-📝License
+📝 License
 -------
 Apache 2.0
 
