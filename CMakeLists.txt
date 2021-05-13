@@ -47,11 +47,11 @@ set(CMAKE_AUTORCC ON) # Create Resource files
 # QCustomPlot
 ################################
 include_directories(QCustomPlot/src)
-add_subdirectory(QCustomPlot)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/QCustomPlot)
 
 ################################
 # QDataVis
 ################################
 include_directories(QDataVis/Headers)
-add_subdirectory(QDataVis)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/QDataVis)
 add_subdirectory(Tests)

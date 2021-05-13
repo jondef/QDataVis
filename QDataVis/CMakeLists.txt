@@ -104,7 +104,7 @@ target_link_libraries(QDataVis PUBLIC QCustomPlot)
 ################################
 # Post-build
 ################################
-if (WIN32)
+if (WIN32 AND CMAKE_PREFIX_PATH)
     set(DEBUG_SUFFIX)
     set(PROJECT_NAME QDataVis)
     # find the qt install path
