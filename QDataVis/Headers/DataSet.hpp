@@ -10,8 +10,13 @@
 #include <utility>
 #include "BinaryTree.hpp"
 
-struct DataSet {
-    DataSet() = default;
+class DataSet : public QThread {
+Q_OBJECT
+
+public:
+    DataSet() {
+
+    }
 
     ~DataSet() {
         delete listWidgetItem;
@@ -32,7 +37,6 @@ struct DataSet {
         return getDataSetType() == FunctionGraph;
     }
 
-
     void changeColor(QColor aColor) {
         this->color = aColor;
         // * update the color on the list widget item
@@ -52,6 +56,10 @@ struct DataSet {
         variant.setValue(this);
         listWidgetItem->setData(Qt::UserRole, variant);
         listWidgetItem->setText(this->name);
+    }
+
+    void run() override {
+        emit resultReady(binaryTree->calculateTree(minimumDomain, maximumDomain, pointDensity));
     }
 
     inline void recalculatePoints() const {
@@ -138,8 +146,11 @@ struct DataSet {
 
     bool overrideGlobalPointDensity = false;
     unsigned int pointDensity = 1000;
-    int minimumDomain = -10;
-    int maximumDomain = 10;
+    double minimumDomain = -10;
+    double maximumDomain = 10;
+signals:
+    void resultReady(QSharedPointer<QCPGraphDataContainer> data);
+
 };
 Q_DECLARE_METATYPE(DataSet *)
 //QDataStream &operator<<(QDataStream &, const DataSet &);

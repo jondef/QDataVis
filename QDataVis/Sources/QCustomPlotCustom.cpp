@@ -257,16 +257,39 @@ void QCustomPlotCustom::globalPointDensityChanged(int density) {
  * it will crash. Solution is to update the data in the main thread.
  */
 void QCustomPlotCustom::replotGraphsOnRangeChange() {
-    QThreadPool::globalInstance()->clear(); // clear the queue
-
-    QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
-        for (DataSet *dataSet : mDataSets) {
-            if (dataSet->dataSetIsFunction()) {
-                emit updateDataSetData(dataSet, dataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity));
-            }
+//    QThreadPool::globalInstance()->clear(); // clear the queue
+    for (DataSet *dataSet : mDataSets) {
+        if (dataSet->dataSetIsFunction()) {
+            dataSet->exit(0);
         }
-        replot(QCustomPlotCustom::rpQueuedReplot);
-    });
+    }
+    for (DataSet *dataSet : mDataSets) {
+        if (dataSet->dataSetIsFunction()) {
+            qDebug() << dataSet->isRunning();
+        }
+    }
+//    QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
+//        for (DataSet *dataSet : mDataSets) {
+//            if (dataSet->dataSetIsFunction()) {
+//                emit updateDataSetData(dataSet, dataSet->binaryTree->calculateTree(xAxis->range().lower, xAxis->range().upper, mGlobalPointDensity));
+//            }
+//        }
+//        replot(QCustomPlotCustom::rpQueuedReplot);
+//    });
+
+    for (DataSet *dataSet : mDataSets) {
+        if (dataSet->dataSetIsFunction()) {
+            dataSet->wait();
+            connect(dataSet, &DataSet::resultReady, this, [this, dataSet](QSharedPointer<QCPGraphDataContainer> data) {
+                emit updateDataSetData(dataSet, data);
+                //replot(QCustomPlotCustom::rpQueuedReplot);
+            });
+            dataSet->maximumDomain = xAxis->range().upper;
+            dataSet->minimumDomain = xAxis->range().lower;
+            dataSet->pointDensity = mGlobalPointDensity;
+            dataSet->start();
+        }
+    }
 }
 
 
