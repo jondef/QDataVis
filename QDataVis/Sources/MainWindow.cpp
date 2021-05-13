@@ -155,12 +155,57 @@ void MainWindow::updateColors(bool checked) {
 
 
 void MainWindow::exportData() {
-
+    QFile out_file("file.dat");
+    if (out_file.open(QFile::WriteOnly)) {
+        // write every data set to file
+        for (DataSet *dataSet : ui->customPlot->mDataSets) {
+            out_file.write(reinterpret_cast<const char *>(dataSet), 10000); // bytes
+        }
+        out_file.close();
+    }
 }
 
 
 void MainWindow::importData() {
+    QFile in_file("file.dat");
+    if(in_file.open(QFile::ReadOnly)) {
+        const qint64 filesize = in_file.size();
 
+        int chunks = filesize / 10000;
+        for (int i = 0; i < chunks; ++i) {
+            uchar *mem;
+            for (int y = 0; y < 25000; ++y) {
+                mem = in_file.map(y, filesize);
+                if (mem) {
+                    qDebug() << y;
+                }
+            }
+            if (!mem) {
+                qDebug() << "SKIPPED";
+                continue;
+            }
+
+            DataSet *dataSet = reinterpret_cast<DataSet *>(mem);
+            qDebug() << dataSet->name;
+            qDebug() << dataSet->color;
+            qDebug() << dataSet->graphWidth;
+            qDebug() << dataSet->pointDensity;
+//            qDebug() << dataSet->graph->name();
+
+            in_file.unmap(mem);
+        }
+
+//        uchar *mem = in_file.map(0, filesize);
+//        DataSet *dataSet = reinterpret_cast<DataSet *>(mem);
+//        qDebug() << dataSet->name;
+//        qDebug() << dataSet->color;
+//        qDebug() << dataSet->graphWidth;
+//        qDebug() << dataSet->pointDensity;
+//        in_file.unmap(mem);
+
+
+        in_file.close();
+    }
 }
 
 
