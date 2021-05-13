@@ -71,8 +71,8 @@ jobs:
     #    uses a compiled language
 
     - run: |
-        cmake ./QDataVis
-        make ./QDataVis/build
+        cmake .
+        make ./build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
