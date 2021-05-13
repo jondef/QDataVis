@@ -71,7 +71,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-        cmake .
+        cmake -DCMAKE_BUILD_TYPE=Debug .
         make ./build
 
     - name: Perform CodeQL Analysis
