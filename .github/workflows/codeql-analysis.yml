@@ -70,9 +70,8 @@ jobs:
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
 
-    - run: |
-        cmake -DCMAKE_BUILD_TYPE=Debug .
-        make ./build
+    - name: Load CMake project
+      run: cmake -DCMAKE_BUILD_TYPE=Debug .
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
