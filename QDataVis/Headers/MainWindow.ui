@@ -39,6 +39,11 @@
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="3" column="0">
          <widget class="QTextEditCustom" name="QTextEdit_functionInput">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
           <property name="placeholderText">
            <string>Add function here</string>
           </property>

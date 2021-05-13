@@ -4,6 +4,9 @@
 
 #include <QCoreApplication>
 #include "QTextEditCustom.hpp"
+#include "QCustomPlotCustom.hpp"
+#include "Node.hpp"
+
 
 void QTextEditCustom::keyPressEvent(QKeyEvent *ev) {
     // if user presses shift+enter, send an accept signal
@@ -35,4 +38,24 @@ void QTextEditCustom::keyPressEvent(QKeyEvent *ev) {
         moveCursor(QTextCursor::Left);
     }
     QTextEdit::keyPressEvent(ev);
+    highlightParentheses();
+}
+
+void QTextEditCustom::highlightParentheses() {
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    QList<int> pArray = Node::getParenthesesArray(toPlainText());
+    for (int i = 0; i < toPlainText().size(); ++i) {
+        if (toPlainText()[i] == '(' || toPlainText()[i] == ')') {
+            QTextEdit::ExtraSelection selection;
+            selection.format.setForeground(QCustomPlotCustom::getGraphColor(pArray.at(i)));
+            selection.format.setBackground(QCustomPlotCustom::getGraphColor(pArray.at(i)).darker(300));
+            selection.cursor = textCursor();
+            selection.cursor.clearSelection();
+            selection.cursor.setPosition(i);
+            selection.cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+            extraSelections.append(selection);
+        }
+    }
+    setExtraSelections(extraSelections);
 }

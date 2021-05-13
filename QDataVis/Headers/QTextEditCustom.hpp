@@ -13,9 +13,12 @@ Q_OBJECT
     using QTextEdit::QTextEdit;
 
 public:
-    QTextEditCustom(QWidget *parent) : QTextEdit(parent) {
+    explicit QTextEditCustom(QWidget *parent) : QTextEdit(parent) {
         setTabChangesFocus(true);
+        setAcceptRichText(false);
     }
+
+    void highlightParentheses();
 
 protected:
     void keyPressEvent(QKeyEvent *ev) override;
