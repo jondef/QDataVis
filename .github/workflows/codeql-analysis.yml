@@ -75,8 +75,8 @@ jobs:
     - name: Load CMake project
       run: cmake -DCMAKE_BUILD_TYPE=Debug .
       
-    - name: Compile
-      run: make QDataVis -j8
+    #- name: Compile
+    #  run: make QDataVis -j8
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
