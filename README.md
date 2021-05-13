@@ -1,4 +1,4 @@
-[![QDataVis](doc/logo.png | width=1000)](https://github.com/jondef/QDataVis)
+[![QDataVis](doc/logo50percent.png)](https://github.com/jondef/QDataVis)
 
 [Download](https://github.com/jondef/QDataVis#-download) |
 [Feedback](https://github.com/jondef/QDataVis#%EF%B8%8F-feedback)
