@@ -51,12 +51,12 @@ jobs:
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
         
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2.13.2
-      with:
-        version: '6.1.0'
-        host: 'linux'
-        target: 'desktop'
+    #- name: Install Qt
+    #  uses: jurplel/install-qt-action@v2.13.2
+    #  with:
+    #    version: '6.1.0'
+    #    host: 'linux'
+    #    target: 'desktop'
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
@@ -72,8 +72,8 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
       
-    - name: Load CMake project
-      run: cmake -DCMAKE_BUILD_TYPE=Debug .
+    #- name: Load CMake project
+    #  run: cmake -DCMAKE_BUILD_TYPE=Debug .
       
     #- name: Compile
     #  run: make QDataVis -j8
