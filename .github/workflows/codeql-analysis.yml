@@ -53,6 +53,10 @@ jobs:
         
     - name: Install Qt
       uses: jurplel/install-qt-action@v2.13.2
+      with:
+        version: '6.1.0'
+        host: 'linux'
+        target: 'desktop'
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
