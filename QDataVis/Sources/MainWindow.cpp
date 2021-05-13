@@ -208,8 +208,9 @@ void MainWindow::addLinearRegression() {
 }
 
 void MainWindow::addFunctionGraph() {
-    QListWidgetItem *listWidgetItem = new QListWidgetItem();
     QString graphName = ui->QTextEdit_functionInput->toPlainText().simplified();
+    if (graphName.isEmpty()) return;
+    QListWidgetItem *listWidgetItem = new QListWidgetItem();
 
     ui->customPlot->addFunctionGraph(graphName, listWidgetItem);
     ui->QListWidget_functionList->addItem(listWidgetItem);
