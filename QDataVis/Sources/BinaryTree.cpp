@@ -47,6 +47,9 @@ void BinaryTree::preprocessor(QString &expression) {
         // replace with positive look ahead
         expression.replace(QRegularExpression(QString("%1{1}(?=\\d|\\()").arg(symbol)), QString("%1*").arg(symbol));
     }
+    if (expression.isEmpty()) {
+        expression = "0";
+    }
 }
 
 /**

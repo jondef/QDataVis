@@ -37,7 +37,19 @@
         <string>Functions</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="7" column="0">
+        <item row="3" column="0">
+         <widget class="QTextEditCustom" name="QTextEdit_functionInput">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="placeholderText">
+           <string>Add function here</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QLabel" name="label_3">
@@ -64,19 +76,10 @@
         <item row="1" column="0">
          <widget class="QListWidget" name="QListWidget_functionList"/>
         </item>
-        <item row="3" column="0">
-         <widget class="QLineEdit" name="QLineEdit_addFunction">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="inputMask">
-           <string/>
-          </property>
-          <property name="placeholderText">
-           <string>Add function here</string>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="QPushButton_addFunction">
+          <property name="text">
+           <string>Add function</string>
           </property>
          </widget>
         </item>
@@ -206,7 +209,7 @@
      <x>0</x>
      <y>0</y>
      <width>943</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -288,6 +291,11 @@
    <extends>QWidget</extends>
    <header>QCustomPlotCustom.hpp</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QTextEditCustom</class>
+   <extends>QTextEdit</extends>
+   <header>QTextEditCustom.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

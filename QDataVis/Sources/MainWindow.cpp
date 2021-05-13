@@ -25,7 +25,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
     connect(ui->pushButton_linearRegression, &QPushButton::clicked, this, &MainWindow::addLinearRegression);
 
     // * function tab
-    connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
+    connect(ui->QTextEdit_functionInput, &QTextEditCustom::inputAccepted, ui->QPushButton_addFunction, &QPushButton::click);
+    connect(ui->QPushButton_addFunction, &QPushButton::clicked, this, &MainWindow::addFunctionGraph);
     connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeFunctionGraph);
     connect(ui->spinBox_setGlobalPointDensity, qOverload<int>(&QSpinBox::valueChanged), ui->customPlot,
             &QCustomPlotCustom::globalPointDensityChanged);
@@ -200,15 +201,16 @@ void MainWindow::addLinearRegression() {
     }
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
     QPair<double, double> data = selectedDataSet->linearRegression();
-    QString oldText = ui->QLineEdit_addFunction->text();
-    ui->QLineEdit_addFunction->setText(QString("%1x+%2").arg(QString::number(data.first, 'g', 10), QString::number(data.second, 'g', 10)));
+    QString oldText = ui->QTextEdit_functionInput->toPlainText();
+    ui->QTextEdit_functionInput->setText(QString("%1x+%2").arg(QString::number(data.first, 'g', 10), QString::number(data.second, 'g', 10)));
     addFunctionGraph();
-    ui->QLineEdit_addFunction->setText(oldText);
+    ui->QTextEdit_functionInput->setText(oldText);
 }
 
 void MainWindow::addFunctionGraph() {
+    QString graphName = ui->QTextEdit_functionInput->toPlainText().simplified();
+    if (graphName.isEmpty()) return;
     QListWidgetItem *listWidgetItem = new QListWidgetItem();
-    QString graphName = ui->QLineEdit_addFunction->text();
 
     ui->customPlot->addFunctionGraph(graphName, listWidgetItem);
     ui->QListWidget_functionList->addItem(listWidgetItem);

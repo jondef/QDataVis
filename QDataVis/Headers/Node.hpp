@@ -57,9 +57,9 @@ public:
 
     [[nodiscard]] double computeOperation(double xPlug) const;
 
-private:
     static QList<int> getParenthesesArray(const QString &string);
 
+private:
     static QList<int> findAllOccurrences(QString string, const QString &what);
 
     bool createChildren(QString string);
