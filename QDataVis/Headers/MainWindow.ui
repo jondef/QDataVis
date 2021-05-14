@@ -41,7 +41,7 @@
          <widget class="QTextEditCustom" name="QTextEdit_functionInput">
           <property name="font">
            <font>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="placeholderText">
