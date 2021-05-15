@@ -41,7 +41,7 @@ void BinaryTree::preprocessor(QString &expression) {
     }
 
     // make the implicit multiply symbol explicit
-    for (const QString &symbol : {"x", "pi", "e"}) {
+    for (const QString &symbol : {"x", "pi", "e"}) { // todo: add support for aebx^c = a*10^(b)*x^c E NOTATION
         // replace with positive look-behind
         expression.replace(QRegularExpression(QString("(?<=\\d|\\))%1{1}").arg(symbol)), QString("*%1").arg(symbol));
         // replace with positive look ahead
