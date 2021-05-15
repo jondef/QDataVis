@@ -6,7 +6,7 @@ close all;
 
 figure();
 %data = readmatrix('data.txt'); % for matlab
-data = dlmread('data.txt', ' ', 0, 0);
+data = dlmread('data1.txt', ' ', 0, 0);
 f = data(:,1);  %x -> A
 signal = data(:,2); %y -> b
 plot(f, signal, 'b.') ;hold on;
@@ -73,7 +73,7 @@ x = x';
 Kondition_ohne_anpassen = cond(A);
 
 fx = A*x;
-plot(f, x(5).*fz, "r-");
+%plot(f, x(5).*fz, "r-");
 plot(f, fx, 'g-');
 title("Gefittete Kurve ohne x-Anpassung. Kond: "+ Kondition_ohne_anpassen);
 legend("Messpünkte", "Peak alleine" ,"Polynom+Peak");
