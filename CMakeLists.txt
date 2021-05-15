@@ -50,6 +50,11 @@ include_directories(QCustomPlot/src)
 add_subdirectory(QCustomPlot)
 
 ################################
+# Eigen3
+################################
+include_directories(Eigen)
+
+################################
 # QDataVis
 ################################
 include_directories(QDataVis/Headers)
