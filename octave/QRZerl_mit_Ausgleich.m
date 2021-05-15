@@ -13,7 +13,7 @@ plot(f, signal, 'b.') ;hold on;
 
 
 m = length(f);       %Zeilen
-n = 2;               %Spalten
+n = 10;               %Spalten
 
 %Koeffizient vor fz und Polynom mit Ausgleichsrechnung zu bestimmen
 % (Ohne anpassung der X-Koordinate)
@@ -24,12 +24,10 @@ fz = 1./(1+(z1.^2));              %f = a*1/(1+x'^2), x'= (x-x0)/50
 
 % Aufstellen von A
 for degree = 1:n
-    if degree == (n - 1)
+    if degree == n
         A(1:m, degree) = ones(m,1);
-    elseif degree == n
-        A(1:m, degree) = fz;
     else
-        A(1:m, degree) = f.^(n - degree - 1);
+        A(1:m, degree) = f.^(n - degree);
     end
 end
 
@@ -89,6 +87,14 @@ x = x';
 Kondition_ohne_anpassen = cond(A);
 
 fx = A*x;
+%Display the function as text
+y_sym = ''; exp(x)
+for i=1:n
+  y_sym = strcat(y_sym, ' + ', num2str(x(i)), 'x^', num2str(n-i));
+end
+
+disp(y_sym);
+
 %plot(f, x(5).*fz, "r-");
 plot(f, fx, 'm-', 'linewidth', 1);
 title("Gefittete Kurve ohne x-Anpassung. Kond: "+ Kondition_ohne_anpassen);
