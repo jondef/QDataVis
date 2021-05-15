@@ -13,7 +13,7 @@ plot(f, signal, 'b.') ;hold on;
 
 
 m = length(f);       %Zeilen
-n = 5;               %Spalten
+n = 6;               %Spalten
 
 %Koeffizient vor fz und Polynom mit Ausgleichsrechnung zu bestimmen
 % (Ohne anpassung der X-Koordinate)
@@ -22,12 +22,13 @@ x0 = ones(m,1).*80.3e3;
 z1 = (x1-x0)./50;       %definiert Breite und Ort des Peaks
 fz = 1./(1+(z1.^2));              %f = a*1/(1+x'^2), x'= (x-x0)/50
 
-% Aufstellen von A 
-A(1:m, 1) = f.^3;
-A(1:m, 2) = f.^2;
-A(1:m, 3) = f;
-A(1:m, 4) = ones(m,1);
-A(1:m, 5) = fz;
+% Aufstellen von A
+A(1:m, 1) = f.^4
+A(1:m, 2) = f.^3;
+A(1:m, 3) = f.^2;
+A(1:m, 4) = f;
+A(1:m, 5) = ones(m,1);
+A(1:m, 6) = fz;
 
 Im = eye(m);
 
