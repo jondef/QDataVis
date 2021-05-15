@@ -50,7 +50,7 @@ private slots:
 
     void savePlotImage();
 
-    void addLinearRegression();
+    void addRegression();
 
     void readSettings();
 

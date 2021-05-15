@@ -129,6 +129,13 @@ struct DataSet {
         return QPair<double, double>(a, b);
     }
 
+    /**
+     * This method does a regression on the data set.
+     * @param degree: degree of the regression (ex: 1 for linear or 2 for quadratic)
+     * @return QList<double> containing the coefficients from biggest to smallest.
+     */
+    [[nodiscard]] QList<double> regression(unsigned int degree) const;
+
     QString name;
     QListWidgetItem *listWidgetItem;
     QCPGraph *graph;

@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
     // * points tab
     connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
     connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removePointGraph);
-    connect(ui->pushButton_linearRegression, &QPushButton::clicked, this, &MainWindow::addLinearRegression);
+    connect(ui->pushButton_regression, &QPushButton::clicked, this, &MainWindow::addRegression);
 
     // * function tab
     connect(ui->QTextEdit_functionInput, &QTextEditCustom::inputAccepted, ui->QPushButton_addFunction, &QPushButton::click);
@@ -193,18 +193,15 @@ void MainWindow::savePlotImage() {
     }
 }
 
-void MainWindow::addLinearRegression() {
+void MainWindow::addRegression() {
     QListWidgetItem *selectedListWidgetItem = ui->listWidget_PointGraphList->currentItem();
     if (!selectedListWidgetItem) {
         statusBarMsg("Select a dataset on which to do linear regression");
         return;
     }
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
-    QPair<double, double> data = selectedDataSet->linearRegression();
-    QString oldText = ui->QTextEdit_functionInput->toPlainText();
-    ui->QTextEdit_functionInput->setText(QString("%1x+%2").arg(QString::number(data.first, 'g', 10), QString::number(data.second, 'g', 10)));
-    addFunctionGraph();
-    ui->QTextEdit_functionInput->setText(oldText);
+    QList<double> coeffs = selectedDataSet->regression(ui->spinBox_regressionDegree->value());
+    qDebug() << coeffs;
 }
 
 void MainWindow::addFunctionGraph() {
