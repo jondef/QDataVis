@@ -200,7 +200,7 @@ void MainWindow::addRegression() {
         return;
     }
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
-    QList<double> coeffs = selectedDataSet->regression(ui->spinBox_regressionDegree->value());
+    QVector<double> coeffs = selectedDataSet->regression(ui->spinBox_regressionDegree->value());
     qDebug() << coeffs;
 }
 

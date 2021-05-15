@@ -134,7 +134,7 @@ struct DataSet {
      * @param degree: degree of the regression (ex: 1 for linear or 2 for quadratic)
      * @return QList<double> containing the coefficients from biggest to smallest.
      */
-    [[nodiscard]] QList<double> regression(unsigned int degree) const;
+    [[nodiscard]] QVector<double> regression(int degree) const;
 
     QString name;
     QListWidgetItem *listWidgetItem;
