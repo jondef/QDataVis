@@ -102,7 +102,7 @@ legend("Messpünkte", "Peak alleine" ,"Polynom+Peak");
 hold off;
 
 
-%% Berechnen Ausgleichsrechnung mit Anpassung auf x-Achse
+%% Berechnen Ausgleichsrechnung mit Anpassung auf x-Achse (80k bis 81k --> 0 bis 1) auf x-achse
 #{
 figure();
 
