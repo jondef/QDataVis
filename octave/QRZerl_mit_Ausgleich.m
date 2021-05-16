@@ -7,38 +7,38 @@ close all;
 figure();
 %data = readmatrix('data.txt'); % for matlab
 data = dlmread('data1.txt', ' ', 0, 0);
-f = data(:,1);  %x -> A
-signal = data(:,2); %y -> b
-plot(f, signal, 'b.') ;hold on;
+xPoints = data(:,1);  %x -> A
+yPoints = data(:,2); %y -> b
+plot(xPoints, yPoints, 'b.') ;hold on;
 
 
-m = length(f);       %Zeilen
+m = length(xPoints);       %Zeilen
 n = 10;               %Spalten
 
 %Koeffizient vor fz und Polynom mit Ausgleichsrechnung zu bestimmen
 % (Ohne anpassung der X-Koordinate)
-x1 = f;
+x1 = xPoints;
 x0 = ones(m,1).*80.3e3;
 z1 = (x1-x0)./50;       %definiert Breite und Ort des Peaks
-fz = 1./(1+(z1.^2));              %f = a*1/(1+x'^2), x'= (x-x0)/50
+%fz = 1./(1+(z1.^2));              %f = a*1/(1+x'^2), x'= (x-x0)/50
 
 % Aufstellen von A
 for degree = 1:n
     if degree == n
         A(1:m, degree) = ones(m,1);
     else
-        A(1:m, degree) = f.^(n - degree);
+        A(1:m, degree) = xPoints.^(n - degree);
     end
 end
 
-%A(1:m, 1) = f.^8;
-%A(1:m, 2) = f.^7;
-%A(1:m, 3) = f.^6;
-%A(1:m, 4) = f.^5;
-%A(1:m, 5) = f.^4;
-%A(1:m, 6) = f.^3;
-%A(1:m, 7) = f.^2;
-%A(1:m, 8) = f.^1;
+%A(1:m, 1) = xPoints.^8;
+%A(1:m, 2) = xPoints.^7;
+%A(1:m, 3) = xPoints.^6;
+%A(1:m, 4) = xPoints.^5;
+%A(1:m, 5) = xPoints.^4;
+%A(1:m, 6) = xPoints.^3;
+%A(1:m, 7) = xPoints.^2;
+%A(1:m, 8) = xPoints.^1;
 %A(1:m, 9) = ones(m,1);
 
 %A(1:m, 10) = fz;
@@ -71,7 +71,7 @@ end
 clear x;
 
 %Rückwärtseinsetzen
-y = Q'*signal;
+y = Q'*yPoints;
                    % R*x = y;
 x(n) = y(n)/R(n,n);
 for i= (n-1):-1:1
@@ -95,8 +95,8 @@ end
 
 disp(y_sym);
 
-%plot(f, x(5).*fz, "r-");
-plot(f, fx, 'm-', 'linewidth', 1);
+%plot(xPoints, x(5).*fz, "r-");
+plot(xPoints, fx, 'm-', 'linewidth', 1);
 title("Gefittete Kurve ohne x-Anpassung. Kond: "+ Kondition_ohne_anpassen);
 legend("Messpünkte", "Peak alleine" ,"Polynom+Peak");
 hold off;
@@ -113,7 +113,7 @@ x0 = (ones(m,1).*(80.3e3 - 80e3))./1000;
 z1 = (x1-x0)./50;       %definiert Breite und Ort des Peaks
 fz = 1./(1+((z1.*1000).^2));              %f = a*1/(1+x'^2), x'= (x-x0)/50
 
-plot(x1, signal, 'r.'); hold on;
+plot(x1, yPoints, 'r.'); hold on;
 
 % Aufstellen von A 
 A(1:m, 1) = x1.^3;
@@ -148,7 +148,7 @@ end
 clear x;
 
 %Rückwärtseinsetzen
-y = Q'*signal;
+y = Q'*yPoints;
                    % R*x = y;
 x(n) = y(n)/R(n,n);
 for i= (n-1):-1:1
