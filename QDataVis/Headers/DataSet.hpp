@@ -136,6 +136,8 @@ struct DataSet {
      */
     [[nodiscard]] QVector<double> regression(int degree) const;
 
+    static QString getFunctionString(const QVector<double>& coeffs);
+
     QString name;
     QListWidgetItem *listWidgetItem;
     QCPGraph *graph;

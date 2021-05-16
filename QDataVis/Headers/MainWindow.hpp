@@ -36,7 +36,7 @@ public slots:
 
 private slots:
 
-    void addFunctionGraph();
+    void addFunctionGraph(QString func);
 
     void removeFunctionGraph();
 

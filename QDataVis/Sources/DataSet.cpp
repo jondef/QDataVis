@@ -86,3 +86,15 @@ QVector<double> DataSet::regression(int degree) const {
 
     return QVector<double>(x.data(), x.data() + x.rows() * x.cols());
 }
+
+/**
+ * Makes a function string out of a list of coeffs
+ */
+QString DataSet::getFunctionString(const QVector<double>& coeffs) {
+    QString regression = "";
+    for (int i = 0; i < coeffs.size(); ++i) {
+        regression += QString("%1*x^%2+").arg(QString::number(coeffs.at(i), 'E', 16)).arg(coeffs.length() - i - 1);
+    }
+    regression.truncate(regression.lastIndexOf('+'));
+    return regression;
+}

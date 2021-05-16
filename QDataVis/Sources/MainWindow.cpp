@@ -26,7 +26,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
 
     // * function tab
     connect(ui->QTextEdit_functionInput, &QTextEditCustom::inputAccepted, ui->QPushButton_addFunction, &QPushButton::click);
-    connect(ui->QPushButton_addFunction, &QPushButton::clicked, this, &MainWindow::addFunctionGraph);
+    connect(ui->QPushButton_addFunction, &QPushButton::clicked, this, [this]() {
+        addFunctionGraph(ui->QTextEdit_functionInput->toPlainText().simplified());
+    });
     connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeFunctionGraph);
     connect(ui->spinBox_setGlobalPointDensity, qOverload<int>(&QSpinBox::valueChanged), ui->customPlot,
             &QCustomPlotCustom::globalPointDensityChanged);
@@ -202,25 +204,15 @@ void MainWindow::addRegression() {
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
     QVector<double> coeffs = selectedDataSet->regression(ui->spinBox_regressionDegree->value());
 
-    QString oldText = ui->QTextEdit_functionInput->toPlainText();
-
-    QString regression = "";
-    for (int i = 0; i < coeffs.size(); ++i) {
-        regression += QString("%1*x^%2+").arg(QString::number(coeffs.at(i), 'E', 16)).arg(coeffs.length() - i - 1);
-    }
-    regression.truncate(regression.lastIndexOf('+'));
-
-    ui->QTextEdit_functionInput->setText(regression);
-    addFunctionGraph();
-    ui->QTextEdit_functionInput->setText(oldText);
+    QString regression = DataSet::getFunctionString(coeffs);
+    addFunctionGraph(regression);
 }
 
-void MainWindow::addFunctionGraph() {
-    QString graphName = ui->QTextEdit_functionInput->toPlainText().simplified();
-    if (graphName.isEmpty()) return;
+void MainWindow::addFunctionGraph(QString func) {
+    if (func.isEmpty()) return;
     QListWidgetItem *listWidgetItem = new QListWidgetItem();
 
-    ui->customPlot->addFunctionGraph(graphName, listWidgetItem);
+    ui->customPlot->addFunctionGraph(func, listWidgetItem);
     ui->QListWidget_functionList->addItem(listWidgetItem);
 }
 
