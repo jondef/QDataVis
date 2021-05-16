@@ -201,7 +201,18 @@ void MainWindow::addRegression() {
     }
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
     QVector<double> coeffs = selectedDataSet->regression(ui->spinBox_regressionDegree->value());
-    qDebug() << coeffs;
+
+    QString oldText = ui->QTextEdit_functionInput->toPlainText();
+
+    QString regression = "";
+    for (int i = 0; i < coeffs.size(); ++i) {
+        regression += QString("%1*x^%2+").arg(QString::number(coeffs.at(i), 'E', 16)).arg(coeffs.length() - i - 1);
+    }
+    regression.truncate(regression.lastIndexOf('+'));
+
+    ui->QTextEdit_functionInput->setText(regression);
+    addFunctionGraph();
+    ui->QTextEdit_functionInput->setText(oldText);
 }
 
 void MainWindow::addFunctionGraph() {

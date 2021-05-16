@@ -91,9 +91,7 @@ QVector<double> DataSet::regression(int degree) const {
         x.coeffRef(i - 1, 0) = (y.coeff(i - 1, 0) - s) / R.coeff(i - 1, i - 1);
     }
 
-    MatrixXd fx = A * x.transpose();
-
-    return QVector<double>(fx.data(), fx.data() + fx.rows() * fx.cols());
+    return QVector<double>(x.data(), x.data() + x.rows() * x.cols());
 }
 
 
