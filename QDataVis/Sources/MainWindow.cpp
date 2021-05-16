@@ -3,6 +3,7 @@
 //
 
 
+#include <QtConcurrent/QtConcurrent>
 #include "MainWindow.hpp"
 
 
@@ -202,10 +203,16 @@ void MainWindow::addRegression() {
         return;
     }
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
-    QVector<double> coeffs = selectedDataSet->regression(ui->spinBox_regressionDegree->value());
 
-    QString regression = DataSet::getFunctionString(coeffs);
-    addFunctionGraph(regression);
+    QFuture<QString> f = QtConcurrent::run(QThreadPool::globalInstance(), [this, selectedDataSet]() {
+        return DataSet::getFunctionString(selectedDataSet->regression(ui->spinBox_regressionDegree->value()));
+    });
+    QFutureWatcher<QString> *watcher = new QFutureWatcher<QString>;
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher]() {
+        addFunctionGraph(watcher->result());
+        watcher->deleteLater();
+    });
+    watcher->setFuture(f);
 }
 
 void MainWindow::addFunctionGraph(QString func) {
