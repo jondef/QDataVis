@@ -161,9 +161,21 @@ void MainWindow::updateColors(bool checked) {
 void MainWindow::exportData() {
     QFile out_file("file.dat");
     if (out_file.open(QFile::WriteOnly)) {
+        QDataStream out(&out_file);
+
+        // Write a header with a "magic number" and a version
+        out << (quint32)0xA0B0C0D0;
+        out << (qint32)123;
+        out.setVersion(QDataStream::Qt_6_1);
+
         // write every data set to file
         for (DataSet *dataSet : ui->customPlot->mDataSets) {
-            out_file.write(reinterpret_cast<const char *>(dataSet), 10000); // bytes
+            int num_of_bytes_written = out.writeRawData(reinterpret_cast<const char *>(dataSet), sizeof(DataSet));
+            qDebug() << num_of_bytes_written;
+            quint32 sep = 123456789;
+            out << sep;
+            num_of_bytes_written = out.writeRawData(reinterpret_cast<const char *>(dataSet->binaryTree), sizeof(BinaryTree));
+            qDebug() << num_of_bytes_written;
         }
         out_file.close();
     }
@@ -173,39 +185,54 @@ void MainWindow::exportData() {
 void MainWindow::importData() {
     QFile in_file("file.dat");
     if(in_file.open(QFile::ReadOnly)) {
-        const qint64 filesize = in_file.size();
+        QDataStream in(&in_file);
 
-        int chunks = filesize / 10000;
-        for (int i = 0; i < chunks; ++i) {
-            uchar *mem;
-            for (int y = 0; y < 25000; ++y) {
-                mem = in_file.map(y, filesize);
-                if (mem) {
-                    qDebug() << y;
-                }
-            }
-            if (!mem) {
-                qDebug() << "SKIPPED";
-                continue;
-            }
-
-            DataSet *dataSet = reinterpret_cast<DataSet *>(mem);
-            qDebug() << dataSet->name;
-            qDebug() << dataSet->color;
-            qDebug() << dataSet->graphWidth;
-            qDebug() << dataSet->pointDensity;
-//            qDebug() << dataSet->graph->name();
-
-            in_file.unmap(mem);
+        // Read and check the header
+        quint32 magic;
+        in >> magic;
+        if (magic != 0xA0B0C0D0) {
+            qDebug() << "bad file format";
+            return;
         }
 
-//        uchar *mem = in_file.map(0, filesize);
-//        DataSet *dataSet = reinterpret_cast<DataSet *>(mem);
-//        qDebug() << dataSet->name;
-//        qDebug() << dataSet->color;
-//        qDebug() << dataSet->graphWidth;
-//        qDebug() << dataSet->pointDensity;
-//        in_file.unmap(mem);
+        // Read the version
+        qint32 version;
+        in >> version;
+        if (version < 100) {
+            qDebug() << "bad file too old";
+            return;
+        }
+        if (version > 123) {
+            qDebug() << "bad file too new";
+            return;
+        }
+
+        if (version <= 110)
+            in.setVersion(QDataStream::Qt_6_1);
+        else
+            in.setVersion(QDataStream::Qt_6_1);
+
+
+        // Read the data
+
+        int nDataSet = sizeof(DataSet);
+        std::unique_ptr<char[]> buf_ptr_dataSet = std::make_unique<char[]>(nDataSet);
+
+        int number_of_bytes_read = in.readRawData(buf_ptr_dataSet.get(), nDataSet);
+        qDebug() << number_of_bytes_read;
+        DataSet *dataSet = reinterpret_cast<DataSet *>(buf_ptr_dataSet.get());
+        qDebug() << dataSet->name;
+        qDebug() << dataSet->color;
+        qDebug() << dataSet->graphWidth;
+        quint32 sep;
+        in >> sep;
+        int nTree = sizeof(BinaryTree);
+        std::unique_ptr<char[]> buf_ptr_tree = std::make_unique<char[]>(nTree);
+        number_of_bytes_read = in.readRawData(buf_ptr_tree.get(), nTree);
+
+        qDebug() << number_of_bytes_read;
+        BinaryTree *tree = reinterpret_cast<BinaryTree *>(buf_ptr_tree.get());
+        tree->printTree();
 
 
         in_file.close();
