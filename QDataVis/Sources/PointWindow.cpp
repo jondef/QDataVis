@@ -61,15 +61,13 @@ PointWindow::PointWindow(QWidget *parent) : QDialog(parent), ui(new Ui::uiPointW
                 return generator.bounded(max, min + 1); // inclusive, exclusive
             }
         };
-        QVector<int> xArray(1);
-        QVector<int> yArray(1);
-        int xrange = 1000;
+        QVector<double> xArray = DataSet::generateXArray(0, 10, 1000);
+        QVector<double> yArray(1);
 
-        for (int x = 1; x < xrange; ++x) {
-            xArray.append(x);
+        for (int x = 1; x < xArray.length(); ++x) {
             yArray.append(randint(yArray.at(x - 1) - 2, yArray.at(x - 1) + 2));
         }
-        for (int i = 0; i < xrange; ++i) {
+        for (int i = 0; i < xArray.length(); ++i) {
             ui->textEdit_graphPoints->append(QString("%1,%2").arg(xArray.at(i)).arg(yArray.at(i)));
         }
     });

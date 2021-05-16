@@ -49,7 +49,9 @@ void QTextEditCustom::highlightParentheses() {
         if (toPlainText()[i] == '(' || toPlainText()[i] == ')') {
             QTextEdit::ExtraSelection selection;
             selection.format.setForeground(QCustomPlotCustom::getGraphColor(pArray.at(i)));
-            selection.format.setBackground(QCustomPlotCustom::getGraphColor(pArray.at(i)).darker(300));
+            QColor color = QCustomPlotCustom::getGraphColor(pArray.at(i));
+            color.setAlpha(50);
+            selection.format.setBackground(color);
             selection.cursor = textCursor();
             selection.cursor.clearSelection();
             selection.cursor.setPosition(i);
