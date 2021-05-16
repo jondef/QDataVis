@@ -3,6 +3,7 @@
 //
 
 
+#include <QtConcurrent/QtConcurrent>
 #include "MainWindow.hpp"
 
 
@@ -22,10 +23,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
     // * points tab
     connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
     connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removePointGraph);
-    connect(ui->pushButton_linearRegression, &QPushButton::clicked, this, &MainWindow::addLinearRegression);
+    connect(ui->pushButton_regression, &QPushButton::clicked, this, &MainWindow::addRegression);
 
     // * function tab
-    connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
+    connect(ui->QTextEdit_functionInput, &QTextEditCustom::inputAccepted, ui->QPushButton_addFunction, &QPushButton::click);
+    connect(ui->QPushButton_addFunction, &QPushButton::clicked, this, [this]() {
+        addFunctionGraph(ui->QTextEdit_functionInput->toPlainText().simplified());
+    });
     connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeFunctionGraph);
     connect(ui->spinBox_setGlobalPointDensity, qOverload<int>(&QSpinBox::valueChanged), ui->customPlot,
             &QCustomPlotCustom::globalPointDensityChanged);
@@ -237,25 +241,30 @@ void MainWindow::savePlotImage() {
     }
 }
 
-void MainWindow::addLinearRegression() {
+void MainWindow::addRegression() {
     QListWidgetItem *selectedListWidgetItem = ui->listWidget_PointGraphList->currentItem();
     if (!selectedListWidgetItem) {
         statusBarMsg("Select a dataset on which to do linear regression");
         return;
     }
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
-    QPair<double, double> data = selectedDataSet->linearRegression();
-    QString oldText = ui->QLineEdit_addFunction->text();
-    ui->QLineEdit_addFunction->setText(QString("%1x+%2").arg(QString::number(data.first, 'g', 10), QString::number(data.second, 'g', 10)));
-    addFunctionGraph();
-    ui->QLineEdit_addFunction->setText(oldText);
+
+    QFuture<QString> f = QtConcurrent::run(QThreadPool::globalInstance(), [this, selectedDataSet]() {
+        return DataSet::getFunctionString(selectedDataSet->regression(ui->spinBox_regressionDegree->value()));
+    });
+    QFutureWatcher<QString> *watcher = new QFutureWatcher<QString>;
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher]() {
+        addFunctionGraph(watcher->result());
+        watcher->deleteLater();
+    });
+    watcher->setFuture(f);
 }
 
-void MainWindow::addFunctionGraph() {
+void MainWindow::addFunctionGraph(QString func) {
+    if (func.isEmpty()) return;
     QListWidgetItem *listWidgetItem = new QListWidgetItem();
-    QString graphName = ui->QLineEdit_addFunction->text();
 
-    ui->customPlot->addFunctionGraph(graphName, listWidgetItem);
+    ui->customPlot->addFunctionGraph(func, listWidgetItem);
     ui->QListWidget_functionList->addItem(listWidgetItem);
 }
 

@@ -36,7 +36,7 @@ public slots:
 
 private slots:
 
-    void addFunctionGraph();
+    void addFunctionGraph(QString func);
 
     void removeFunctionGraph();
 
@@ -50,7 +50,7 @@ private slots:
 
     void savePlotImage();
 
-    void addLinearRegression();
+    void addRegression();
 
     void readSettings();
 

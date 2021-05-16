@@ -21,6 +21,7 @@ inline double roundNumber(double value) {
  * ((-x^2-4*x+46)^(1/2)-4)
  * -2*ln(abs(x+1)/abs(x))
  * ln(abs(x*(x-1)))/(2*x-1)
+ * sin(x)*(x) + 1 == sin(x)*x+1
  */
 class BinaryTreeTest : public QObject {
 Q_OBJECT
