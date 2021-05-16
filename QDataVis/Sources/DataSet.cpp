@@ -16,6 +16,10 @@ MatrixXd vConcat(MatrixXd A, MatrixXd B) {
     return D;
 }
 
+/**
+ * See: https://gist.github.com/gocarlos/c91237b02c120c6319612e42fa196d77
+ * Note: matrix index starts at 1 in matlab and at 0 in eigen -> never forget -1!
+ */
 QVector<double> DataSet::regression(int degree) const {
     QSharedPointer<QCPGraphDataContainer> data = graph->data();
     int m = data->size(); // rows
@@ -55,7 +59,8 @@ QVector<double> DataSet::regression(int degree) const {
     for (int k = 1; k <= n; ++k) {
         MatrixXd x = R.col(k - 1).bottomRows(R.rows() - k + 1); // we wanna show R.rows - k rows from the bottom // fixme: ErrorRowIndexOutOfBounds with 5 data points and degree 10
 
-        double lambda = x.coeff(k, k) < 0 ? x.norm() : -x.norm();
+        // x is a matrix with 1 column and however many rows
+        double lambda = x.coeff(k - 1, 0) < 0 ? x.norm() : -x.norm();
 
         MatrixXd e = Im.col(k - 1).bottomRows(R.rows() - k + 1);
         MatrixXd v = (x - lambda * e) / (x - lambda * e).norm(); // use normalize()
@@ -64,7 +69,7 @@ QVector<double> DataSet::regression(int degree) const {
         // H = eye(m)-2.*[z;v]*[z;v]';
         MatrixXd H = Eigen::MatrixXd::Identity(m, m) - (2 * (vConcat(z, v) * vConcat(z, v).transpose()));
 
-        Q = Q * H;
+        Q = Q * H; // mXm * mXm matrix mul => VERY SLOW
         R = H * R;
     }
     // Rückwärtseinsetzen
@@ -81,7 +86,7 @@ QVector<double> DataSet::regression(int degree) const {
             s += x.coeff(0, j - 1) * R.coeff(i - 1, j - 1);
         }
         // x(i) = (y(i) - s)/R(i,i);
-        x.coeffRef(i - 1, 0) = (y.coeff(i - 1, 0) - s) / R.coeff(i - 1, i - 1);
+        x.coeffRef(0, i - 1) = (y.coeff(i - 1, 0) - s) / R.coeff(i - 1, i - 1);
     }
 
     return QVector<double>(x.data(), x.data() + x.rows() * x.cols());
