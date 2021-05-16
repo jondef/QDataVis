@@ -30,10 +30,20 @@ BinaryTree::~BinaryTree() {
  * 3e^((5x+3)(-6x4)) will become 3*e^((5*x+3)*(-6*x*4))
  */
 void BinaryTree::preprocessor(QString &expression) {
+    // region replace 1.24552E-22*x^9 with 1.24552*10^(-22)*x^9
+    QRegularExpression regexx = QRegularExpression("((?<=E)[+-]?\\d+)");
+    while (expression.indexOf(regexx) != -1) {
+        QRegularExpressionMatch match = regexx.match(expression);
+        expression.insert(match.capturedStart(), '(');
+        expression.insert(match.capturedEnd() + 1, ')');
+    }
+    expression.replace("E(", "*10^(");
+    // endregion
     expression.remove(" ");
     expression.replace("-", "+-");
     expression.replace(")(", ")*(");
 
+    // insert implicit *
     QRegularExpression regex = QRegularExpression("((?<=\\W)[a-zA-Z][0-9(])|([0-9)][a-zA-Z])");
     while (expression.indexOf(regex) != -1) {
         int index = expression.indexOf(regex) + 1;
