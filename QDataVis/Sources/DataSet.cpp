@@ -10,7 +10,7 @@ using namespace Eigen;
 /**
  * Concatenates two matrices vertically. A at the top and B at the bottom
  */
-MatrixXd vConcat(MatrixXd A, MatrixXd B) {
+MatrixXd vConcat(const MatrixXd& A, const MatrixXd& B) {
     MatrixXd D(A.rows()+B.rows(), A.cols()); // <-- D(A.rows() + B.rows(), ...)
     D << A, B;
     return D;
