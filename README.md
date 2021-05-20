@@ -43,7 +43,7 @@ git clone --recurse-submodules https://github.com/jondef/QDataVis.git
 ```
 2. Load the CMake project and compile!
 ```sh
-cd ./DataVis && cmake -DCMAKE_BUILD_TYPE=Debug . && make QDataVis -j8
+cd ./QDataVis && cmake -DCMAKE_BUILD_TYPE=Debug . && make QDataVis -j8
 ```
 
 ❤️ Feedback
