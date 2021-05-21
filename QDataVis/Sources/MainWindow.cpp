@@ -205,7 +205,7 @@ void MainWindow::addRegression() {
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
 
     QFuture<QString> f = QtConcurrent::run(QThreadPool::globalInstance(), [this, selectedDataSet]() {
-        return DataSet::getFunctionString(selectedDataSet->regression(ui->spinBox_regressionDegree->value()));
+        return DataSet::getFunctionString(selectedDataSet->regression(ui->spinBox_regressionDegree->value() + 1));
     });
     QFutureWatcher<QString> *watcher = new QFutureWatcher<QString>;
     connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher]() {
