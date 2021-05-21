@@ -159,12 +159,16 @@ void MainWindow::updateColors(bool checked) {
 
 
 void MainWindow::exportData() {
-    QFile out_file("file.dat");
+    QString savePathFilename = QFileDialog::getSaveFileName(this, tr("Export data"), "", tr("*.dat"));
+    if (savePathFilename.isEmpty()) { return; }
+
+    QFile out_file(savePathFilename);
     if (!out_file.open(QFile::WriteOnly)) {
+        QMessageBox::warning(nullptr, "Error", tr("\n Could not create file on disk"));
         return;
     }
-    QDataStream out(&out_file);
 
+    QDataStream out(&out_file);
     // Write a header with a "magic number" and a version
     out << (quint32)0xA0B0C0D0;
     out << (qint32)123;
@@ -183,8 +187,12 @@ void MainWindow::exportData() {
 
 
 void MainWindow::importData() {
-    QFile in_file("file.dat");
+    QString savePathFilename = QFileDialog::getOpenFileName(this, tr("Import data"), "", tr("*.dat"));
+    if (savePathFilename.isEmpty()) { return; }
+
+    QFile in_file(savePathFilename);
     if(!in_file.open(QFile::ReadOnly)) {
+        QMessageBox::warning(nullptr, "Error", tr("\n Could not read file from disk"));
         return;
     }
     QDataStream in(&in_file);
