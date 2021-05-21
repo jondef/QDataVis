@@ -167,7 +167,6 @@ void MainWindow::exportData() {
         QMessageBox::warning(nullptr, "Error", tr("\n Could not create file on disk"));
         return;
     }
-
     QDataStream out(&out_file);
     // Write a header with a "magic number" and a version
     out << (quint32)0xA0B0C0D0;
@@ -200,21 +199,18 @@ void MainWindow::importData() {
     // Read and check the header
     quint32 magic;
     in >> magic;
-    if (magic != 0xA0B0C0D0)
+    if (magic != 0xA0B0C0D0) {
         return;
+    }
 
     // Read the version
     qint32 version;
     in >> version;
-    if (version < 100)
+    if (version < 100) {
         return;
-    if (version > 123)
-        return;
+    }
 
-    if (version <= 110)
-        in.setVersion(QDataStream::Qt_6_1);
-    else
-        in.setVersion(QDataStream::Qt_6_1);
+    in.setVersion(QDataStream::Qt_6_1);
 
     // read the amount of stored data sets
     qint32 amount_of_dataSets;
@@ -226,9 +222,6 @@ void MainWindow::importData() {
         in >> *dataSet;
         addFunctionGraph(dataSet->displayName);
     }
-//    if (version >= 120)
-//        in >> data_new_in_XXX_version_1_2;
-//    in >> other_interesting_data;
 
     in_file.close();
 }
