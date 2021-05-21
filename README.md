@@ -3,12 +3,11 @@
 [Download](https://github.com/jondef/QDataVis#-download) |
 [Feedback](https://github.com/jondef/QDataVis#%EF%B8%8F-feedback)
 
-![GitHub labels](https://img.shields.io/badge/Version-v1.0.0-blue)
-![GitHub labels](https://img.shields.io/badge/Language-C++-orange)
-![GitHub](https://img.shields.io/github/license/jondef/QDataVis)
-![GitHub repo size](https://img.shields.io/github/repo-size/jondef/QDataVis)
-![Maintenance](https://img.shields.io/maintenance/yes/2021)
-![GitHub labels](https://img.shields.io/badge/Ask%20me-anything-blue)
+![GitHub labels](https://img.shields.io/badge/Version-v1.0.0-blue?style=for-the-badge&color=1554FF)
+![GitHub labels](https://img.shields.io/badge/Language-C++-orange?style=for-the-badge&color=FFB639)
+![GitHub](https://img.shields.io/github/license/jondef/QDataVis?style=for-the-badge&color=1554FF)
+![GitHub repo size](https://img.shields.io/github/repo-size/jondef/QDataVis?style=for-the-badge&color=1554FF)
+![Maintenance](https://img.shields.io/maintenance/yes/2021?style=for-the-badge&color=1554FF)
 
 QDataVis is a simple to use, UI based, interactive plotter powered by <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Qt_logo_2016.svg/1280px-Qt_logo_2016.svg.png" height="15"/> that seeks to provide a quick way of visualising data sets.
 
@@ -43,7 +42,7 @@ git clone --recurse-submodules https://github.com/jondef/QDataVis.git
 ```
 2. Load the CMake project and compile!
 ```sh
-cd ./DataVis && cmake -DCMAKE_BUILD_TYPE=Debug . && make QDataVis -j8
+cd ./QDataVis && cmake -DCMAKE_BUILD_TYPE=Debug . && make QDataVis -j8
 ```
 
 ❤️ Feedback

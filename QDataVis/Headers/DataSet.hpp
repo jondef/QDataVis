@@ -51,7 +51,7 @@ struct DataSet {
         QVariant variant;
         variant.setValue(this);
         listWidgetItem->setData(Qt::UserRole, variant);
-        listWidgetItem->setText(this->name);
+        listWidgetItem->setText(this->displayName);
     }
 
     inline void recalculatePoints() const {
@@ -138,7 +138,8 @@ struct DataSet {
 
     static QString getFunctionString(const QVector<double>& coeffs);
 
-    QString name;
+    QString displayName;
+    QString functionString;
     QListWidgetItem *listWidgetItem;
     QCPGraph *graph;
     BinaryTree *binaryTree;
@@ -151,21 +152,7 @@ struct DataSet {
     int maximumDomain = 10;
 };
 Q_DECLARE_METATYPE(DataSet *)
-//QDataStream &operator<<(QDataStream &, const DataSet &);
-//QDataStream &operator>>(QDataStream &, DataSet &);
-
-//QDataStream &operator<<(QDataStream &out, const DataSet &dataSet) {
-//    out << dataSet.name << dataSet.color << quint32(dataSet.pointDensity);
-//    return out;
-//}
-//
-//QDataStream &operator>>(QDataStream &in, DataSet &painting) {
-//    QString name;
-//    QColor color;
-//    quint32 pointDensity;
-//    in >> name >> color >> pointDensity;
-//    painting = DataSet();
-//    return in;
-//}
+QDataStream &operator<<(QDataStream &out, const DataSet &dataSet);
+QDataStream &operator>>(QDataStream &in, DataSet &dataSet);
 
 #endif //QDATAVIS_GRAPH_H

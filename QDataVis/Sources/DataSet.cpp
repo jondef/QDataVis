@@ -103,3 +103,23 @@ QString DataSet::getFunctionString(const QVector<double>& coeffs) {
     regression.truncate(regression.lastIndexOf('+'));
     return regression;
 }
+
+QDataStream &operator<<(QDataStream &out, const DataSet &dataSet) {
+    out << dataSet.displayName << dataSet.functionString << dataSet.color << quint32(dataSet.graphWidth) << quint32(dataSet.pointDensity);
+    return out;
+}
+
+QDataStream &operator>>(QDataStream &in, DataSet &dataSet) {
+    QString displayName;
+    QString functionString;
+    QColor color;
+    quint32 graphWidth;
+    quint32 pointDensity;
+    in >> displayName >> functionString >> color >> graphWidth >> pointDensity;
+    dataSet.displayName = displayName;
+    dataSet.functionString = functionString;
+    dataSet.color = color;
+    dataSet.graphWidth = graphWidth;
+    dataSet.pointDensity = pointDensity;
+    return in;
+}
