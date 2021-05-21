@@ -160,83 +160,69 @@ void MainWindow::updateColors(bool checked) {
 
 void MainWindow::exportData() {
     QFile out_file("file.dat");
-    if (out_file.open(QFile::WriteOnly)) {
-        QDataStream out(&out_file);
-
-        // Write a header with a "magic number" and a version
-        out << (quint32)0xA0B0C0D0;
-        out << (qint32)123;
-        out.setVersion(QDataStream::Qt_6_1);
-
-        // write every data set to file
-        for (DataSet *dataSet : ui->customPlot->mDataSets) {
-            int num_of_bytes_written = out.writeRawData(reinterpret_cast<const char *>(dataSet), sizeof(DataSet));
-            qDebug() << num_of_bytes_written;
-            quint32 sep = 123456789;
-            out << sep;
-            num_of_bytes_written = out.writeRawData(reinterpret_cast<const char *>(dataSet->binaryTree), sizeof(BinaryTree));
-            qDebug() << num_of_bytes_written;
-        }
-        out_file.close();
+    if (!out_file.open(QFile::WriteOnly)) {
+        return;
     }
+    QDataStream out(&out_file);
+
+    // Write a header with a "magic number" and a version
+    out << (quint32)0xA0B0C0D0;
+    out << (qint32)123;
+
+    out.setVersion(QDataStream::Qt_6_1);
+
+    // write the amount of saved data sets
+    out << (quint32)ui->customPlot->mDataSets.size();
+
+    // Write the data
+    for (DataSet *dataSet : ui->customPlot->mDataSets) {
+        out << *dataSet;
+    }
+    out_file.close();
 }
 
 
 void MainWindow::importData() {
     QFile in_file("file.dat");
-    if(in_file.open(QFile::ReadOnly)) {
-        QDataStream in(&in_file);
-
-        // Read and check the header
-        quint32 magic;
-        in >> magic;
-        if (magic != 0xA0B0C0D0) {
-            qDebug() << "bad file format";
-            return;
-        }
-
-        // Read the version
-        qint32 version;
-        in >> version;
-        if (version < 100) {
-            qDebug() << "bad file too old";
-            return;
-        }
-        if (version > 123) {
-            qDebug() << "bad file too new";
-            return;
-        }
-
-        if (version <= 110)
-            in.setVersion(QDataStream::Qt_6_1);
-        else
-            in.setVersion(QDataStream::Qt_6_1);
-
-
-        // Read the data
-
-        int nDataSet = sizeof(DataSet);
-        std::unique_ptr<char[]> buf_ptr_dataSet = std::make_unique<char[]>(nDataSet);
-
-        int number_of_bytes_read = in.readRawData(buf_ptr_dataSet.get(), nDataSet);
-        qDebug() << number_of_bytes_read;
-        DataSet *dataSet = reinterpret_cast<DataSet *>(buf_ptr_dataSet.get());
-        qDebug() << dataSet->name;
-        qDebug() << dataSet->color;
-        qDebug() << dataSet->graphWidth;
-        quint32 sep;
-        in >> sep;
-        int nTree = sizeof(BinaryTree);
-        std::unique_ptr<char[]> buf_ptr_tree = std::make_unique<char[]>(nTree);
-        number_of_bytes_read = in.readRawData(buf_ptr_tree.get(), nTree);
-
-        qDebug() << number_of_bytes_read;
-        BinaryTree *tree = reinterpret_cast<BinaryTree *>(buf_ptr_tree.get());
-        tree->printTree();
-
-
-        in_file.close();
+    if(!in_file.open(QFile::ReadOnly)) {
+        return;
     }
+    QDataStream in(&in_file);
+
+    // Read and check the header
+    quint32 magic;
+    in >> magic;
+    if (magic != 0xA0B0C0D0)
+        return;
+
+    // Read the version
+    qint32 version;
+    in >> version;
+    if (version < 100)
+        return;
+    if (version > 123)
+        return;
+
+    if (version <= 110)
+        in.setVersion(QDataStream::Qt_6_1);
+    else
+        in.setVersion(QDataStream::Qt_6_1);
+
+    // read the amount of stored data sets
+    qint32 amount_of_dataSets;
+    in >> amount_of_dataSets;
+
+    // Read the data
+    for (int i = 0; i < amount_of_dataSets; ++i) {
+        DataSet *dataSet = new DataSet();
+        in >> *dataSet;
+        addFunctionGraph(dataSet->displayName);
+    }
+//    if (version >= 120)
+//        in >> data_new_in_XXX_version_1_2;
+//    in >> other_interesting_data;
+
+    in_file.close();
 }
 
 
