@@ -138,7 +138,8 @@ struct DataSet {
 
     static QString getFunctionString(const QVector<double>& coeffs);
 
-    QString name;
+    QString displayName;
+    QString functionString;
     QListWidgetItem *listWidgetItem;
     QCPGraph *graph;
     BinaryTree *binaryTree;
