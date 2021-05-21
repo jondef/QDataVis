@@ -209,7 +209,7 @@ void QCustomPlotCustom::addFunctionGraph(const QString &functionString, QListWid
     pDataSet->graph = new QCPGraph(xAxis, yAxis);
     pDataSet->graph->setName(functionString);
     pDataSet->listWidgetItem = listWidgetItem;
-    pDataSet->name = functionString;
+    pDataSet->displayName = functionString;
     pDataSet->graph->addToLegend();
 
     QtConcurrent::run(QThreadPool::globalInstance(), [this, pDataSet, functionString]() {
@@ -234,7 +234,7 @@ void QCustomPlotCustom::deleteGraph(DataSet *graph) {
 void QCustomPlotCustom::addPointsGraph(const QString &graphName, QListWidgetItem *listWidgetItem) {
     DataSet *pDataSet = new DataSet();
 
-    pDataSet->name = graphName;
+    pDataSet->displayName = graphName;
     pDataSet->listWidgetItem = listWidgetItem;
     pDataSet->graph = new QCPGraph(xAxis, yAxis);
     pDataSet->graph->setName(graphName);
