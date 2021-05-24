@@ -11,7 +11,11 @@
 #include "BinaryTree.hpp"
 
 struct DataSet {
-    DataSet() = default;
+    DataSet() {
+        listWidgetItem = nullptr;
+        graph = nullptr;
+        binaryTree = nullptr;
+    };
 
     ~DataSet() {
         delete listWidgetItem;

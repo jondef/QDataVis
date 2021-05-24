@@ -218,9 +218,9 @@ void MainWindow::importData() {
 
     // Read the data
     for (int i = 0; i < amount_of_dataSets; ++i) {
-        DataSet *dataSet = new DataSet();
-        in >> *dataSet;
-        addFunctionGraph(dataSet->displayName);
+        DataSet dataSet;
+        in >> dataSet;
+        addFunctionGraph(dataSet.displayName);
     }
 
     in_file.close();
