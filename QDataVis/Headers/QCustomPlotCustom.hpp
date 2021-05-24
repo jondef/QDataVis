@@ -67,6 +67,10 @@ public slots:
 
     void setCursor(bool enabled);
 
+    inline static QColor getGraphColor(int colorIndex) {
+        return colors.at(colorIndex % 10);
+    }
+
 private  slots:
 
     void traceGraph(QMouseEvent *event);
@@ -78,10 +82,6 @@ private  slots:
     void plotAxisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart part);
 
     void plotLegendGraphDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item);
-
-    inline static QColor getGraphColor(int colorIndex) {
-        return colors.at(colorIndex % 10);
-    }
 
 private:
     static QVariant QCPRangeInterpolator(const QCPRange &start, const QCPRange &end, qreal progress);

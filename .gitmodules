@@ -2,3 +2,7 @@
 	path = QCustomPlot
 	url = https://github.com/jondef/QCustomPlot.git
 	branch = master
+[submodule "Eigen"]
+	path = Eigen
+	url = https://gitlab.com/libeigen/eigen.git
+	branch = master

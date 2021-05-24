@@ -3,6 +3,7 @@
 //
 
 
+#include <QtConcurrent/QtConcurrent>
 #include "MainWindow.hpp"
 
 
@@ -22,10 +23,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
     // * points tab
     connect(ui->QPushButton_AddPointGraph, &QPushButton::clicked, this, &MainWindow::addPointsGraph);
     connect(ui->QPushButton_RemovePointGraph, &QPushButton::clicked, this, &MainWindow::removePointGraph);
-    connect(ui->pushButton_linearRegression, &QPushButton::clicked, this, &MainWindow::addLinearRegression);
+    connect(ui->pushButton_regression, &QPushButton::clicked, this, &MainWindow::addRegression);
 
     // * function tab
-    connect(ui->QLineEdit_addFunction, &QLineEdit::returnPressed, this, &MainWindow::addFunctionGraph);
+    connect(ui->QTextEdit_functionInput, &QTextEditCustom::inputAccepted, ui->QPushButton_addFunction, &QPushButton::click);
+    connect(ui->QPushButton_addFunction, &QPushButton::clicked, this, [this]() {
+        addFunctionGraph(ui->QTextEdit_functionInput->toPlainText().simplified());
+    });
     connect(ui->QPushButton_deleteFunction, &QPushButton::clicked, this, &MainWindow::removeFunctionGraph);
     connect(ui->spinBox_setGlobalPointDensity, qOverload<int>(&QSpinBox::valueChanged), ui->customPlot,
             &QCustomPlotCustom::globalPointDensityChanged);
@@ -155,62 +159,119 @@ void MainWindow::updateColors(bool checked) {
 
 
 void MainWindow::exportData() {
+    QString savePathFilename = QFileDialog::getSaveFileName(this, tr("Export data"), "", tr("*.dat"));
+    if (savePathFilename.isEmpty()) { return; }
 
+    QFile out_file(savePathFilename);
+    if (!out_file.open(QFile::WriteOnly)) {
+        QMessageBox::warning(nullptr, "Error", tr("\n Could not create file on disk"));
+        return;
+    }
+    QDataStream out(&out_file);
+    // Write a header with a "magic number" and a version
+    out << (quint32)0xA0B0C0D0;
+    out << (qint32)123;
+
+    out.setVersion(QDataStream::Qt_6_1);
+
+    // write the amount of saved data sets
+    out << (quint32)ui->customPlot->mDataSets.size();
+
+    // Write the data
+    for (DataSet *dataSet : ui->customPlot->mDataSets) {
+        out << *dataSet;
+    }
+    out_file.close();
 }
 
 
 void MainWindow::importData() {
+    QString savePathFilename = QFileDialog::getOpenFileName(this, tr("Import data"), "", tr("*.dat"));
+    if (savePathFilename.isEmpty()) { return; }
 
+    QFile in_file(savePathFilename);
+    if(!in_file.open(QFile::ReadOnly)) {
+        QMessageBox::warning(nullptr, "Error", tr("\n Could not read file from disk"));
+        return;
+    }
+    QDataStream in(&in_file);
+
+    // Read and check the header
+    quint32 magic;
+    in >> magic;
+    if (magic != 0xA0B0C0D0) {
+        return;
+    }
+
+    // Read the version
+    qint32 version;
+    in >> version;
+    if (version < 100) {
+        return;
+    }
+
+    in.setVersion(QDataStream::Qt_6_1);
+
+    // read the amount of stored data sets
+    qint32 amount_of_dataSets;
+    in >> amount_of_dataSets;
+
+    // Read the data
+    for (int i = 0; i < amount_of_dataSets; ++i) {
+        DataSet *dataSet = new DataSet();
+        in >> *dataSet;
+        addFunctionGraph(dataSet->displayName);
+    }
+
+    in_file.close();
 }
 
 
 void MainWindow::savePlotImage() {
-    // fixme: save as jpg doesn't correctly save in release mode
     QString savePathFilename = QFileDialog::getSaveFileName(this, tr("Save plot"), "", tr("*.jpg;;*.png;;*.bmp;;*.pdf"));
+    if (savePathFilename.isEmpty()) { return; }
 
-    if (savePathFilename.isEmpty()) {
-        return;
-    }
-    QFile file(savePathFilename);
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::warning(nullptr, "Error", tr("\n Could not create image file on disk"));
-    }
-    QString ext = savePathFilename.mid(savePathFilename.length() - 4);
     bool savedOk = false;
-    if (ext == ".png") {
+    if (savePathFilename.toLower().endsWith(".png")) {
         savedOk = ui->customPlot->savePng(savePathFilename, 0, 0, 3.0, 100);
-    } else if (ext == ".jpg") {
-        savedOk = ui->customPlot->saveJpg(savePathFilename, 0, 0, 3.0, 100);
-    } else if (ext == ".bmp") {
+    } else if (savePathFilename.toLower().endsWith(".jpg")) {
+        savedOk = ui->customPlot->saveJpg(savePathFilename, 0, 0, 3.0, -1); // fixme: save as jpg doesn't work
+    } else if (savePathFilename.toLower().endsWith(".bmp")) {
         savedOk = ui->customPlot->saveBmp(savePathFilename, 0, 0, 3.0);
-    } else if (ext == ".pdf") {
+    } else if (savePathFilename.toLower().endsWith(".pdf")) {
         savedOk = ui->customPlot->savePdf(savePathFilename, 0, 0, QCP::epAllowCosmetic, QString(""), QString("Title"));
     }
     if (savedOk) {
-        statusBarMsg(QString("Successfully saved plot as a %1 file").arg(ext), 5000);
+        statusBarMsg(QString("Successfully saved plot to %1").arg(savePathFilename), 5000);
+    } else {
+        QMessageBox::warning(nullptr, "Error", tr("\nAn error occured while saving"));
     }
 }
 
-void MainWindow::addLinearRegression() {
+void MainWindow::addRegression() {
     QListWidgetItem *selectedListWidgetItem = ui->listWidget_PointGraphList->currentItem();
     if (!selectedListWidgetItem) {
         statusBarMsg("Select a dataset on which to do linear regression");
         return;
     }
     DataSet *selectedDataSet = selectedListWidgetItem->data(Qt::UserRole).value<DataSet *>();
-    QPair<double, double> data = selectedDataSet->linearRegression();
-    QString oldText = ui->QLineEdit_addFunction->text();
-    ui->QLineEdit_addFunction->setText(QString("%1x+%2").arg(QString::number(data.first, 'g', 10), QString::number(data.second, 'g', 10)));
-    addFunctionGraph();
-    ui->QLineEdit_addFunction->setText(oldText);
+
+    QFuture<QString> f = QtConcurrent::run(QThreadPool::globalInstance(), [this, selectedDataSet]() {
+        return DataSet::getFunctionString(selectedDataSet->regression(ui->spinBox_regressionDegree->value() + 1));
+    });
+    QFutureWatcher<QString> *watcher = new QFutureWatcher<QString>;
+    connect(watcher, &QFutureWatcher<QString>::finished, this, [this, watcher]() {
+        addFunctionGraph(watcher->result());
+        watcher->deleteLater();
+    });
+    watcher->setFuture(f);
 }
 
-void MainWindow::addFunctionGraph() {
+void MainWindow::addFunctionGraph(QString func) {
+    if (func.isEmpty()) return;
     QListWidgetItem *listWidgetItem = new QListWidgetItem();
-    QString graphName = ui->QLineEdit_addFunction->text();
 
-    ui->customPlot->addFunctionGraph(graphName, listWidgetItem);
+    ui->customPlot->addFunctionGraph(func, listWidgetItem);
     ui->QListWidget_functionList->addItem(listWidgetItem);
 }
 

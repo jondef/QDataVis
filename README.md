@@ -3,28 +3,23 @@
 [Download](https://github.com/jondef/QDataVis#-download) |
 [Feedback](https://github.com/jondef/QDataVis#%EF%B8%8F-feedback)
 
-![GitHub labels](https://img.shields.io/badge/Version-v1.0.0-blue)
-![GitHub labels](https://img.shields.io/badge/Language-C++-orange)
-![GitHub](https://img.shields.io/github/license/jondef/QDataVis)
-![GitHub repo size](https://img.shields.io/github/repo-size/jondef/QDataVis)
-![Maintenance](https://img.shields.io/maintenance/yes/2021)
-![GitHub labels](https://img.shields.io/badge/Ask%20me-anything-blue)
+![GitHub labels](https://img.shields.io/badge/Version-v1.0.0-blue?style=for-the-badge&color=1554FF)
+![GitHub labels](https://img.shields.io/badge/Language-C++-orange?style=for-the-badge&color=FFB639)
+![GitHub](https://img.shields.io/github/license/jondef/QDataVis?style=for-the-badge&color=1554FF)
+![GitHub repo size](https://img.shields.io/github/repo-size/jondef/QDataVis?style=for-the-badge&color=1554FF)
+![Maintenance](https://img.shields.io/maintenance/yes/2021?style=for-the-badge&color=1554FF)
 
-QDataVis is a simple to use, UI based, interactive plotter powered by <img src="https://cdn2.hubspot.net/hubfs/149513/Qt2017TemporaryImagesWebsite/qt_logo_with_text_green_rgb.png" height="15"/>.
-
-  - Includes a mathematical expression parser written by me :)
-  - Ability to use OpenGL for rendering
-  - Plot and visualise functions
-  - Plot datasets
-  - Dark mode
+QDataVis is a simple to use, UI based, interactive plotter powered by <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Qt_logo_2016.svg/1280px-Qt_logo_2016.svg.png" height="15"/> that seeks to provide a quick way of visualising data sets.
 
 🚀 Features
 -----------
-  - Plot cursor
-  - Stick tick labels to the zero on the axes
-  - Save your plots as PNG, JPG, etc...
+  - Plot data sets and visualise functions
+  - Polynomial regression (~3x slower than Octave)
+  - Includes a mathematical expression parser written by me :)
+  - Export your plots as an image
   - Configure plot aesthetics
-  - Plot single data points
+  - Ability to use OpenGL for rendering
+  - Dark mode for nerds
 
 🖼️ Screenshot
 ----------
@@ -47,7 +42,7 @@ git clone --recurse-submodules https://github.com/jondef/QDataVis.git
 ```
 2. Load the CMake project and compile!
 ```sh
-cd ./DataVis && cmake -DCMAKE_BUILD_TYPE=Debug . && make QDataVis -j8
+cd ./QDataVis && cmake -DCMAKE_BUILD_TYPE=Debug . && make QDataVis -j8
 ```
 
 ❤️ Feedback
