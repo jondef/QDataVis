@@ -10,12 +10,14 @@
 #include <utility>
 #include "BinaryTree.hpp"
 
-class DataSet : public QThread {
+struct DataSet : public QThread {
 Q_OBJECT
 
 public:
     DataSet() {
-
+        listWidgetItem = nullptr;
+        graph = nullptr;
+        binaryTree = nullptr;
     }
 
     ~DataSet() {
@@ -36,6 +38,7 @@ public:
     bool dataSetIsFunction() const {
         return getDataSetType() == FunctionGraph;
     }
+
 
     void changeColor(QColor aColor) {
         this->color = aColor;
