@@ -9,7 +9,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/jondef/QDataVis?style=for-the-badge&color=1554FF)
 ![Maintenance](https://img.shields.io/maintenance/yes/2021?style=for-the-badge&color=1554FF)
 
-QDataVis is a simple to use, UI based, interactive plotter powered by <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Qt_logo_2016.svg/1280px-Qt_logo_2016.svg.png" height="15"/> that seeks to provide a quick way of visualising data sets.
+QDataVis is a simple to use, UI based, cross-platform, interactive plotter powered by <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Qt_logo_2016.svg/1280px-Qt_logo_2016.svg.png" height="15"/> that seeks to provide a quick way of visualising data sets.
 
 🚀 Features
 -----------
