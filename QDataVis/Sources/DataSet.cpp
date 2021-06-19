@@ -37,8 +37,6 @@ QVector<double> DataSet::regression(int degree) const {
     MatrixXd x1 = xPoints;
     MatrixXd x0 = Eigen::MatrixXd::Ones(m, 1) * 80300;
 
-    MatrixXd z1 = (x1 - x0).array() / 50;
-
     // Set up vector A
     MatrixXd A(m, n);
     for (int i = 1; i <= n; ++i) {
