@@ -3,6 +3,7 @@
 //
 
 #include <QTest>
+#include "qcp.h"
 #include "BinaryTree.hpp"
 
 #define myDebug() qDebug() << Qt::fixed << qSetRealNumberPrecision(16)
