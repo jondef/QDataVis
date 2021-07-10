@@ -103,21 +103,54 @@ QString DataSet::getFunctionString(const QVector<double>& coeffs) {
 }
 
 QDataStream &operator<<(QDataStream &out, const DataSet &dataSet) {
-    out << dataSet.displayName << dataSet.functionString << dataSet.color << quint32(dataSet.graphWidth) << quint32(dataSet.pointDensity);
+    out << dataSet.displayName
+        << dataSet.functionString
+        << *dataSet.listWidgetItem
+//        QCPGraph *graph; // todo: point graph needs point data
+//        BinaryTree *binaryTree; // can be calculated from functionString
+        << dataSet.color
+        << quint32(dataSet.graphWidth)
+
+        << dataSet.overrideGlobalPointDensity
+        << quint32(dataSet.pointDensity)
+        << quint32(dataSet.minimumDomain)
+        << quint32(dataSet.maximumDomain);
     return out;
 }
 
 QDataStream &operator>>(QDataStream &in, DataSet &dataSet) {
     QString displayName;
     QString functionString;
+    QListWidgetItem *listWidgetItem;
+    QCPGraph *graph = nullptr;
+    BinaryTree *binaryTree = nullptr;
     QColor color;
-    quint32 graphWidth;
-    quint32 pointDensity;
-    in >> displayName >> functionString >> color >> graphWidth >> pointDensity;
+    double graphWidth;
+
+    bool overrideGlobalPointDensity;
+    unsigned int pointDensity;
+    int minimumDomain;
+    int maximumDomain;
+
+    in >> displayName
+       >> functionString
+       >> *listWidgetItem
+       >> color
+       >> graphWidth
+       >> overrideGlobalPointDensity
+       >> pointDensity
+       >> minimumDomain
+       >> maximumDomain;
     dataSet.displayName = displayName;
     dataSet.functionString = functionString;
+    dataSet.listWidgetItem = listWidgetItem;
+    dataSet.graph = nullptr;
+    dataSet.binaryTree = nullptr;
     dataSet.color = color;
     dataSet.graphWidth = graphWidth;
+    dataSet.overrideGlobalPointDensity = overrideGlobalPointDensity;
     dataSet.pointDensity = pointDensity;
+    dataSet.minimumDomain = minimumDomain;
+    dataSet.maximumDomain = maximumDomain;
     return in;
 }
