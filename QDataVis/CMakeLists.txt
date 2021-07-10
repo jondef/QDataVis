@@ -6,40 +6,19 @@ project(QDataVis)
 # set version number
 set(VERSION 0.1)
 # get current date time
-if (WIN32)
-    execute_process(
-            COMMAND date -R # date /t
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            OUTPUT_VARIABLE BUILDDATE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-elseif (UNIX)
-    execute_process(
-            COMMAND date -R
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            OUTPUT_VARIABLE BUILDDATE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-elseif (APPLE)
-    execute_process(
-            COMMAND date -R
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            OUTPUT_VARIABLE BUILDDATE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-endif ()
-# Get git commit hash
-execute_process(
-        COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} rev-parse HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_COMMIT_HASH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+string(TIMESTAMP BUILDDATE "%Y-%m-%d %H:%M:%S" UTC)
 # Get git commit date
 execute_process(
         COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} show -s --format=%ci HEAD
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE GIT_COMMIT_DATE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+# Get git commit hash
+execute_process(
+        COMMAND git --git-dir ${CMAKE_SOURCE_DIR}/.git --work-tree ${CMAKE_SOURCE_DIR} rev-parse HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 # Get git branch
