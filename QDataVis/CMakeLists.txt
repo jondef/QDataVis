@@ -4,7 +4,7 @@ project(QDataVis)
 # Versioning
 ################################
 # set version number
-set(VERSION 0.1)
+set(VERSION 1.0)
 # get current date time
 string(TIMESTAMP BUILDDATE "%Y-%m-%d %H:%M:%S" UTC)
 # Get git commit date
