@@ -56,8 +56,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::uiMain
         plotWindow->activateWindow(); // select it
         plotWindow->setWindowState(plotWindow->windowState() & ~Qt::WindowMinimized | Qt::WindowActive); // set to active
     });
-    connect(ui->actionHelp, &QAction::triggered, this, [this]() {
-        QMessageBox::information(this, "Help", "Not implemented");
+    connect(ui->actionHelp, &QAction::triggered, this, []() {
+        QDesktopServices::openUrl(QUrl("https://github.com/jondef/QDataVis", QUrl::TolerantMode));
     });
     connect(ui->actionAbout, &QAction::triggered, this, [this]() {
         QMessageBox::information(this, "About",
