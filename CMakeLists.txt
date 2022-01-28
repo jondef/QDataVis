@@ -36,6 +36,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(QT_VERSION 6)
 set(REQUIRED_LIBS Core Gui Widgets OpenGL PrintSupport)
 
+set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.3\\mingw_64\\lib\\cmake")
 find_package(Qt${QT_VERSION} COMPONENTS ${REQUIRED_LIBS} REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
